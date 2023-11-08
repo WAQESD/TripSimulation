@@ -89,7 +89,8 @@ let getPath = async () => {
 
 onMounted(() => {
   const script = document.createElement("script");
-  script.src = URL + import.meta.env.API_KEY;
+  script.src = URL + import.meta.env.VITE_API_KEY;
+  console.log(script.src);
   script.type = "text/javascript";
   script.async = true;
   script.defer = true;
