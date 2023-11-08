@@ -19,18 +19,18 @@ import VSeperator from "../components/VSeperator.vue";
 
 <style scoped>
 header {
-  padding: 4px 20px;
+  padding: 16px 20px 0 20px;
 }
 
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 16px;
 }
 
 div {
-  font-size: 18px;
+  font-size: 20px;
 }
 
 a {

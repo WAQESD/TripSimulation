@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <span>∘</span>
+  <span>|</span>
 </template>
 
 <style scoped>
