@@ -39,6 +39,10 @@ a {
   color: black;
 }
 
+a:hover {
+  font-weight: bold;
+}
+
 .logo {
   font-weight: bold;
   font-size: 36px;
