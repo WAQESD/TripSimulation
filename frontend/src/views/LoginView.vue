@@ -9,17 +9,17 @@ import GradationBackground from "../components/GradationBackground.vue";
   <main>
     <div class="login-container">
       <h1>Login</h1>
-      <form class="login-form">
-        <input type="text" id="login-id" name="id" placeholder="아이디" />
-        <input type="password" id="login-password" name="password" placeholder="비밀번호" />
+      <form class="login-form" @submit.prevent>
+        <input type="text" id="login-id" name="id" placeholder="아이디" required />
+        <input type="password" id="login-password" name="password" placeholder="비밀번호" required />
         <div class="login-remember-container">
           <input type="checkbox" id="login-remember" name="remember" />
-          <label for="remember">아이디 저장하기</label>
+          <label for="login-remember">아이디 저장하기</label>
         </div>
         <button class="login-btn">로그인하기</button>
         <hr />
-        <h1>소셜 로그인</h1>
-        <div>
+        <h2>소셜 로그인</h2>
+        <div class="social-login-btn-container">
           <img class="social-login-btn" src="../assets/images/naver_circle.png" />
           <span class="social-login-btn-wrapper">
             <img class="social-login-btn kakao" src="../assets/images/kakao_circle.png"
@@ -40,6 +40,10 @@ main {
   padding: 80px 0;
 }
 
+h1 {
+  margin-top: 0;
+}
+
 .login-container {
   display: flex;
   flex-direction: column;
@@ -49,6 +53,7 @@ main {
   border-radius: 20px;
   padding: 40px 0;
   background-color: white;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
 
 .login-form {
@@ -59,8 +64,8 @@ main {
 
 #login-id,
 #login-password {
-  width: 200px;
-  height: 30px;
+  width: 240px;
+  height: 25px;
   border-radius: 16px;
   border: 0.5px grey solid;
   padding: 8px 20px;
@@ -69,10 +74,12 @@ main {
 
 input {
   margin: 4px 0;
+  font-family: "Pretendard-Regular";
 }
 
 label {
   margin-left: 12px;
+  cursor: pointer;
 }
 
 .login-remember-container {
@@ -81,12 +88,14 @@ label {
 }
 
 .login-btn {
-  width: 240px;
+  width: 280px;
   height: 45px;
   border-radius: 16px;
   border: none;
   padding: 8px 20px;
   font-size: 18px;
+  cursor: pointer;
+  font-family: "Pretendard-Regular";
 }
 
 #login-remember {
@@ -96,13 +105,14 @@ label {
 hr {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   width: 400px;
-  margin: 10px 0 0 0;
+  margin: 20px 0 0 0;
 }
 
 .social-login-btn {
   width: 50px;
   height: 50px;
   margin: 6px 0;
+  cursor: pointer;
 }
 
 .kakao {
@@ -121,5 +131,13 @@ hr {
   background-color: #fee500;
   border-radius: 25px;
   margin: 6px 0;
+  cursor: pointer;
+}
+
+.social-login-btn-container {
+  width: 200px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
 }
 </style>
