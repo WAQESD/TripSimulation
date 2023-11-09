@@ -1,21 +1,25 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import { URL, CENTER } from "../util/API";
-import { addController } from "../util/map";
+import { ref, onMounted, provide } from "vue";
 import { douglasPeucker } from "../util/DouglasPeucker";
 import axios from "axios";
 
-let map = null;
-let start = null;
-let goal = null;
+import PathController from "./controller/PathController.vue";
+
 let path = null;
 let polylinePath = null;
 
-const controllerEl = ref(null);
 const car = ref("none");
 const angle = ref(0);
 const name = ref("경로");
-const isStart = ref("출발");
+const pathController = ref(null);
+const map = ref(null);
+
+onMounted(() => {
+  map.value = new window.naver.maps.Map("map", {
+    center: new window.naver.maps.LatLng(import.meta.env.VITE_CENTER_LAT, import.meta.env.VITE_CENTER_LNG),
+    zoom: 14,
+  });
+});
 
 let getAngle = (s, e) => {
   let rad = Math.atan2(e.y - s.y, e.x - s.x);
@@ -32,6 +36,7 @@ let move = (index) => {
     endPath();
     return;
   }
+
   let s = polylinePath[index];
   let e = polylinePath[index + 1];
 
@@ -43,8 +48,8 @@ let move = (index) => {
     move(index + 1);
   }, dist * 300000);
 
-  map.setCenter(s);
-  map.panTo(e, {
+  map.value.setCenter(s);
+  map.value.panTo(e, {
     duration: dist * 300000,
     easing: "linear",
   });
@@ -55,7 +60,7 @@ let startPath = () => {
   car.value = "block";
 };
 
-let getPath = async () => {
+let getPath = async (start, goal) => {
   if (!start || !goal) return;
 
   let { data } = await axios({
@@ -81,62 +86,20 @@ let getPath = async () => {
   path = new window.naver.maps.Polyline({
     path: polylinePath,
     strokeColor: "#5347AA",
-    map: map,
+    map: map.value,
   });
 
-  map.setCenter(polylinePath[0]);
-  map.setZoom(19);
+  map.value.setCenter(polylinePath[0]);
+  map.value.setZoom(19);
   startPath();
 };
-
-onMounted(() => {
-  const script = document.createElement("script");
-  script.src = URL + import.meta.env.VITE_NAVER_MAP_API_KEY;
-  script.type = "text/javascript";
-  script.async = true;
-  script.defer = true;
-  document.head.appendChild(script);
-
-  script.onload = () => {
-    map = new window.naver.maps.Map("map", {
-      center: new window.naver.maps.LatLng(CENTER.lat, CENTER.lng),
-      zoom: 14,
-    });
-
-    addController(map, controllerEl.value, window.naver.maps.Position.TOP_RIGHT);
-
-    window.naver.maps.Event.addListener(map, "click", function (e) {
-      if (isStart.value == "출발") {
-        if (!start) {
-          start = new window.naver.maps.Marker({
-            map: map,
-          });
-        }
-        start.setPosition(e.coord);
-      } else if (isStart.value == "도착") {
-        if (!goal) {
-          goal = new window.naver.maps.Marker({
-            map: map,
-          });
-        }
-        goal.setPosition(e.coord);
-      }
-    });
-  };
-});
 </script>
 
 <template>
   <div id="map-container">
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
-  </div>
-  <div id="controller" ref="controllerEl">
-    <label for="start">출발</label>
-    <input type="radio" value="출발" id="start" v-model="isStart" />
-    <label for="end">도착</label>
-    <input type="radio" value="도착" id="goal" v-model="isStart" />
-    <button type="button" @click="getPath">경로 찾기</button>
+    <PathController @get-path="getPath" :map="map" ref="pathController"></PathController>
   </div>
 </template>
 
@@ -156,28 +119,5 @@ onMounted(() => {
 }
 #map-container {
   position: relative;
-}
-#controller {
-  display: flex;
-  align-items: center;
-  margin: 20px;
-  background-color: white;
-  height: 40px;
-  padding: 0 20px;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.219);
-}
-
-#controller input {
-  margin: 0 6px;
-}
-
-#controller button {
-  background-color: white;
-  border: 1px solid black;
-  border-radius: 4px;
-  cursor: pointer;
-  padding: 2px 8px;
-  font-family: "Pretendard-Regular";
 }
 </style>
