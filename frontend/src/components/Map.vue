@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, provide } from "vue";
+import { ref, onMounted } from "vue";
 import { douglasPeucker } from "../util/DouglasPeucker";
 import axios from "axios";
 
@@ -19,6 +19,8 @@ onMounted(() => {
     center: new window.naver.maps.LatLng(import.meta.env.VITE_CENTER_LAT, import.meta.env.VITE_CENTER_LNG),
     zoom: 14,
   });
+
+  map.value.setCursor("pointer");
 });
 
 let getAngle = (s, e) => {
@@ -42,7 +44,6 @@ let move = (index) => {
 
   let dist = Math.sqrt((s.x - e.x) ** 2 + (s.y - e.y) ** 2);
   angle.value = getAngle(s, e);
-  console.log(index);
 
   setTimeout(() => {
     move(index + 1);
@@ -68,8 +69,8 @@ let getPath = async (start, goal) => {
     url: "http://localhost:8080/save",
     data: {
       name: name.value,
-      start: { lng: start.position._lng, lat: start.position._lat },
-      goal: { lng: goal.position._lng, lat: goal.position._lat },
+      start: { lng: start.x, lat: start.y },
+      goal: { lng: goal.x, lat: goal.y },
     },
   });
 
