@@ -1,6 +1,13 @@
 <script setup>
 import TheHeader from "../commons/TheHeader.vue";
 import GradationBackground from "../components/GradationBackground.vue";
+import { useRouter } from "vue-router";
+
+const router = useRouter();
+
+const startTrip = () => {
+  router.push("/trip");
+};
 </script>
 
 <template>
@@ -18,7 +25,7 @@ import GradationBackground from "../components/GradationBackground.vue";
         <br />
         <p><strong>최적의 경로를 직접 찾아보세요</strong></p>
       </div>
-      <button type="button" class="trip-btn">여행 시작하기</button>
+      <button type="button" class="trip-btn" @click.prevent="startTrip">여행 시작하기</button>
     </div>
   </main>
 </template>

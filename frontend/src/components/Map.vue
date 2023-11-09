@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { URL, CENTER } from "../util/API";
+import { addController } from "../util/map";
 import { douglasPeucker } from "../util/DouglasPeucker";
 import axios from "axios";
 
@@ -10,6 +11,7 @@ let goal = null;
 let path = null;
 let polylinePath = null;
 
+const controllerEl = ref(null);
 const car = ref("none");
 const angle = ref(0);
 const name = ref("경로");
@@ -90,7 +92,6 @@ let getPath = async () => {
 onMounted(() => {
   const script = document.createElement("script");
   script.src = URL + import.meta.env.VITE_NAVER_MAP_API_KEY;
-  console.log(script.src);
   script.type = "text/javascript";
   script.async = true;
   script.defer = true;
@@ -101,6 +102,8 @@ onMounted(() => {
       center: new window.naver.maps.LatLng(CENTER.lat, CENTER.lng),
       zoom: 14,
     });
+
+    addController(map, controllerEl.value, window.naver.maps.Position.TOP_RIGHT);
 
     window.naver.maps.Event.addListener(map, "click", function (e) {
       if (isStart.value == "출발") {
@@ -128,9 +131,7 @@ onMounted(() => {
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
   </div>
-  <div id="controller">
-    <label for="name">파일 이름</label>
-    <input type="text" v-model="name" />
+  <div id="controller" ref="controllerEl">
     <label for="start">출발</label>
     <input type="radio" value="출발" id="start" v-model="isStart" />
     <label for="end">도착</label>
@@ -148,12 +149,35 @@ onMounted(() => {
 #car {
   position: absolute;
   z-index: 1;
-  left: 578px;
-  top: 358px;
+  left: calc(50vw - 22px);
+  top: calc(50vh - 42.5px);
   width: 44px;
   height: 85px;
 }
 #map-container {
   position: relative;
+}
+#controller {
+  display: flex;
+  align-items: center;
+  margin: 20px;
+  background-color: white;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.219);
+}
+
+#controller input {
+  margin: 0 6px;
+}
+
+#controller button {
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px 8px;
+  font-family: "Pretendard-Regular";
 }
 </style>
