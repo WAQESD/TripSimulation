@@ -1,12 +1,12 @@
 <script setup>
 import TheHeader from "../commons/TheHeader.vue";
+import GradationBackground from "../components/GradationBackground.vue";
 </script>
 
 <template>
-  <div class="background-image"></div>
+  <GradationBackground></GradationBackground>
   <TheHeader></TheHeader>
   <main>
-    <!-- <img src="../assets/images/laptop.png" class="main-image" height="600" /> -->
     <img src="../assets/images/laptop.svg" alt="" />
     <div class="text-container">
       <div>
@@ -31,19 +31,6 @@ main {
   align-items: center;
   justify-content: space-around;
   flex-grow: 1;
-}
-
-.background-image {
-  z-index: -1;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  /* background-image: url("../assets/images/home.png"); */
-  background-color: black;
-  background-image: linear-gradient(0deg, black 0%, #ffffff 100%);
-  opacity: 0.2;
 }
 
 p {
