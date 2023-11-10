@@ -2,7 +2,7 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { addController, makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/Map";
 
-import AddressList from "./AddressList.vue";
+import AddressList from "../AddressList.vue";
 defineOptions({
   inheritAttrs: false,
 });
