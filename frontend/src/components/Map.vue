@@ -1,7 +1,9 @@
 <script setup>
-import { ref, onMounted } from "vue";
 import { douglasPeucker } from "../util/DouglasPeucker";
+import { useModalStore } from "../stores/modal";
+import { ref, onMounted } from "vue";
 import axios from "axios";
+
 import PathController from "./controller/PathController.vue";
 
 let path = null;
@@ -12,6 +14,8 @@ const angle = ref(0);
 const name = ref("경로");
 const pathController = ref(null);
 const map = ref(null);
+
+const modalStore = useModalStore();
 
 onMounted(() => {
   map.value = new window.naver.maps.Map("map", {
@@ -57,6 +61,7 @@ let move = (index) => {
 
 let startPath = () => {
   move(0);
+  modalStore.setModal(true);
   car.value = "block";
 };
 
