@@ -2,6 +2,8 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { addController, makeAddress, searchAddressToCoordinate } from "../../util/map";
 
+import AddressList from "./AddressList.vue";
+
 const props = defineProps({
   map: Object,
 });
@@ -16,6 +18,8 @@ const goalAddr = ref("");
 const isClosed = ref(false);
 const controllerEl = ref(null);
 
+const searchResults = ref([]);
+
 const btnIcon = computed(() => (isClosed.value ? ">" : "<"));
 
 const toggleController = () => {
@@ -27,7 +31,15 @@ let infoWindow = new window.naver.maps.InfoWindow({
 });
 
 const searchAddr = (e) => {
-  searchAddressToCoordinate(e.target.value, props.map, infoWindow, startPos, goalPos, startAddr, goalAddr);
+  searchResults.value = searchAddressToCoordinate(
+    e.target.value,
+    props.map,
+    infoWindow,
+    startPos,
+    goalPos,
+    startAddr,
+    goalAddr
+  );
 };
 
 onMounted(() => {
@@ -128,6 +140,7 @@ const getPath = computed(() => () => {
         />
       </div>
       <button type="button" @click="getPath">경로 찾기</button>
+      <AddressList :addressList="searchResults"></AddressList>
     </div>
   </div>
   <div class="close-btn" :class="isClosed ? 'closed' : ''" @click="toggleController">{{ btnIcon }}</div>
@@ -158,7 +171,6 @@ const getPath = computed(() => () => {
 #controller button {
   background-color: white;
   border: 1px solid rgba(0, 0, 0, 0.5);
-  border-radius: 4px;
   cursor: pointer;
   padding: 2px 8px;
   margin-top: 20px;

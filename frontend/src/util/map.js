@@ -132,6 +132,8 @@ export const searchAddressToCoordinate = (address, map, infoWindow, startPos, go
         goalAddr.value = htmlAddresses[0].address;
         infoWindow.close();
       });
+
+      return htmlAddresses;
     }
   );
 };
