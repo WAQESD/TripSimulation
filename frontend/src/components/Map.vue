@@ -5,7 +5,9 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 import PathController from "./controller/PathController.vue";
+import SimpleTextModal from "./modal/SimpleTextModal.vue";
 
+// a.props.map.set("test", "test");
 let path = null;
 let polylinePath = null;
 
@@ -60,9 +62,13 @@ let move = (index) => {
 };
 
 let startPath = () => {
-  move(0);
-  modalStore.setModal(true);
-  car.value = "block";
+  modalStore.setModal(true, SimpleTextModal, {
+    callback: () => {
+      move(0);
+      car.value = "block";
+    },
+    text: "지정한 경로로 시뮬레이션을 시작합니다.",
+  });
 };
 
 let getPath = async (start, goal) => {

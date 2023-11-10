@@ -6,7 +6,7 @@ const modalStore = useModalStore();
 
 <template>
   <div :class="{ none: !modalStore.isActive }" class="modal-container">
-    <component class="modal-content" :is="modalStore.content"></component>
+    <component class="modal-content" :is="modalStore.content" v-bind="modalStore.props"></component>
   </div>
 </template>
 
