@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed, onMounted, nextTick } from "vue";
-import { addController, makeAddress, searchAddressToCoordinate } from "../../util/map";
+import { addController, makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/Map";
 
 import AddressList from "./AddressList.vue";
-
+defineOptions({
+  inheritAttrs: false,
+});
 const props = defineProps({
   map: Object,
 });
@@ -26,20 +28,34 @@ const toggleController = () => {
   isClosed.value = !isClosed.value;
 };
 
+const timer = null;
+
 let infoWindow = new window.naver.maps.InfoWindow({
   anchorSkew: true,
 });
 
+const makeInfoWindow = (item) => {
+  let coord = new window.naver.maps.LatLng(item.point.y, item.point.x);
+  if (infoWindow) infoWindow.close();
+  makeInfoWindowByCoord(coord, infoWindow, props.map, startPos, startAddr, goalPos, goalAddr);
+  props.map.setCenter(coord);
+};
+
 const searchAddr = (e) => {
-  searchResults.value = searchAddressToCoordinate(
-    e.target.value,
-    props.map,
-    infoWindow,
-    startPos,
-    goalPos,
-    startAddr,
-    goalAddr
-  );
+  if (timer) clearTimeout(timer);
+
+  setTimeout(() => {
+    searchAddressToCoordinate(
+      e.target.value,
+      props.map,
+      infoWindow,
+      startPos,
+      goalPos,
+      startAddr,
+      goalAddr,
+      searchResults
+    );
+  }, 150);
 };
 
 onMounted(() => {
@@ -48,57 +64,7 @@ onMounted(() => {
 
     window.naver.maps.Event.addListener(props.map, "click", function ({ coord }) {
       if (infoWindow) infoWindow.close();
-
-      window.naver.maps.Service.reverseGeocode(
-        {
-          coords: coord,
-          orders: [window.naver.maps.Service.OrderType.ADDR, window.naver.maps.Service.OrderType.ROAD_ADDR].join(","),
-        },
-        function (status, response) {
-          if (status === window.naver.maps.Service.Status.ERROR) {
-            return alert("Something Wrong!");
-          }
-
-          var items = response.v2.results,
-            address = "",
-            htmlAddresses = [];
-
-          for (var i = 0, ii = items.length, item; i < ii; i++) {
-            item = items[i];
-            address = makeAddress(item) || "";
-
-            htmlAddresses.push(address);
-          }
-
-          infoWindow.setContent(
-            [
-              '<div style="padding: 16px; ">',
-              htmlAddresses.join("<br />"),
-              `
-                <div style="text-align: center; margin-top: 12px">
-                  <button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>
-                  <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
-                </div>
-              `,
-              "</div>",
-            ].join("\n")
-          );
-
-          infoWindow.open(props.map, coord);
-
-          document.querySelector("#info-start-btn").addEventListener("click", () => {
-            startPos.value = coord;
-            startAddr.value = htmlAddresses[0];
-            infoWindow.close();
-          });
-
-          document.querySelector("#info-goal-btn").addEventListener("click", () => {
-            goalPos.value = coord;
-            goalAddr.value = htmlAddresses[0];
-            infoWindow.close();
-          });
-        }
-      );
+      makeInfoWindowByCoord(coord, infoWindow, props.map, startPos, startAddr, goalPos, goalAddr);
     });
   });
 });
@@ -118,7 +84,7 @@ const getPath = computed(() => () => {
           placeholder="출발지 입력"
           id="start"
           v-model="startAddr"
-          @blur="
+          @keyup="
             (e) => {
               searchAddr(e);
             }
@@ -132,7 +98,7 @@ const getPath = computed(() => () => {
           placeholder="도착지 입력"
           id="goal"
           v-model="goalAddr"
-          @blur="
+          @keyup="
             (e) => {
               searchAddr(e);
             }
@@ -140,7 +106,7 @@ const getPath = computed(() => () => {
         />
       </div>
       <button type="button" @click="getPath">경로 찾기</button>
-      <AddressList :addressList="searchResults"></AddressList>
+      <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
     </div>
   </div>
   <div class="close-btn" :class="isClosed ? 'closed' : ''" @click="toggleController">{{ btnIcon }}</div>

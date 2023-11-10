@@ -82,7 +82,20 @@ function hasAddition(addition) {
   return !!(addition && addition.value);
 }
 
-export const searchAddressToCoordinate = (address, map, infoWindow, startPos, goalPos, startAddr, goalAddr) => {
+export const searchAddressToCoordinate = (
+  address,
+  map,
+  infoWindow,
+  startPos,
+  goalPos,
+  startAddr,
+  goalAddr,
+  searchResults
+) => {
+  if (!address) {
+    searchResults.value = [];
+    return;
+  }
   window.naver.maps.Service.geocode(
     {
       query: address,
@@ -93,6 +106,7 @@ export const searchAddressToCoordinate = (address, map, infoWindow, startPos, go
       }
 
       if (response.v2.meta.totalCount === 0) {
+        searchResults.value = [];
         return;
       }
 
@@ -133,7 +147,60 @@ export const searchAddressToCoordinate = (address, map, infoWindow, startPos, go
         infoWindow.close();
       });
 
-      return htmlAddresses;
+      searchResults.value = htmlAddresses;
+    }
+  );
+};
+
+export const makeInfoWindowByCoord = (coord, infoWindow, map, startPos, startAddr, goalPos, goalAddr) => {
+  window.naver.maps.Service.reverseGeocode(
+    {
+      coords: coord,
+      orders: [window.naver.maps.Service.OrderType.ADDR, window.naver.maps.Service.OrderType.ROAD_ADDR].join(","),
+    },
+    function (status, response) {
+      if (status === window.naver.maps.Service.Status.ERROR) {
+        return alert("Something Wrong!");
+      }
+
+      var items = response.v2.results,
+        address = "",
+        htmlAddresses = [];
+
+      for (var i = 0, ii = items.length, item; i < ii; i++) {
+        item = items[i];
+        address = makeAddress(item) || "";
+
+        htmlAddresses.push(address);
+      }
+
+      infoWindow.setContent(
+        [
+          '<div style="padding: 16px; ">',
+          htmlAddresses.join("<br />"),
+          `
+            <div style="text-align: center; margin-top: 12px">
+              <button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>
+              <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
+            </div>
+          `,
+          "</div>",
+        ].join("\n")
+      );
+
+      infoWindow.open(map, coord);
+
+      document.querySelector("#info-start-btn").addEventListener("click", () => {
+        startPos.value = coord;
+        startAddr.value = htmlAddresses[0];
+        infoWindow.close();
+      });
+
+      document.querySelector("#info-goal-btn").addEventListener("click", () => {
+        goalPos.value = coord;
+        goalAddr.value = htmlAddresses[0];
+        infoWindow.close();
+      });
     }
   );
 };

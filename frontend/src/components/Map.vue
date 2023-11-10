@@ -2,7 +2,6 @@
 import { ref, onMounted } from "vue";
 import { douglasPeucker } from "../util/DouglasPeucker";
 import axios from "axios";
-
 import PathController from "./controller/PathController.vue";
 
 let path = null;
@@ -16,7 +15,7 @@ const map = ref(null);
 
 onMounted(() => {
   map.value = new window.naver.maps.Map("map", {
-    center: new window.naver.maps.LatLng(import.meta.env.VITE_CENTER_LAT, import.meta.env.VITE_CENTER_LNG),
+    center: new window.naver.maps.LatLng(import.meta.env.VITE_DEFAULT_LAT, import.meta.env.VITE_DEFAULT_LNG),
     zoom: 14,
   });
 
@@ -100,7 +99,7 @@ let getPath = async (start, goal) => {
   <div id="map-container">
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
-    <PathController @get-path="getPath" :map="map" ref="pathController"></PathController>
+    <PathController @get-path="getPath" :map="map" ref="pathController" display="none"></PathController>
   </div>
 </template>
 
