@@ -32,12 +32,12 @@ const onClick = (item) => {
 .address-list {
   box-sizing: border-box;
   width: 330px;
-  height: 690px;
   margin-top: 20px;
   border: 1px solid rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   overflow: auto;
   padding: 0;
+  flex-grow: 1;
 }
 
 .address-item {

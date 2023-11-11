@@ -132,6 +132,7 @@ const getPath = computed(() => () => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  flex-grow: 1;
 }
 
 #controller button {
