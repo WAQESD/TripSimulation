@@ -82,7 +82,7 @@ let getPath = async (start, goal) => {
 
   let { data } = await axios({
     method: "post",
-    url: "http://192.168.120.84:8080/save",
+    url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
     data: {
       name: name.value,
       start: { lng: start.x, lat: start.y },
