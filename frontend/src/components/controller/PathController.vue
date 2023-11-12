@@ -1,14 +1,25 @@
 <script setup>
-import { ref, computed, onMounted, nextTick } from "vue";
-import { addController, makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/Map";
+import { ref, computed, onMounted, nextTick, watch } from "vue";
+import {
+  initController,
+  addController,
+  removeController,
+  makeInfoWindowByCoord,
+  searchAddressToCoordinate,
+} from "../../util/Map";
 
 import AddressList from "../AddressList.vue";
 defineOptions({
   inheritAttrs: false,
 });
+
 const props = defineProps({
   map: Object,
+  show: Boolean,
 });
+
+const position = window.naver.maps.Position.TOP_LEFT;
+
 const emit = defineEmits(["getPath"]);
 
 const startPos = ref(null);
@@ -60,7 +71,7 @@ const searchAddr = (e) => {
 
 onMounted(() => {
   nextTick(() => {
-    addController(props.map, controllerEl.value, window.naver.maps.Position.TOP_LEFT);
+    initController(props.map, controllerEl.value, position);
 
     window.naver.maps.Event.addListener(props.map, "click", function ({ coord }) {
       if (infoWindow) infoWindow.close();
@@ -72,44 +83,54 @@ onMounted(() => {
 const getPath = computed(() => () => {
   emit("getPath", startPos.value, goalPos.value);
 });
+
+watch(
+  () => props.show,
+  () => {
+    if (props.show) addController(props.map, controllerEl.value, position);
+    else removeController(props.map, controllerEl.value, position);
+  }
+);
 </script>
 
 <template>
-  <div :class="isClosed ? 'closed' : ''" id="controller" ref="controllerEl">
-    <div class="controller-input-container">
-      <div class="input-wrapper">
-        <label id="label-start" for="start">출 발</label>
-        <input
-          type="text"
-          placeholder="출발지 입력"
-          id="start"
-          v-model="startAddr"
-          @keyup="
-            (e) => {
-              searchAddr(e);
-            }
-          "
-        />
+  <div ref="controllerEl">
+    <div :class="isClosed ? 'closed' : ''" id="controller">
+      <div class="controller-input-container">
+        <div class="input-wrapper">
+          <label id="label-start" for="start">출 발</label>
+          <input
+            type="text"
+            placeholder="출발지 입력"
+            id="start"
+            v-model="startAddr"
+            @keyup="
+              (e) => {
+                searchAddr(e);
+              }
+            "
+          />
+        </div>
+        <div class="input-wrapper">
+          <label id="label-goal" for="goal">도 착</label>
+          <input
+            type="text"
+            placeholder="도착지 입력"
+            id="goal"
+            v-model="goalAddr"
+            @keyup="
+              (e) => {
+                searchAddr(e);
+              }
+            "
+          />
+        </div>
+        <button type="button" @click="getPath">경로 찾기</button>
+        <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
       </div>
-      <div class="input-wrapper">
-        <label id="label-goal" for="goal">도 착</label>
-        <input
-          type="text"
-          placeholder="도착지 입력"
-          id="goal"
-          v-model="goalAddr"
-          @keyup="
-            (e) => {
-              searchAddr(e);
-            }
-          "
-        />
-      </div>
-      <button type="button" @click="getPath">경로 찾기</button>
-      <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
     </div>
+    <div class="close-btn" :class="isClosed ? 'closed' : ''" @click="toggleController">{{ btnIcon }}</div>
   </div>
-  <div class="close-btn" :class="isClosed ? 'closed' : ''" @click="toggleController">{{ btnIcon }}</div>
 </template>
 
 <style scoped>

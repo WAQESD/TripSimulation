@@ -110,14 +110,20 @@ let getPath = async (start, goal) => {
   map.value.setZoom(19);
   startPath();
 };
+
+document.addEventListener("keydown", (e) => {
+  if (e.key == "a") {
+    tripStart.value = !tripStart.value;
+  }
+});
 </script>
 
 <template>
   <div id="map-container">
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
-    <PathController @get-path="getPath" :map="map" display="none"></PathController>
-    <!-- <VehicleController v-if="tripStart" :map="map"></VehicleController> -->
+    <PathController :show="!tripStart" @get-path="getPath" :map="map" display="none"></PathController>
+    <VehicleController :show="tripStart" :map="map"></VehicleController>
   </div>
 </template>
 

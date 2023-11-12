@@ -1,27 +1,59 @@
 <script setup>
-import { ref, onMounted, nextTick } from "vue";
-import { addController } from "../../util/Map";
+import { ref, onMounted, nextTick, watch } from "vue";
+import { initController, addController, removeController } from "../../util/Map";
 
 const props = defineProps({
   map: Object,
+  show: Boolean,
 });
 
-const emit = defineEmits(["downSpeed", "upSpeed"]);
+const isPaused = ref(false);
+
+const position = window.naver.maps.Position.TOP_RIGHT;
+
+const emit = defineEmits(["downSpeed", "upSpeed", "pause", "start"]);
+
+const downSpeed = () => {
+  emit("downSpeed");
+};
+
+const upSpeed = () => {
+  emit("upSpeed");
+};
+
+const pause = () => {
+  isPaused.value = true;
+  emit("puase");
+};
+
+const start = () => {
+  isPaused.value = false;
+  emit("start");
+};
 
 const controllerEl = ref(null);
 
 onMounted(() => {
   nextTick(() => {
-    addController(props.map, controllerEl.value, window.naver.maps.Position.TOP_RIGHT);
+    if (props.show) initController(props.map, controllerEl.value, position);
   });
 });
+
+watch(
+  () => props.show,
+  () => {
+    if (props.show) addController(props.map, controllerEl.value, position);
+    else removeController(props.map, controllerEl.value, position);
+  }
+);
 </script>
 
 <template>
   <div class="vehicle-controller-container" ref="controllerEl" display="none">
-    <div class="vehicle-speed-btn">⏪</div>
-    <div class="vehicle-speed-btn">⏸</div>
-    <div class="vehicle-speed-btn">⏩</div>
+    <div class="vehicle-speed-btn" @click="downSpeed">⏪</div>
+    <div v-show="!isPaused" class="vehicle-speed-btn" @click="pause">⏸</div>
+    <div v-show="isPaused" class="vehicle-speed-btn" @click="start">⏯</div>
+    <div class="vehicle-speed-btn" @click="upSpeed">⏩</div>
   </div>
 </template>
 
