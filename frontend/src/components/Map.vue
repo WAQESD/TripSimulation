@@ -8,7 +8,6 @@ import PathController from "./controller/PathController.vue";
 import VehicleController from "./controller/VehicleController.vue";
 import SimpleTextModal from "./modal/SimpleTextModal.vue";
 
-// a.props.map.set("test", "test");
 let path = null;
 let polylinePath = null;
 
@@ -122,7 +121,7 @@ document.addEventListener("keydown", (e) => {
   <div id="map-container">
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
-    <PathController :show="!tripStart" @get-path="getPath" :map="map" display="none"></PathController>
+    <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
     <VehicleController :show="tripStart" :map="map"></VehicleController>
   </div>
 </template>
