@@ -6,7 +6,7 @@ import {
   removeController,
   makeInfoWindowByCoord,
   searchAddressToCoordinate,
-} from "../../util/Map";
+} from "../../util/map";
 
 import AddressList from "../AddressList.vue";
 defineOptions({

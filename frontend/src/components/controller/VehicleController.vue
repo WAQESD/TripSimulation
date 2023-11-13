@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
-import { initController, addController, removeController } from "../../util/Map";
+import { initController, addController, removeController } from "../../util/map";
 
 const props = defineProps({
   map: Object,
