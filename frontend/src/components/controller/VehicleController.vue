@@ -36,7 +36,6 @@ const controllerEl = ref(null);
 onMounted(() => {
   nextTick(() => {
     initController(props.map, controllerEl.value, position);
-    if (!props.show) removeController(props.map, controllerEl.value, position);
   });
 });
 

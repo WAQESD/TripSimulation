@@ -1,7 +1,7 @@
 <script setup>
 import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "../stores/modal";
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import axios from "axios";
 
 import PathController from "./controller/PathController.vue";
@@ -16,16 +16,40 @@ const angle = ref(0);
 const name = ref("경로");
 const map = ref(null);
 const tripStart = ref(false);
+const moduleOnLoad = ref(false);
+const subModuleOnLoad = ref(false);
 
 const modalStore = useModalStore();
 
-onMounted(() => {
-  map.value = new window.naver.maps.Map("map", {
-    center: new window.naver.maps.LatLng(import.meta.env.VITE_DEFAULT_LAT, import.meta.env.VITE_DEFAULT_LNG),
-    zoom: 14,
-  });
+const allModuleOnLoad = computed(() => moduleOnLoad.value && subModuleOnLoad.value);
 
-  map.value.setCursor("pointer");
+onMounted(() => {
+  const mapModule = document.createElement("script");
+  mapModule.type = "text/javascript";
+  mapModule.src = import.meta.env.VITE_MAP_MODULE_SRC;
+
+  document.head.appendChild(mapModule);
+
+  mapModule.onload = () => {
+    map.value = new window.naver.maps.Map("map", {
+      center: new window.naver.maps.LatLng(import.meta.env.VITE_DEFAULT_LAT, import.meta.env.VITE_DEFAULT_LNG),
+      zoom: 14,
+    });
+
+    map.value.setCursor("pointer");
+
+    moduleOnLoad.value = true;
+  };
+
+  const mapSubModule = document.createElement("script");
+  mapSubModule.type = "text/javascript";
+  mapSubModule.src = import.meta.env.VITE_MAP_SUB_MODULE_SRC;
+
+  document.head.appendChild(mapSubModule);
+
+  mapSubModule.onload = () => {
+    subModuleOnLoad.value = true;
+  };
 });
 
 let getAngle = (s, e) => {
@@ -121,8 +145,10 @@ document.addEventListener("keydown", (e) => {
   <div id="map-container">
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
-    <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
-    <VehicleController :show="tripStart" :map="map"></VehicleController>
+    <div v-if="allModuleOnLoad">
+      <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
+      <VehicleController :show="tripStart" :map="map"></VehicleController>
+    </div>
   </div>
 </template>
 
