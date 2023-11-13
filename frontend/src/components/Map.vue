@@ -1,5 +1,5 @@
 <script setup>
-import { douglasPeucker } from "../util/DouglasPeucker";
+import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "../stores/modal";
 import { ref, onMounted } from "vue";
 import axios from "axios";
