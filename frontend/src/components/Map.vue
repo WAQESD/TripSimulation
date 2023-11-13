@@ -5,17 +5,17 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 import PathController from "./controller/PathController.vue";
+import VehicleController from "./controller/VehicleController.vue";
 import SimpleTextModal from "./modal/SimpleTextModal.vue";
 
-// a.props.map.set("test", "test");
 let path = null;
 let polylinePath = null;
 
 const car = ref("none");
 const angle = ref(0);
 const name = ref("경로");
-const pathController = ref(null);
 const map = ref(null);
+const tripStart = ref(false);
 
 const modalStore = useModalStore();
 
@@ -34,8 +34,12 @@ let getAngle = (s, e) => {
 };
 
 let endPath = () => {
-  car.value = "none";
-  alert("도착했습니다.");
+  modalStore.setModal(true, SimpleTextModal, {
+    text: "목적지에 도착했습니다.",
+    callback: () => {
+      car.value = "none";
+    },
+  });
 };
 
 let move = (index) => {
@@ -52,11 +56,11 @@ let move = (index) => {
 
   setTimeout(() => {
     move(index + 1);
-  }, dist * 300000);
+  }, dist * 700000);
 
   map.value.setCenter(s);
   map.value.panTo(e, {
-    duration: dist * 300000,
+    duration: dist * 700000,
     easing: "linear",
   });
 };
@@ -66,6 +70,7 @@ let startPath = () => {
     callback: () => {
       move(0);
       car.value = "block";
+      tripStart.value = true;
     },
     text: "지정한 경로로 시뮬레이션을 시작합니다.",
   });
@@ -76,7 +81,7 @@ let getPath = async (start, goal) => {
 
   let { data } = await axios({
     method: "post",
-    url: "http://localhost:8080/save",
+    url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
     data: {
       name: name.value,
       start: { lng: start.x, lat: start.y },
@@ -104,13 +109,20 @@ let getPath = async (start, goal) => {
   map.value.setZoom(19);
   startPath();
 };
+
+document.addEventListener("keydown", (e) => {
+  if (e.key == "a") {
+    tripStart.value = !tripStart.value;
+  }
+});
 </script>
 
 <template>
   <div id="map-container">
     <img id="car" src="../assets/images/car.png" :style="{ display: car, transform: `rotate(${angle}deg)` }" />
     <div id="map"></div>
-    <PathController @get-path="getPath" :map="map" ref="pathController" display="none"></PathController>
+    <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
+    <VehicleController :show="tripStart" :map="map"></VehicleController>
   </div>
 </template>
 

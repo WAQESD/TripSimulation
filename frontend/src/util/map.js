@@ -1,7 +1,15 @@
-export const addController = (map, el, position) => {
+export const initController = (map, el, position) => {
   window.naver.maps.Event.once(map, "init", function () {
     map.controls[position].push(el);
   });
+};
+
+export const addController = (map, el, position) => {
+  map.controls[position].push(el);
+};
+
+export const removeController = (map, el, position) => {
+  map.controls[position].removeElement(el);
 };
 
 export function makeAddress(item) {
