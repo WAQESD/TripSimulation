@@ -21,7 +21,6 @@ export const usePlayerStore = defineStore("player", () => {
     this._element = document.createElement("div");
     this._element.innerHTML = options.html;
     this._element.style.position = "absolute";
-    this._element.style.transform = `translateX(0) translateY(0)`;
 
     this.setPosition(options.position);
     this.setMap(options.map || null);
@@ -84,24 +83,32 @@ export const usePlayerStore = defineStore("player", () => {
       this._element.off();
     };
 
-    CustomOverlay.prototype.moveTo = function (from, to, time, callback) {
+    CustomOverlay.prototype.moveTo = function (from, to, time, index) {
       var projection = this.getProjection();
 
       const fromPixel = projection.fromCoordToOffset(from);
       const toPixel = projection.fromCoordToOffset(to);
 
       this._element.style.transform = `rotate(${getAngle(from, to)}deg)`;
-      this._element.style.transition = `transform ${time}ms linear`;
 
-      this._element.style.transform = `translateX(${toPixel.x - fromPixel.x}px) translateY(${
-        toPixel.y - fromPixel.y
-      }px)`;
+      this._element.style.transition = `left ${time}ms linear, top ${time}ms linear`;
+      this._element.style.left = toPixel.x - width / 2 + "px";
+      this._element.style.top = toPixel.y - height / 2 + "px";
+      // map.setCenter(from);
 
-      this._element.addEventListener("transitionend", callback);
+      this._element.addEventListener(
+        "transitionend",
+        () => {
+          next(index + 1);
+        },
+        { once: true }
+      );
     };
   };
 
   const startPath = () => {
+    isEnd.value = false;
+
     modalStore.setModal(true, SimpleTextModal, {
       callback: () => {
         next(0);
@@ -125,16 +132,23 @@ export const usePlayerStore = defineStore("player", () => {
       return;
     }
 
+    console.log(index);
+
     currentStart.value = polylinePath[index];
     currentGoal.value = polylinePath[index + 1];
 
-    let dist = Math.sqrt(
-      (currentStart.value.x - currentGoal.value.x) ** 2 + (currentStart.value.y - currentGoal.value.y) ** 2
-    );
+    let sx = currentStart.value.x * 100000;
+    let sy = currentStart.value.y * 100000;
+    let gx = currentGoal.value.x * 100000;
+    let gy = currentGoal.value.y * 100000;
 
-    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 700000, () => {
-      next(index + 1);
-    });
+    let dist = Math.sqrt((sx - gx) * (sx - gx) + (sy - gy) * (sy - gy));
+
+    console.log(dist);
+    // carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 70000, () => {
+    //   next(index + 1);
+    // });
+    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 50, index);
   };
 
   let getPath = async (start, goal) => {
@@ -156,8 +170,8 @@ export const usePlayerStore = defineStore("player", () => {
 
     console.log("before : ", pathData.length, "after : ", zipped.length);
 
-    polylinePath = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
-    // polylinePath = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    // polylinePath = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    polylinePath = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
 
     if (path) path.setMap(null);
 
@@ -168,7 +182,7 @@ export const usePlayerStore = defineStore("player", () => {
     });
 
     map.setCenter(polylinePath[0]);
-    map.setZoom(19);
+    map.setZoom(17);
 
     currentStart.value = polylinePath[0];
     currentGoal.value = polylinePath[1];
