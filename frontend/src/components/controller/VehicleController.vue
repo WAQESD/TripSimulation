@@ -23,12 +23,12 @@ const upSpeed = () => {
 
 const pause = () => {
   isPaused.value = true;
-  emit("puase");
+  emit("pause");
 };
 
-const start = () => {
+const reStart = () => {
   isPaused.value = false;
-  emit("start");
+  emit("reStart");
 };
 
 const controllerEl = ref(null);
@@ -52,7 +52,7 @@ watch(
   <div v-show="props.show" class="vehicle-controller-container" ref="controllerEl">
     <div class="vehicle-speed-btn" @click="downSpeed">⏪</div>
     <div v-show="!isPaused" class="vehicle-speed-btn" @click="pause">⏸</div>
-    <div v-show="isPaused" class="vehicle-speed-btn" @click="start">⏯</div>
+    <div v-show="isPaused" class="vehicle-speed-btn" @click="reStart">⏯</div>
     <div class="vehicle-speed-btn" @click="upSpeed">⏩</div>
   </div>
 </template>

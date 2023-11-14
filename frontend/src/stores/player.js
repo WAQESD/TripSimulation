@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, watch } from "vue";
+import { ref } from "vue";
 import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "./modal";
 import axios from "axios";
@@ -7,12 +7,13 @@ import axios from "axios";
 import SimpleTextModal from "../components/modal/SimpleTextModal.vue";
 
 export const usePlayerStore = defineStore("player", () => {
-  const speed = ref(1);
+  const speed = ref(5);
   const currentStart = ref(null);
   const currentGoal = ref(null);
   const isEnd = ref(false);
   const modalStore = useModalStore();
   const carOverlay = ref(null);
+  const isPaused = ref(false);
 
   const width = 44;
   const height = 85;
@@ -22,6 +23,28 @@ export const usePlayerStore = defineStore("player", () => {
   let path = null;
   let map = null;
   let startTime = 0;
+  let currentIndex = 0;
+  let expectedEndTime = 0;
+  let lastTime = 0;
+
+  const decreaseSpeed = () => {
+    if (speed.value > 0) speed.value -= 1;
+  };
+
+  const increaseSpeed = () => {
+    if (speed.value < import.meta.env.VITE_MAX_SPEED) speed.value += 1;
+  };
+
+  const pause = () => {
+    isPaused.value = true;
+    carOverlay.value.pause();
+  };
+
+  const reStart = () => {
+    isPaused.value = false;
+    console.log(lastTime, currentIndex);
+    carOverlay.value.moveTo(carOverlay.value.getPosition(), currentGoal.value, lastTime, currentIndex);
+  };
 
   let getAngle = (s, e) => {
     if (!currentStart.value || !currentGoal.value) return 0;
@@ -77,25 +100,61 @@ export const usePlayerStore = defineStore("player", () => {
     };
 
     CustomOverlay.prototype.moveTo = function (from, to, time, index) {
-      this._element.style.transform = `rotate(${getAngle(from, to)}deg)`;
+      currentIndex = index;
+      expectedEndTime = time;
 
+      this._element.style.transform = `rotate(${getAngle(from, to)}deg)`;
       this._element.style.transition = `left ${time}ms linear, top ${time}ms linear`;
+
       this.setPosition(to);
+
       startTime = performance.now();
       map.panTo(to, { duration: time, easing: "linear" });
 
       this._element.addEventListener(
         "transitionend",
         () => {
-          console.log(time, performance.now() - startTime);
           if (polylinePath.length <= index + 2) finish();
           else
             setTimeout(() => {
-              next(index + 1);
+              if (!isPaused.value) next(index + 1);
             });
         },
         { once: true }
       );
+    };
+
+    CustomOverlay.prototype.pause = function () {
+      // const estimatedTime = expectedEndTime - (performance.now() - startTime);
+      // const rate = estimatedTime / expectedEndTime;
+      var projection = this.getProjection();
+
+      let fromPixel = projection.fromCoordToOffset(currentStart.value);
+      let toPixel = projection.fromCoordToOffset(currentGoal.value);
+      let nowPixel = {
+        x: parseFloat(this._element.style.left.replace("px", "") + width / 2),
+        y: parseFloat(this._element.style.top.replace("px", "") + height / 2),
+      };
+
+      console.log(fromPixel);
+      console.log(toPixel);
+      console.log(nowPixel);
+      let rate = (toPixel.x - nowPixel.x) / (toPixel.x - fromPixel.x);
+
+      lastTime = expectedEndTime * (1 - rate);
+
+      const estimatedPosition = {
+        x: currentStart.value.x + (currentGoal.value.x - currentStart.value.x) * rate,
+        y: currentGoal.value.y + (currentGoal.value.y - currentGoal.value.y) * rate,
+      };
+
+      console.log(rate);
+      console.log(currentStart.value);
+      console.log(currentGoal.value);
+      console.log(estimatedPosition);
+
+      this._element.style.transition = ``;
+      this.setPosition(estimatedPosition);
     };
   };
 
@@ -130,7 +189,7 @@ export const usePlayerStore = defineStore("player", () => {
     let gy = currentGoal.value.y * 100000;
 
     let dist = Math.sqrt((sx - gx) * (sx - gx) + (sy - gy) * (sy - gy));
-    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist, index);
+    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 7, index);
   };
 
   let getPath = async (start, goal) => {
@@ -174,5 +233,5 @@ export const usePlayerStore = defineStore("player", () => {
     startPath();
   };
 
-  return { setMap, getPath };
+  return { setMap, getPath, decreaseSpeed, increaseSpeed, pause, reStart };
 });
