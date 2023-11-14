@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { ref, watch } from "vue";
 import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "./modal";
 import axios from "axios";
@@ -17,25 +17,11 @@ export const usePlayerStore = defineStore("player", () => {
   const width = 44;
   const height = 85;
 
-  var CustomOverlay = function (options) {
-    this._element = document.createElement("div");
-    this._element.innerHTML = options.html;
-    this._element.style.position = "absolute";
-
-    this.setPosition(options.position);
-    this.setMap(options.map || null);
-  };
-
+  let CustomOverlay = null;
   let polylinePath = null;
   let path = null;
-
   let map = null;
-
-  const car = computed(() => {
-    if (isEnd.value) return "";
-    return `<img id="car" src="/src/assets/images/car.png" style="width: ${width}px;
-      height: ${height}px;"/>`;
-  });
+  let startTime = 0;
 
   let getAngle = (s, e) => {
     if (!currentStart.value || !currentGoal.value) return 0;
@@ -45,6 +31,17 @@ export const usePlayerStore = defineStore("player", () => {
 
   let setMap = (newMap) => {
     map = newMap;
+    CustomOverlay = function (options) {
+      this._element = document.createElement("img");
+      this._element.id = "car";
+      this._element.src = "/src/assets/images/car.png";
+      this._element.style.width = width + "px";
+      this._element.style.height = height + "px";
+      this._element.style.position = "absolute";
+
+      this.setPosition(options.position);
+      this.setMap(options.map || null);
+    };
 
     CustomOverlay.prototype = new window.naver.maps.OverlayView();
     CustomOverlay.prototype.constructor = CustomOverlay;
@@ -64,9 +61,7 @@ export const usePlayerStore = defineStore("player", () => {
     };
 
     CustomOverlay.prototype.draw = function () {
-      if (!this.getMap()) {
-        return;
-      }
+      if (!this.getMap()) return;
 
       var projection = this.getProjection(),
         position = this.getPosition(),
@@ -77,29 +72,27 @@ export const usePlayerStore = defineStore("player", () => {
     };
 
     CustomOverlay.prototype.onRemove = function () {
-      var overlayLayer = this.getPanes().overlayLayer;
-
-      this._element.remove();
-      this._element.off();
+      this._element.parentNode.removeChild(this._element);
+      this._element.replaceWith(this._element.cloneNode(true));
     };
 
     CustomOverlay.prototype.moveTo = function (from, to, time, index) {
-      var projection = this.getProjection();
-
-      const fromPixel = projection.fromCoordToOffset(from);
-      const toPixel = projection.fromCoordToOffset(to);
-
       this._element.style.transform = `rotate(${getAngle(from, to)}deg)`;
 
       this._element.style.transition = `left ${time}ms linear, top ${time}ms linear`;
-      this._element.style.left = toPixel.x - width / 2 + "px";
-      this._element.style.top = toPixel.y - height / 2 + "px";
-      // map.setCenter(from);
+      this.setPosition(to);
+      startTime = performance.now();
+      map.panTo(to, { duration: time, easing: "linear" });
 
       this._element.addEventListener(
         "transitionend",
         () => {
-          next(index + 1);
+          console.log(time, performance.now() - startTime);
+          if (polylinePath.length <= index + 2) finish();
+          else
+            setTimeout(() => {
+              next(index + 1);
+            });
         },
         { once: true }
       );
@@ -122,18 +115,12 @@ export const usePlayerStore = defineStore("player", () => {
       text: "목적지에 도착했습니다.",
       callback: () => {
         isEnd.value = true;
+        carOverlay.value.setMap(null);
       },
     });
   };
 
   const next = (index) => {
-    if (polylinePath.length <= index + 1) {
-      finish();
-      return;
-    }
-
-    console.log(index);
-
     currentStart.value = polylinePath[index];
     currentGoal.value = polylinePath[index + 1];
 
@@ -143,12 +130,7 @@ export const usePlayerStore = defineStore("player", () => {
     let gy = currentGoal.value.y * 100000;
 
     let dist = Math.sqrt((sx - gx) * (sx - gx) + (sy - gy) * (sy - gy));
-
-    console.log(dist);
-    // carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 70000, () => {
-    //   next(index + 1);
-    // });
-    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 50, index);
+    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist, index);
   };
 
   let getPath = async (start, goal) => {
@@ -170,8 +152,8 @@ export const usePlayerStore = defineStore("player", () => {
 
     console.log("before : ", pathData.length, "after : ", zipped.length);
 
-    // polylinePath = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
-    polylinePath = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    polylinePath = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    // polylinePath = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
 
     if (path) path.setMap(null);
 
@@ -184,11 +166,7 @@ export const usePlayerStore = defineStore("player", () => {
     map.setCenter(polylinePath[0]);
     map.setZoom(17);
 
-    currentStart.value = polylinePath[0];
-    currentGoal.value = polylinePath[1];
-
     carOverlay.value = new CustomOverlay({
-      html: car.value,
       position: polylinePath[0],
       map: map,
     });

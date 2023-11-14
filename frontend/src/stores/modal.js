@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, shallowRef } from "vue";
 
 export const useModalStore = defineStore("modal", () => {
   const isActive = ref(false);
-  const content = ref(null);
+  const content = shallowRef(null);
   const props = ref({});
 
   function setModal(state, component = null, propsObj = null) {

@@ -60,7 +60,14 @@ const getPath = (s, e) => {
     <div id="map"></div>
     <div v-if="allModuleOnLoad">
       <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
-      <VehicleController :show="tripStart" :map="map"></VehicleController>
+      <VehicleController
+        :show="tripStart"
+        :map="map"
+        @down-speed="playerStore.decreseSpeed"
+        @up-speed="playerStore.increaseSpeed"
+        @pause="playerStore.pause"
+        @re-start="playerStore.reStart"
+      ></VehicleController>
     </div>
   </div>
 </template>
@@ -70,14 +77,6 @@ const getPath = (s, e) => {
   width: 100vw;
   height: 100vh;
   z-index: 0;
-}
-#car {
-  position: absolute;
-  z-index: 1;
-  left: calc(50vw - 22px);
-  top: calc(50vh - 42.5px);
-  width: 44px;
-  height: 85px;
 }
 #map-container {
   position: relative;
