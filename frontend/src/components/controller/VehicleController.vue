@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
 import { initController, addController, removeController } from "../../util/map";
-import { usePlayerStore } from "../../stores/player";
 
 const props = defineProps({
   map: Object,
@@ -10,7 +9,6 @@ const props = defineProps({
 
 const isPaused = ref(false);
 const position = window.naver.maps.Position.TOP_RIGHT;
-const playerStore = usePlayerStore();
 
 const emit = defineEmits(["downSpeed", "upSpeed", "pause", "reStart"]);
 

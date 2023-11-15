@@ -11,10 +11,13 @@ export const usePlayerStore = defineStore("player", () => {
   const currentStart = ref(null);
   const currentGoal = ref(null);
   const isEnd = ref(false);
+  const tripStart = ref(false);
   const modalStore = useModalStore();
   const carOverlay = ref(null);
   const isPaused = ref(false);
   const miniMapBounds = ref(false);
+  const departureTime = ref(null);
+  const arrivalTime = ref(null);
 
   const width = 44;
   const height = 85;
@@ -175,6 +178,7 @@ export const usePlayerStore = defineStore("player", () => {
       text: "목적지에 도착했습니다.",
       callback: () => {
         isEnd.value = true;
+        tripStart.value = false;
         carOverlay.value.setMap(null);
       },
     });
@@ -211,6 +215,20 @@ export const usePlayerStore = defineStore("player", () => {
     let pathData = data.route.traoptimal[0].path;
     let zipped = douglasPeucker(pathData, 0.00002);
 
+    let [hour, minute, second] = new Date(data.route.traoptimal[0].summary.departureTime)
+      .toTimeString()
+      .split(" ")[0]
+      .split(":");
+    departureTime.value = { hour, minute, second };
+
+    [hour, minute, second] = new Date(
+      new Date(data.route.traoptimal[0].summary.departureTime).getTime() + data.route.traoptimal[0].summary.duration
+    )
+      .toTimeString()
+      .split(" ")[0]
+      .split(":");
+    arrivalTime.value = { hour, minute, second };
+
     console.log("before : ", pathData.length, "after : ", zipped.length);
 
     polylinePath.value = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
@@ -232,6 +250,7 @@ export const usePlayerStore = defineStore("player", () => {
       map: map,
     });
 
+    tripStart.value = true;
     startPath();
   };
 
@@ -247,5 +266,8 @@ export const usePlayerStore = defineStore("player", () => {
     currentStart,
     currentGoal,
     getAngle,
+    departureTime,
+    arrivalTime,
+    tripStart,
   };
 });
