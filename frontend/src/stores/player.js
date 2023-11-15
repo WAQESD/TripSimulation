@@ -14,12 +14,13 @@ export const usePlayerStore = defineStore("player", () => {
   const modalStore = useModalStore();
   const carOverlay = ref(null);
   const isPaused = ref(false);
+  const miniMapBounds = ref(false);
 
   const width = 44;
   const height = 85;
 
   let CustomOverlay = null;
-  let polylinePath = null;
+  let polylinePath = ref(null);
   let path = null;
   let map = null;
   let startTime = 0;
@@ -27,21 +28,17 @@ export const usePlayerStore = defineStore("player", () => {
   let expectedEndTime = 0;
 
   const increaseSpeed = () => {
-    if (speed.value > 1) {
-      pause();
-      speed.value -= 1;
-      reStart();
-    }
-    console.log(speed.value);
+    if (speed.value <= 1) return;
+    pause();
+    speed.value -= 1;
+    reStart();
   };
 
   const decreaseSpeed = () => {
-    if (speed.value < import.meta.env.VITE_MAX_SPEED) {
-      pause();
-      speed.value += 1;
-      reStart();
-    }
-    console.log(speed.value);
+    if (speed.value >= import.meta.env.VITE_MAX_SPEED) return;
+    pause();
+    speed.value += 1;
+    reStart();
   };
 
   const pause = () => {
@@ -128,7 +125,7 @@ export const usePlayerStore = defineStore("player", () => {
 
       this.setPosition(to);
 
-      map.panTo(to, { duration: expectedEndTime, easing: "linear" });
+      // map.panTo(to, { duration: expectedEndTime, easing: "linear" });
 
       this._element.addEventListener("transitionstart", () => {
         startTime = performance.now();
@@ -137,7 +134,7 @@ export const usePlayerStore = defineStore("player", () => {
       this._element.addEventListener(
         "transitionend",
         () => {
-          if (polylinePath.length <= index + 2) finish();
+          if (polylinePath.value.length <= index + 2) finish();
           else
             setTimeout(() => {
               if (!isPaused.value) next(index + 1);
@@ -184,8 +181,8 @@ export const usePlayerStore = defineStore("player", () => {
   };
 
   const next = (index) => {
-    currentStart.value = polylinePath[index];
-    currentGoal.value = polylinePath[index + 1];
+    currentStart.value = polylinePath.value[index];
+    currentGoal.value = polylinePath.value[index + 1];
 
     let dist = getDist(currentStart.value, currentGoal.value);
     carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist, index);
@@ -205,32 +202,50 @@ export const usePlayerStore = defineStore("player", () => {
       },
     });
 
+    let bbox = data.route.traoptimal[0].summary.bbox;
+    miniMapBounds.value = new window.naver.maps.LatLngBounds(
+      new window.naver.maps.LatLng(bbox[0][1], bbox[0][0]),
+      new window.naver.maps.LatLng(bbox[1][1], bbox[1][0])
+    );
+
     let pathData = data.route.traoptimal[0].path;
     let zipped = douglasPeucker(pathData, 0.00002);
 
     console.log("before : ", pathData.length, "after : ", zipped.length);
 
-    polylinePath = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
-    // polylinePath = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    polylinePath.value = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    // polylinePath.value = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
 
     if (path) path.setMap(null);
 
     path = new window.naver.maps.Polyline({
-      path: polylinePath,
+      path: polylinePath.value,
       strokeColor: "#5347AA",
       map: map,
     });
 
-    map.setCenter(polylinePath[0]);
+    map.setCenter(polylinePath.value[0]);
     map.setZoom(17);
 
     carOverlay.value = new CustomOverlay({
-      position: polylinePath[0],
+      position: polylinePath.value[0],
       map: map,
     });
 
     startPath();
   };
 
-  return { setMap, getPath, decreaseSpeed, increaseSpeed, pause, reStart };
+  return {
+    setMap,
+    getPath,
+    decreaseSpeed,
+    increaseSpeed,
+    pause,
+    reStart,
+    polylinePath,
+    miniMapBounds,
+    currentStart,
+    currentGoal,
+    getAngle,
+  };
 });
