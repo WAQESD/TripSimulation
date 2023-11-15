@@ -4,6 +4,7 @@ import { usePlayerStore } from "../stores/player";
 
 import PathController from "./controller/PathController.vue";
 import VehicleController from "./controller/VehicleController.vue";
+import MiniMapController from "./controller/MiniMapController.vue";
 
 const map = ref(null);
 const tripStart = ref(false);
@@ -60,6 +61,7 @@ const getPath = (s, e) => {
     <div id="map"></div>
     <div v-if="allModuleOnLoad">
       <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
+      <MiniMapController :show="tripStart" :map="map"></MiniMapController>
       <VehicleController
         :show="tripStart"
         :map="map"

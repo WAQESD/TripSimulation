@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
 import { initController, addController, removeController } from "../../util/map";
+import { usePlayerStore } from "../../stores/player";
 
 const props = defineProps({
   map: Object,
@@ -8,8 +9,8 @@ const props = defineProps({
 });
 
 const isPaused = ref(false);
-
 const position = window.naver.maps.Position.TOP_RIGHT;
+const playerStore = usePlayerStore();
 
 const emit = defineEmits(["downSpeed", "upSpeed", "pause", "reStart"]);
 
@@ -62,7 +63,7 @@ watch(
   box-sizing: border-box;
   display: flex;
   padding: 5px 10px;
-  margin: 22px 30px 0 0;
+  margin: 16px 4px 0 0;
 }
 .vehicle-speed-btn {
   font-size: 30px;
