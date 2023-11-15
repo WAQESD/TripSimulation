@@ -63,7 +63,7 @@ const getPath = (s, e) => {
       <VehicleController
         :show="tripStart"
         :map="map"
-        @down-speed="playerStore.decreseSpeed"
+        @down-speed="playerStore.decreaseSpeed"
         @up-speed="playerStore.increaseSpeed"
         @pause="playerStore.pause"
         @re-start="playerStore.reStart"

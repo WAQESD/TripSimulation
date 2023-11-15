@@ -25,31 +25,51 @@ export const usePlayerStore = defineStore("player", () => {
   let startTime = 0;
   let currentIndex = 0;
   let expectedEndTime = 0;
-  let lastTime = 0;
-
-  const decreaseSpeed = () => {
-    if (speed.value > 0) speed.value -= 1;
-  };
 
   const increaseSpeed = () => {
-    if (speed.value < import.meta.env.VITE_MAX_SPEED) speed.value += 1;
+    if (speed.value > 1) {
+      pause();
+      speed.value -= 1;
+      reStart();
+    }
+    console.log(speed.value);
+  };
+
+  const decreaseSpeed = () => {
+    if (speed.value < import.meta.env.VITE_MAX_SPEED) {
+      pause();
+      speed.value += 1;
+      reStart();
+    }
+    console.log(speed.value);
   };
 
   const pause = () => {
+    if (isPaused.value) return;
     isPaused.value = true;
     carOverlay.value.pause();
   };
 
   const reStart = () => {
+    if (!isPaused.value) return;
     isPaused.value = false;
-    console.log(lastTime, currentIndex);
-    carOverlay.value.moveTo(carOverlay.value.getPosition(), currentGoal.value, lastTime, currentIndex);
+    let dist = getDist(currentStart.value, currentGoal.value);
+    carOverlay.value.moveTo(carOverlay.value.getPosition(), currentGoal.value, dist, currentIndex);
   };
 
   let getAngle = (s, e) => {
     if (!currentStart.value || !currentGoal.value) return 0;
     let rad = Math.atan2(e.y - s.y, e.x - s.x);
     return 90 - (rad * 180) / Math.PI;
+  };
+
+  let getDist = (s, g) => {
+    let sx = s.x * 100000;
+    let sy = s.y * 100000;
+    let gx = g.x * 100000;
+    let gy = g.y * 100000;
+
+    return Math.sqrt((sx - gx) * (sx - gx) + (sy - gy) * (sy - gy));
   };
 
   let setMap = (newMap) => {
@@ -99,16 +119,16 @@ export const usePlayerStore = defineStore("player", () => {
       this._element.replaceWith(this._element.cloneNode(true));
     };
 
-    CustomOverlay.prototype.moveTo = function (from, to, time, index) {
+    CustomOverlay.prototype.moveTo = function (from, to, dist, index) {
       currentIndex = index;
-      expectedEndTime = time;
+      expectedEndTime = dist * 1.5 ** (speed.value - 3);
 
       this._element.style.transform = `rotate(${getAngle(from, to)}deg)`;
-      this._element.style.transition = `left ${time}ms linear, top ${time}ms linear`;
+      this._element.style.transition = `left ${expectedEndTime}ms linear, top ${expectedEndTime}ms linear`;
 
       this.setPosition(to);
 
-      // map.panTo(to, { duration: time, easing: "linear" });
+      map.panTo(to, { duration: expectedEndTime, easing: "linear" });
 
       this._element.addEventListener("transitionstart", () => {
         startTime = performance.now();
@@ -130,8 +150,6 @@ export const usePlayerStore = defineStore("player", () => {
     CustomOverlay.prototype.pause = function () {
       const estimatedTime = performance.now() - startTime;
       const rate = Math.min(1, estimatedTime / expectedEndTime);
-
-      lastTime = expectedEndTime * (1 - rate);
 
       const estimatedPosition = {
         x: currentStart.value.x + (currentGoal.value.x - currentStart.value.x) * rate,
@@ -169,13 +187,8 @@ export const usePlayerStore = defineStore("player", () => {
     currentStart.value = polylinePath[index];
     currentGoal.value = polylinePath[index + 1];
 
-    let sx = currentStart.value.x * 100000;
-    let sy = currentStart.value.y * 100000;
-    let gx = currentGoal.value.x * 100000;
-    let gy = currentGoal.value.y * 100000;
-
-    let dist = Math.sqrt((sx - gx) * (sx - gx) + (sy - gy) * (sy - gy));
-    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist * 7, index);
+    let dist = getDist(currentStart.value, currentGoal.value);
+    carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist, index);
   };
 
   let getPath = async (start, goal) => {
