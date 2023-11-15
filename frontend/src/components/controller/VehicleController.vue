@@ -11,7 +11,7 @@ const isPaused = ref(false);
 
 const position = window.naver.maps.Position.TOP_RIGHT;
 
-const emit = defineEmits(["downSpeed", "upSpeed", "pause", "start"]);
+const emit = defineEmits(["downSpeed", "upSpeed", "pause", "reStart"]);
 
 const downSpeed = () => {
   emit("downSpeed");

@@ -86,7 +86,7 @@ export const usePlayerStore = defineStore("player", () => {
     CustomOverlay.prototype.draw = function () {
       if (!this.getMap()) return;
 
-      var projection = this.getProjection(),
+      let projection = this.getProjection(),
         position = this.getPosition(),
         pixelPosition = projection.fromCoordToOffset(position);
 
@@ -108,8 +108,11 @@ export const usePlayerStore = defineStore("player", () => {
 
       this.setPosition(to);
 
-      startTime = performance.now();
-      map.panTo(to, { duration: time, easing: "linear" });
+      // map.panTo(to, { duration: time, easing: "linear" });
+
+      this._element.addEventListener("transitionstart", () => {
+        startTime = performance.now();
+      });
 
       this._element.addEventListener(
         "transitionend",
@@ -125,36 +128,19 @@ export const usePlayerStore = defineStore("player", () => {
     };
 
     CustomOverlay.prototype.pause = function () {
-      // const estimatedTime = expectedEndTime - (performance.now() - startTime);
-      // const rate = estimatedTime / expectedEndTime;
-      var projection = this.getProjection();
-
-      let fromPixel = projection.fromCoordToOffset(currentStart.value);
-      let toPixel = projection.fromCoordToOffset(currentGoal.value);
-      let nowPixel = {
-        x: parseFloat(this._element.style.left.replace("px", "") + width / 2),
-        y: parseFloat(this._element.style.top.replace("px", "") + height / 2),
-      };
-
-      console.log(fromPixel);
-      console.log(toPixel);
-      console.log(nowPixel);
-      let rate = (toPixel.x - nowPixel.x) / (toPixel.x - fromPixel.x);
+      const estimatedTime = performance.now() - startTime;
+      const rate = Math.min(1, estimatedTime / expectedEndTime);
 
       lastTime = expectedEndTime * (1 - rate);
 
       const estimatedPosition = {
         x: currentStart.value.x + (currentGoal.value.x - currentStart.value.x) * rate,
-        y: currentGoal.value.y + (currentGoal.value.y - currentGoal.value.y) * rate,
+        y: currentStart.value.y + (currentGoal.value.y - currentStart.value.y) * rate,
       };
-
-      console.log(rate);
-      console.log(currentStart.value);
-      console.log(currentGoal.value);
-      console.log(estimatedPosition);
 
       this._element.style.transition = ``;
       this.setPosition(estimatedPosition);
+      currentStart.value = estimatedPosition;
     };
   };
 
