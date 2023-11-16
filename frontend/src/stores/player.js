@@ -96,6 +96,11 @@ export const usePlayerStore = defineStore("player", () => {
       this.setMap(options.map || null);
     };
 
+    window.naver.maps.Event.addListener(map.value, "dragstart", () => {
+      map.value.setCenter(map.value.getCenter());
+      traceMode.value = false;
+    });
+
     CustomOverlay.prototype = new window.naver.maps.OverlayView();
     CustomOverlay.prototype.constructor = CustomOverlay;
 
