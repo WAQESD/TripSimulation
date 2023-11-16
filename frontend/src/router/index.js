@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
-import TripSimulation from "../views/TripSimulation.vue";
+import TripView from "../views/TripView.vue";
 import LoginView from "../views/LoginView.vue";
 import SignupView from "../views/SignupView.vue";
 
@@ -25,7 +25,7 @@ const router = createRouter({
     {
       path: "/trip",
       name: "trip",
-      component: TripSimulation,
+      component: TripView,
     },
   ],
 });

@@ -37,6 +37,7 @@ watch(
 
       if (playerStore.polylinePath) {
         if (path) path.setMap(null);
+
         path = new window.naver.maps.Polyline({
           path: playerStore.polylinePath,
           strokeColor: "#00008B",
