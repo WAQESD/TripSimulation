@@ -19,6 +19,9 @@ export const usePlayerStore = defineStore("player", () => {
   const departureTime = ref(null);
   const arrivalTime = ref(null);
   const map = ref(null);
+  const startPlace = ref(null);
+  const goalPlace = ref(null);
+  const wayPoints = ref([]);
 
   const width = 44;
   const height = 85;
@@ -270,5 +273,8 @@ export const usePlayerStore = defineStore("player", () => {
     arrivalTime,
     tripStart,
     map,
+    startPlace,
+    goalPlace,
+    wayPoints,
   };
 });
