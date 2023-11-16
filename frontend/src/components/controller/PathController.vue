@@ -84,8 +84,8 @@ watch(
 </script>
 
 <template>
-  <div ref="controllerEl">
-    <div :class="isClosed ? 'closed' : ''" id="controller">
+  <div class="path-controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
+    <div id="controller">
       <div class="controller-input-container">
         <div class="input-wrapper">
           <label id="label-start" for="start">출 발</label>
@@ -119,11 +119,15 @@ watch(
         <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
       </div>
     </div>
-    <div class="close-btn" :class="isClosed ? 'closed' : ''" @click="toggleController">{{ btnIcon }}</div>
+    <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
 </template>
 
 <style scoped>
+.path-controller-container {
+  transition: transform 0.5s;
+}
+
 #controller {
   display: flex;
   flex-direction: column;
@@ -136,7 +140,6 @@ watch(
   box-sizing: border-box;
   width: 400px;
   height: 100vh;
-  transition: transform 0.5s;
 }
 
 .controller-input-container {
@@ -222,7 +225,6 @@ input {
   border-radius: 0 8px 8px 0;
   cursor: pointer;
   text-align: center;
-  transition: transform 0.5s;
 }
 
 .closed {
