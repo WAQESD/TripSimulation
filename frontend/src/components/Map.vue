@@ -5,9 +5,9 @@ import { usePlayerStore } from "../stores/player";
 import PathController from "./controller/PathController.vue";
 import VehicleController from "./controller/VehicleController.vue";
 import MiniMapController from "./controller/MiniMapController.vue";
+import InformationController from "./controller/InformationController.vue";
 
 const map = ref(null);
-const tripStart = ref(false);
 const moduleOnLoad = ref(false);
 const subModuleOnLoad = ref(false);
 const playerStore = usePlayerStore();
@@ -45,12 +45,6 @@ onMounted(() => {
   };
 });
 
-document.addEventListener("keydown", (e) => {
-  if (e.key == "a") {
-    tripStart.value = !tripStart.value;
-  }
-});
-
 const getPath = (s, e) => {
   playerStore.getPath(s, e);
 };
@@ -60,16 +54,17 @@ const getPath = (s, e) => {
   <div id="map-container">
     <div id="map"></div>
     <div v-if="allModuleOnLoad">
-      <PathController :show="!tripStart" @get-path="getPath" :map="map"></PathController>
-      <MiniMapController :show="tripStart" :map="map"></MiniMapController>
+      <PathController :show="!playerStore.tripStart" @get-path="getPath" :map="map"></PathController>
+      <MiniMapController :show="playerStore.tripStart" :map="map"></MiniMapController>
       <VehicleController
-        :show="tripStart"
+        :show="playerStore.tripStart"
         :map="map"
         @down-speed="playerStore.decreaseSpeed"
         @up-speed="playerStore.increaseSpeed"
         @pause="playerStore.pause"
         @re-start="playerStore.reStart"
       ></VehicleController>
+      <InformationController :show="playerStore.tripStart" :map="map"></InformationController>
     </div>
   </div>
 </template>
