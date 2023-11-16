@@ -1,58 +1,34 @@
 <script setup>
 import { ref, onMounted, nextTick, watch } from "vue";
 import { initController, addController, removeController } from "../../util/map";
-
-const props = defineProps({
-  map: Object,
-  show: Boolean,
-});
+import { usePlayerStore } from "../../stores/player";
 
 const isPaused = ref(false);
 const position = window.naver.maps.Position.TOP_RIGHT;
-
-const emit = defineEmits(["downSpeed", "upSpeed", "pause", "reStart"]);
-
-const downSpeed = () => {
-  emit("downSpeed");
-};
-
-const upSpeed = () => {
-  emit("upSpeed");
-};
-
-const pause = () => {
-  isPaused.value = true;
-  emit("pause");
-};
-
-const reStart = () => {
-  isPaused.value = false;
-  emit("reStart");
-};
-
 const controllerEl = ref(null);
+const playerStore = usePlayerStore();
 
 onMounted(() => {
   nextTick(() => {
-    initController(props.map, controllerEl.value, position);
+    initController(playerStore.map, controllerEl.value, position);
   });
 });
 
 watch(
-  () => props.show,
+  () => playerStore.tripStart,
   () => {
-    if (props.show) addController(props.map, controllerEl.value, position);
-    else removeController(props.map, controllerEl.value, position);
+    if (playerStore.tripStart) addController(playerStore.map, controllerEl.value, position);
+    else removeController(playerStore.map, controllerEl.value, position);
   }
 );
 </script>
 
 <template>
-  <div v-show="props.show" class="vehicle-controller-container" ref="controllerEl">
-    <div class="vehicle-speed-btn" @click="downSpeed">⏪</div>
-    <div v-show="!isPaused" class="vehicle-speed-btn" @click="pause">⏸</div>
-    <div v-show="isPaused" class="vehicle-speed-btn" @click="reStart">⏯</div>
-    <div class="vehicle-speed-btn" @click="upSpeed">⏩</div>
+  <div v-show="playerStore.tripStart" class="vehicle-controller-container" ref="controllerEl">
+    <div class="vehicle-speed-btn" @click="playerStore.decreaseSpeed">⏪</div>
+    <div v-show="!isPaused" class="vehicle-speed-btn" @click="playerStore.pause">⏸</div>
+    <div v-show="isPaused" class="vehicle-speed-btn" @click="playerStore.reStart">⏯</div>
+    <div class="vehicle-speed-btn" @click="playerStore.increaseSpeed">⏩</div>
   </div>
 </template>
 

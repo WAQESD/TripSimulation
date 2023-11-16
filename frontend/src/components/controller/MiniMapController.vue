@@ -3,11 +3,6 @@ import { onMounted, watch, nextTick, ref } from "vue";
 import { initController, addController, removeController } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 
-const props = defineProps({
-  map: Object,
-  show: Boolean,
-});
-
 const miniMap = ref(null);
 const controllerEl = ref(null);
 const position = window.naver.maps.Position.TOP_RIGHT;
@@ -16,7 +11,7 @@ const marker = ref(null);
 
 onMounted(() => {
   nextTick(() => {
-    initController(props.map, controllerEl.value, position);
+    initController(playerStore.map, controllerEl.value, position);
     miniMap.value = new window.naver.maps.Map("minimap", {
       center: new window.naver.maps.LatLng(import.meta.env.VITE_DEFAULT_LAT, import.meta.env.VITE_DEFAULT_LNG),
       zoom: 14,
@@ -34,10 +29,10 @@ onMounted(() => {
 });
 
 watch(
-  () => props.show,
+  () => playerStore.tripStart,
   () => {
-    if (props.show) {
-      addController(props.map, controllerEl.value, position);
+    if (playerStore.tripStart) {
+      addController(playerStore.map, controllerEl.value, position);
 
       if (playerStore.polylinePath) {
         new window.naver.maps.Polyline({
@@ -51,7 +46,7 @@ watch(
       if (playerStore.miniMapBounds) {
         miniMap.value.fitBounds(playerStore.miniMapBounds);
       }
-    } else removeController(props.map, controllerEl.value, position);
+    } else removeController(playerStore.map, controllerEl.value, position);
   }
 );
 
@@ -76,7 +71,7 @@ watch(
 </script>
 
 <template>
-  <div v-show="props.show" class="minimap-controller-container" ref="controllerEl">
+  <div v-show="playerStore.tripStart" class="minimap-controller-container" ref="controllerEl">
     <div id="minimap"></div>
   </div>
 </template>
