@@ -21,13 +21,18 @@ watch(
     else removeController(playerStore.map, controllerEl.value, position);
   }
 );
+
+const puaseOrRestart = () => {
+  if (isPaused.value) playerStore.reStart();
+  else playerStore.pause();
+  isPaused.value = !isPaused.value;
+};
 </script>
 
 <template>
   <div v-show="playerStore.tripStart" class="vehicle-controller-container" ref="controllerEl">
     <div class="vehicle-speed-btn" @click="playerStore.decreaseSpeed">⏪</div>
-    <div v-show="!isPaused" class="vehicle-speed-btn" @click="playerStore.pause">⏸</div>
-    <div v-show="isPaused" class="vehicle-speed-btn" @click="playerStore.reStart">⏯</div>
+    <div class="vehicle-speed-btn" @click="puaseOrRestart">{{ isPaused ? "⏯" : "⏸" }}</div>
     <div class="vehicle-speed-btn" @click="playerStore.increaseSpeed">⏩</div>
   </div>
 </template>
