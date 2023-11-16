@@ -44,27 +44,16 @@ onMounted(() => {
     subModuleOnLoad.value = true;
   };
 });
-
-const getPath = (s, e) => {
-  playerStore.getPath(s, e);
-};
 </script>
 
 <template>
   <div id="map-container">
     <div id="map"></div>
-    <div v-if="allModuleOnLoad">
-      <PathController :show="!playerStore.tripStart" @get-path="getPath" :map="map"></PathController>
-      <MiniMapController :show="playerStore.tripStart" :map="map"></MiniMapController>
-      <VehicleController
-        :show="playerStore.tripStart"
-        :map="map"
-        @down-speed="playerStore.decreaseSpeed"
-        @up-speed="playerStore.increaseSpeed"
-        @pause="playerStore.pause"
-        @re-start="playerStore.reStart"
-      ></VehicleController>
-      <InformationController :show="playerStore.tripStart" :map="map"></InformationController>
+    <div class="map-controller-container" v-if="allModuleOnLoad">
+      <PathController />
+      <MiniMapController />
+      <VehicleController />
+      <InformationController />
     </div>
   </div>
 </template>
