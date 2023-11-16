@@ -7,20 +7,10 @@ import {
   makeInfoWindowByCoord,
   searchAddressToCoordinate,
 } from "../../util/map";
+import { usePlayerStore } from "../../stores/player";
 
 import AddressList from "../AddressList.vue";
-defineOptions({
-  inheritAttrs: false,
-});
-
-const props = defineProps({
-  map: Object,
-  show: Boolean,
-});
-
 const position = window.naver.maps.Position.TOP_LEFT;
-
-const emit = defineEmits(["getPath"]);
 
 const startPos = ref(null);
 const goalPos = ref(null);
@@ -30,8 +20,8 @@ const goalAddr = ref("");
 
 const isClosed = ref(false);
 const controllerEl = ref(null);
-
 const searchResults = ref([]);
+const playerStore = usePlayerStore();
 
 const btnIcon = computed(() => (isClosed.value ? ">" : "<"));
 
@@ -48,8 +38,8 @@ let infoWindow = new window.naver.maps.InfoWindow({
 const makeInfoWindow = (item) => {
   let coord = new window.naver.maps.LatLng(item.point.y, item.point.x);
   if (infoWindow) infoWindow.close();
-  makeInfoWindowByCoord(coord, infoWindow, props.map, startPos, startAddr, goalPos, goalAddr);
-  props.map.setCenter(coord);
+  makeInfoWindowByCoord(coord, infoWindow, playerStore.map, startPos, startAddr, goalPos, goalAddr);
+  playerStore.map.setCenter(coord);
 };
 
 const searchAddr = (e) => {
@@ -58,7 +48,7 @@ const searchAddr = (e) => {
   setTimeout(() => {
     searchAddressToCoordinate(
       e.target.value,
-      props.map,
+      playerStore.map,
       infoWindow,
       startPos,
       goalPos,
@@ -71,24 +61,24 @@ const searchAddr = (e) => {
 
 onMounted(() => {
   nextTick(() => {
-    initController(props.map, controllerEl.value, position);
+    initController(playerStore.map, controllerEl.value, position);
 
-    window.naver.maps.Event.addListener(props.map, "click", function ({ coord }) {
+    window.naver.maps.Event.addListener(playerStore.map, "click", function ({ coord }) {
       if (infoWindow) infoWindow.close();
-      makeInfoWindowByCoord(coord, infoWindow, props.map, startPos, startAddr, goalPos, goalAddr);
+      makeInfoWindowByCoord(coord, infoWindow, playerStore.map, startPos, startAddr, goalPos, goalAddr);
     });
   });
 });
 
-const getPath = computed(() => () => {
-  emit("getPath", startPos.value, goalPos.value);
-});
+const getPath = () => {
+  playerStore.getPath(startPos.value, goalPos.value);
+};
 
 watch(
-  () => props.show,
+  () => !playerStore.tripStart,
   () => {
-    if (props.show) addController(props.map, controllerEl.value, position);
-    else removeController(props.map, controllerEl.value, position);
+    if (!playerStore.tripStart) addController(playerStore.map, controllerEl.value, position);
+    else removeController(playerStore.map, controllerEl.value, position);
   }
 );
 </script>

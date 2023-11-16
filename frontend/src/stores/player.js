@@ -18,6 +18,7 @@ export const usePlayerStore = defineStore("player", () => {
   const miniMapBounds = ref(false);
   const departureTime = ref(null);
   const arrivalTime = ref(null);
+  const map = ref(null);
 
   const width = 44;
   const height = 85;
@@ -25,7 +26,6 @@ export const usePlayerStore = defineStore("player", () => {
   let CustomOverlay = null;
   let polylinePath = ref(null);
   let path = null;
-  let map = null;
   let startTime = 0;
   let currentIndex = 0;
   let expectedEndTime = 0;
@@ -73,7 +73,7 @@ export const usePlayerStore = defineStore("player", () => {
   };
 
   let setMap = (newMap) => {
-    map = newMap;
+    map.value = newMap;
     CustomOverlay = function (options) {
       this._element = document.createElement("img");
       this._element.id = "car";
@@ -239,15 +239,15 @@ export const usePlayerStore = defineStore("player", () => {
     path = new window.naver.maps.Polyline({
       path: polylinePath.value,
       strokeColor: "#5347AA",
-      map: map,
+      map: map.value,
     });
 
-    map.setCenter(polylinePath.value[0]);
-    map.setZoom(17);
+    map.value.setCenter(polylinePath.value[0]);
+    map.value.setZoom(17);
 
     carOverlay.value = new CustomOverlay({
       position: polylinePath.value[0],
-      map: map,
+      map: map.value,
     });
 
     tripStart.value = true;
@@ -269,5 +269,6 @@ export const usePlayerStore = defineStore("player", () => {
     departureTime,
     arrivalTime,
     tripStart,
+    map,
   };
 });
