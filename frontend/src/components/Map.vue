@@ -26,6 +26,7 @@ onMounted(() => {
     map.value = new window.naver.maps.Map("map", {
       center: new window.naver.maps.LatLng(import.meta.env.VITE_DEFAULT_LAT, import.meta.env.VITE_DEFAULT_LNG),
       zoom: 14,
+      tileSpare: 5,
     });
 
     map.value.setCursor("pointer");
