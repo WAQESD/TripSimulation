@@ -3,38 +3,33 @@ import { ref, onMounted, nextTick, watch } from "vue";
 import { initController, addController, removeController } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 
-const props = defineProps({
-  map: Object,
-  show: Boolean,
-});
-
 const position = window.naver.maps.Position.TOP_LEFT;
 const controllerEl = ref(null);
 const playerStore = usePlayerStore();
 
 onMounted(() => {
   nextTick(() => {
-    initController(props.map, controllerEl.value, position);
+    initController(playerStore.map, controllerEl.value, position);
   });
 });
 
 watch(
-  () => props.show,
+  () => playerStore.tripStart,
   () => {
-    if (props.show) addController(props.map, controllerEl.value, position);
-    else removeController(props.map, controllerEl.value, position);
+    if (playerStore.tripStart) addController(playerStore.map, controllerEl.value, position);
+    else removeController(playerStore.map, controllerEl.value, position);
   }
 );
 </script>
 
 <template>
-  <div class="information-controller-container" v-show="props.show" ref="controllerEl">
-    <div v-if="props.show" class="information-controller-time">
+  <div class="information-controller-container" v-show="playerStore.tripStart" ref="controllerEl">
+    <div v-if="playerStore.tripStart" class="information-controller-time">
       {{ `${playerStore.departureTime.hour}:${playerStore.departureTime.minute}` }}
       <div class="information-contorller-departure">출발</div>
     </div>
     <div class="information-controller-icon">→</div>
-    <div v-if="props.show" class="information-controller-time">
+    <div v-if="playerStore.tripStart" class="information-controller-time">
       {{ `${playerStore.arrivalTime.hour}:${playerStore.arrivalTime.minute}` }}
       <div class="information-contorller-arrival">도착</div>
     </div>
