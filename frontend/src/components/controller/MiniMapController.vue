@@ -83,6 +83,7 @@ watch(
 .minimap-controller-container {
   background-color: white;
   margin: 15px 15px 0 0;
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
 }
 
 #minimap {
