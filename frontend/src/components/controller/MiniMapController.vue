@@ -8,6 +8,7 @@ const controllerEl = ref(null);
 const position = window.naver.maps.Position.TOP_RIGHT;
 const playerStore = usePlayerStore();
 const marker = ref(null);
+let path = null;
 
 onMounted(() => {
   nextTick(() => {
@@ -35,7 +36,9 @@ watch(
       addController(playerStore.map, controllerEl.value, position);
 
       if (playerStore.polylinePath) {
-        new window.naver.maps.Polyline({
+        if (path) path.setMap(null);
+
+        path = new window.naver.maps.Polyline({
           path: playerStore.polylinePath,
           strokeColor: "#00008B",
           strokeWeight: 3,
