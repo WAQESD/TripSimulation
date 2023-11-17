@@ -1,11 +1,9 @@
 <script setup>
 import { onMounted } from "vue";
-import { useRouter } from "vue-router";
+import { RouterView } from "vue-router";
 
 import TheHeader from "../commons/TheHeader.vue";
 import GradationBackground from "../components/GradationBackground.vue";
-
-const router = useRouter();
 
 onMounted(() => {
   const script = document.createElement("script");
@@ -14,17 +12,15 @@ onMounted(() => {
   script.crossOrigin = "anonymous";
 
   script.onload = () => {
-    window.Kakao.init("JS_KEY");
+    window.Kakao.init(import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
   };
   document.head.appendChild(script);
 });
 
-const kakaoLogin = async () => {
-  const test = await window.Kakao.Auth.authorize({
-    redirectUri: "http://localhost:5173",
+const kakaoLogin = () => {
+  window.Kakao.Auth.authorize({
+    redirectUri: import.meta.env.VITE_KAKAO_REDIRECT_URL,
   });
-
-  console.dir(test);
 };
 </script>
 
@@ -53,6 +49,7 @@ const kakaoLogin = async () => {
         </div>
       </form>
     </div>
+    <RouterView></RouterView>
   </main>
 </template>
 
