@@ -1,11 +1,19 @@
 <script setup>
-defineProps({
+import { usePlayerStore } from "../stores/player";
+const playerStore = usePlayerStore();
+
+const props = defineProps({
   place: Object,
 });
+
+const onClick = () => {
+  const placeCenter = new window.naver.maps.LatLng({ lat: props.place.lat, lng: props.place.lng });
+  playerStore.map.setCenter(placeCenter);
+};
 </script>
 
 <template>
-  <div class="place-container">
+  <div class="place-container" @click="onClick">
     <img class="place-thumbnail" :src="place.thumbnail" />
     <div class="place-info-container">
       <div class="place-info">
@@ -30,7 +38,18 @@ defineProps({
   display: flex;
   flex-direction: row;
   font-family: "Pretendard-Regular";
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: all 0.4s;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 2px solid white;
+}
+
+.place-container:hover {
+  color: rgba(255, 0, 0, 0.7);
+  border: 2px solid rgba(255, 0, 0, 0.7);
+  border-radius: 4px;
 }
 
 .place-info-container {
