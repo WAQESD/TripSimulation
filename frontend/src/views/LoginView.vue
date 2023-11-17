@@ -1,6 +1,31 @@
 <script setup>
+import { onMounted } from "vue";
+import { useRouter } from "vue-router";
+
 import TheHeader from "../commons/TheHeader.vue";
 import GradationBackground from "../components/GradationBackground.vue";
+
+const router = useRouter();
+
+onMounted(() => {
+  const script = document.createElement("script");
+  script.src = "https://t1.kakaocdn.net/kakao_js_sdk/2.5.0/kakao.min.js";
+  script.integrity = "sha384-kYPsUbBPlktXsY6/oNHSUDZoTX6+YI51f63jCPEIPFP09ttByAdxd2mEjKuhdqn4";
+  script.crossOrigin = "anonymous";
+
+  script.onload = () => {
+    window.Kakao.init("JS_KEY");
+  };
+  document.head.appendChild(script);
+});
+
+const kakaoLogin = async () => {
+  const test = await window.Kakao.Auth.authorize({
+    redirectUri: "http://localhost:5173",
+  });
+
+  console.dir(test);
+};
 </script>
 
 <template>
@@ -22,7 +47,7 @@ import GradationBackground from "../components/GradationBackground.vue";
         <div class="social-login-btn-container">
           <img class="social-login-btn" src="../assets/images/naver_circle.png" />
           <span class="social-login-btn-wrapper">
-            <img class="social-login-btn kakao" src="../assets/images/kakao_circle.png"
+            <img class="social-login-btn kakao" src="../assets/images/kakao_circle.png" @click="kakaoLogin"
           /></span>
           <img class="social-login-btn" src="../assets/images/google_circle.svg" />
         </div>
