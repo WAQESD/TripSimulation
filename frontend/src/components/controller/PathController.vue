@@ -59,6 +59,10 @@ const searchAddr = (e) => {
   }, 150);
 };
 
+const getPath = () => {
+  playerStore.getPath(startPos.value, goalPos.value);
+};
+
 onMounted(() => {
   nextTick(() => {
     initController(playerStore.map, controllerEl.value, position);
@@ -69,10 +73,6 @@ onMounted(() => {
     });
   });
 });
-
-const getPath = () => {
-  playerStore.getPath(startPos.value, goalPos.value);
-};
 
 watch(
   () => !playerStore.tripStart,
@@ -126,6 +126,7 @@ watch(
 <style scoped>
 .path-controller-container {
   transition: transform 0.5s;
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
 }
 
 #controller {

@@ -6,6 +6,7 @@ import PathController from "./controller/PathController.vue";
 import VehicleController from "./controller/VehicleController.vue";
 import MiniMapController from "./controller/MiniMapController.vue";
 import InformationController from "./controller/InformationController.vue";
+import PositionController from "./controller/PositionController.vue";
 
 const map = ref(null);
 const moduleOnLoad = ref(false);
@@ -54,6 +55,7 @@ onMounted(() => {
       <MiniMapController />
       <VehicleController />
       <InformationController />
+      <PositionController />
     </div>
   </div>
 </template>

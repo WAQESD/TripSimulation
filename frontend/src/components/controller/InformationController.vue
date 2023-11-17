@@ -16,8 +16,8 @@ const startPlace = ref({
   arrivalTime: null,
   placeName: "NC 대전 유성점",
   placeAddress: "대전 유성구 계룡로 119",
-  Lat: 123.123,
-  Lng: 37.123,
+  lng: 127.3440814,
+  lat: 36.3537882,
   thumbnail:
     "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20220111_295%2F1641891871024IliaN_JPEG%2F%25B4%25EB%25C0%25FCNC_%25C1%25B6%25B0%25A8%25B5%25B5.jpg",
 });
@@ -28,8 +28,8 @@ const goalPlace = ref({
   arrivalTime: { hour: "08", minute: "52", second: "45" },
   placeName: "성심당 본점",
   placeAddress: "대전 중구 대종로480번길 15",
-  Lat: 123.123,
-  Lng: 37.123,
+  lng: 127.4273345,
+  lat: 36.3276683,
   thumbnail:
     "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20180413_221%2F1523606684451FP1va_JPEG%2FEI2p0GphPlS6XQaMl8hjn4Q1.jpg",
 });
@@ -37,46 +37,55 @@ const goalPlace = ref({
 const wayPoints = ref([
   {
     ...startPlace.value,
+    placeId: 3,
     departureTime: { hour: "08", minute: "22", second: "13" },
     arrivalTime: { hour: "08", minute: "23", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 4,
     departureTime: { hour: "08", minute: "23", second: "13" },
     arrivalTime: { hour: "08", minute: "24", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 5,
     departureTime: { hour: "08", minute: "24", second: "13" },
     arrivalTime: { hour: "08", minute: "25", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 6,
     departureTime: { hour: "08", minute: "25", second: "13" },
     arrivalTime: { hour: "08", minute: "26", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 7,
     departureTime: { hour: "08", minute: "26", second: "13" },
     arrivalTime: { hour: "08", minute: "27", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 8,
     departureTime: { hour: "08", minute: "27", second: "13" },
     arrivalTime: { hour: "08", minute: "28", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 9,
     departureTime: { hour: "08", minute: "28", second: "13" },
     arrivalTime: { hour: "08", minute: "29", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 10,
     departureTime: { hour: "08", minute: "29", second: "13" },
     arrivalTime: { hour: "08", minute: "30", second: "13" },
   },
   {
     ...startPlace.value,
+    placeId: 11,
     departureTime: { hour: "08", minute: "30", second: "13" },
     arrivalTime: { hour: "08", minute: "31", second: "13" },
   },
@@ -141,6 +150,7 @@ watch(
   box-sizing: border-box;
   width: 400px;
   height: 100vh;
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
 }
 .information-time-container {
   display: flex;

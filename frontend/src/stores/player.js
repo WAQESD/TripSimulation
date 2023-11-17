@@ -22,6 +22,7 @@ export const usePlayerStore = defineStore("player", () => {
   const startPlace = ref(null);
   const goalPlace = ref(null);
   const wayPoints = ref([]);
+  const traceMode = ref(false);
 
   const width = 44;
   const height = 85;
@@ -32,12 +33,18 @@ export const usePlayerStore = defineStore("player", () => {
   let startTime = 0;
   let currentIndex = 0;
   let expectedEndTime = 0;
+  let estimatedTime = 0;
 
   const increaseSpeed = () => {
     if (speed.value <= 1) return;
     pause();
     speed.value -= 1;
     reStart();
+  };
+
+  const toggleTraceMode = () => {
+    if (!traceMode.value) map.value.setCenter(carOverlay.value.getCurrentPosition());
+    traceMode.value = !traceMode.value;
   };
 
   const decreaseSpeed = () => {
@@ -89,6 +96,11 @@ export const usePlayerStore = defineStore("player", () => {
       this.setMap(options.map || null);
     };
 
+    window.naver.maps.Event.addListener(map.value, "dragstart", () => {
+      map.value.setCenter(map.value.getCenter());
+      traceMode.value = false;
+    });
+
     CustomOverlay.prototype = new window.naver.maps.OverlayView();
     CustomOverlay.prototype.constructor = CustomOverlay;
 
@@ -122,6 +134,19 @@ export const usePlayerStore = defineStore("player", () => {
       this._element.replaceWith(this._element.cloneNode(true));
     };
 
+    CustomOverlay.prototype.getCurrentPosition = function () {
+      if (isPaused.value) return currentStart.value;
+      else {
+        estimatedTime = performance.now() - startTime;
+        const rate = Math.min(1, estimatedTime / expectedEndTime);
+
+        return {
+          x: currentStart.value.x + (currentGoal.value.x - currentStart.value.x) * rate,
+          y: currentStart.value.y + (currentGoal.value.y - currentStart.value.y) * rate,
+        };
+      }
+    };
+
     CustomOverlay.prototype.moveTo = function (from, to, dist, index) {
       currentIndex = index;
       expectedEndTime = dist * 1.5 ** (speed.value - 3);
@@ -131,7 +156,7 @@ export const usePlayerStore = defineStore("player", () => {
 
       this.setPosition(to);
 
-      // map.panTo(to, { duration: expectedEndTime, easing: "linear" });
+      if (traceMode.value) map.value.panTo(to, { duration: expectedEndTime, easing: "linear" });
 
       this._element.addEventListener("transitionstart", () => {
         startTime = performance.now();
@@ -151,7 +176,7 @@ export const usePlayerStore = defineStore("player", () => {
     };
 
     CustomOverlay.prototype.pause = function () {
-      const estimatedTime = performance.now() - startTime;
+      estimatedTime = performance.now() - startTime;
       const rate = Math.min(1, estimatedTime / expectedEndTime);
 
       const estimatedPosition = {
@@ -162,6 +187,7 @@ export const usePlayerStore = defineStore("player", () => {
       this._element.style.transition = ``;
       this.setPosition(estimatedPosition);
       currentStart.value = estimatedPosition;
+      if (traceMode.value) map.value.setCenter(estimatedPosition);
     };
   };
 
@@ -276,5 +302,6 @@ export const usePlayerStore = defineStore("player", () => {
     startPlace,
     goalPlace,
     wayPoints,
+    toggleTraceMode,
   };
 });
