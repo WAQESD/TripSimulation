@@ -4,14 +4,14 @@ import axios from "axios";
 const service = axios.create({
   baseURL: import.meta.env.VITE_BASE_API,
   timeout: import.meta.env.VITE_API_TIMEOUT, // request timeout
-  withCredentials: true,
+  // withCredentials: true,
 });
 
 service.interceptors.request.use(
   (config) => {
     config.headers["Content-Type"] = "application/json;charset=UTF-8";
-    config.headers["Access-Control-Allow-Origin"] = "http://localhost:8080";
-    config.headers["Access-Control-Allow-Headers"] = import.meta.env.VITE_BASE_API;
+    config.headers["Access-Control-Allow-Origin"] = "*";
+    config.headers["Access-Control-Allow-Headers"] = "*";
 
     return config;
   },

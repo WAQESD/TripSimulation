@@ -1,6 +1,8 @@
 <script setup>
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { RouterView } from "vue-router";
+// import axios from "../util/request";
+import axios from "axios";
 
 import TheHeader from "../commons/TheHeader.vue";
 import GradationBackground from "../components/GradationBackground.vue";
@@ -22,6 +24,41 @@ const kakaoLogin = () => {
     redirectUri: import.meta.env.VITE_KAKAO_REDIRECT_URL,
   });
 };
+
+const googleLogin = () => {
+  const url =
+    "https://accounts.google.com/o/oauth2/v2/auth?client_id=" +
+    import.meta.env.VITE_GOOGLE_CLIENT_ID +
+    "&redirect_uri=" +
+    import.meta.env.VITE_GOOGLE_REDIRECT_URL +
+    "&response_type=code" +
+    "&scope=email profile";
+
+  window.location.href = url;
+};
+
+const naverLogin = () => {
+  const url =
+    "https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=" +
+    import.meta.env.VITE_NAVER_CLIENT_ID +
+    "&redirect_uri=" +
+    import.meta.env.VITE_NAVER_REDIRECT_URL +
+    "&state=1234";
+
+  window.location.href = url;
+};
+
+const userEmail = ref("");
+const userPassword = ref("");
+
+const login = () => {
+  axios
+    .post(import.meta.env.VITE_BASE_API + "/login/userLogin", {
+      userEmail: userEmail.value,
+      userPassword: userPassword.value,
+    })
+    .then(({ data }) => console.log(data));
+};
 </script>
 
 <template>
@@ -30,9 +67,16 @@ const kakaoLogin = () => {
   <main>
     <div class="login-container">
       <h1>Login</h1>
-      <form class="login-form" @submit.prevent>
-        <input type="text" id="login-id" name="id" placeholder="아이디" required />
-        <input type="password" id="login-password" name="password" placeholder="비밀번호" required />
+      <form class="login-form" @submit.prevent="login">
+        <input type="email" id="login-email" name="login-email" placeholder="이메일" v-model="userEmail" required />
+        <input
+          type="password"
+          id="login-password"
+          name="password"
+          placeholder="비밀번호"
+          v-model="userPassword"
+          required
+        />
         <div class="login-remember-container">
           <input type="checkbox" id="login-remember" name="remember" />
           <label for="login-remember">아이디 저장하기</label>
@@ -41,11 +85,11 @@ const kakaoLogin = () => {
         <hr />
         <h2>소셜 로그인</h2>
         <div class="social-login-btn-container">
-          <img class="social-login-btn" src="../assets/images/naver_circle.png" />
+          <img class="social-login-btn" src="../assets/images/naver_circle.png" @click="naverLogin" />
           <span class="social-login-btn-wrapper">
             <img class="social-login-btn kakao" src="../assets/images/kakao_circle.png" @click="kakaoLogin"
           /></span>
-          <img class="social-login-btn" src="../assets/images/google_circle.svg" />
+          <img class="social-login-btn" src="../assets/images/google_circle.svg" @click="googleLogin" />
         </div>
       </form>
     </div>
@@ -84,7 +128,7 @@ h1 {
   align-items: center;
 }
 
-#login-id,
+#login-email,
 #login-password {
   width: 240px;
   height: 25px;
