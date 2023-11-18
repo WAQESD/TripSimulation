@@ -4,6 +4,7 @@ import TripView from "../views/TripView.vue";
 import LoginView from "../views/LoginView.vue";
 import SignupView from "../views/SignupView.vue";
 import KakaoLogin from "../components/login/KakaoLogin.vue";
+import GoogleLogin from "../components/login/GoogleLogin.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -22,6 +23,11 @@ const router = createRouter({
           path: "kakao",
           name: "kakao",
           component: KakaoLogin,
+        },
+        {
+          path: "google",
+          name: "google",
+          component: GoogleLogin,
         },
       ],
     },
