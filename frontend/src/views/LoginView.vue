@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { RouterView } from "vue-router";
-import axios from "../util/request";
+// import axios from "../util/request";
+import axios from "axios";
 
 import TheHeader from "../commons/TheHeader.vue";
 import GradationBackground from "../components/GradationBackground.vue";
@@ -25,35 +26,26 @@ const kakaoLogin = () => {
 };
 
 const googleLogin = () => {
-  axios
-    .get(import.meta.env.VITE_GOOGLE_API_URL, {
-      params: {
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID,
-        redirect_uri: import.meta.env.VITE_GOOGLE_REDIRECT_URL,
-        response_type: "code",
-        scope: "https://www.googleapis.com/auth/drive.metadata.readonly",
-        include_granted_scopes: "true",
-        state: "pass-through value",
-      },
-    })
-    .then((response) => {
-      console.log(response);
-    });
+  const url =
+    "https://accounts.google.com/o/oauth2/v2/auth?client_id=" +
+    import.meta.env.VITE_GOOGLE_CLIENT_ID +
+    "&redirect_uri=" +
+    import.meta.env.VITE_GOOGLE_REDIRECT_URL +
+    "&response_type=code" +
+    "&scope=email profile";
+
+  window.location.href = url;
 };
 
 const naverLogin = () => {
-  axios
-    .get(import.meta.env.VITE_NAVER_API_URL, {
-      params: {
-        client_id: import.meta.env.VITE_NAVER_CLIENT_ID,
-        redirect_uri: import.meta.env.VITE_NAVER_REDIRECT_URL,
-        response_type: "code",
-        state: "1234",
-      },
-    })
-    .then((response) => {
-      console.log(response);
-    });
+  const url =
+    "https://nid.naver.com/oauth2.0/authorize?response_type=code&client_id=" +
+    import.meta.env.VITE_NAVER_CLIENT_ID +
+    "&redirect_uri=" +
+    import.meta.env.VITE_NAVER_REDIRECT_URL +
+    "&state=1234";
+
+  window.location.href = url;
 };
 
 const userEmail = ref("");
@@ -136,7 +128,7 @@ h1 {
   align-items: center;
 }
 
-#login-id,
+#login-email,
 #login-password {
   width: 240px;
   height: 25px;
