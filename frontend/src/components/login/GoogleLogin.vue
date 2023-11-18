@@ -10,12 +10,12 @@ onMounted(() => {
   const path = "/api/socialLogin";
   const payload = {
     code: route.query.code,
-    registrationId: "kakao",
+    registrationId: "google",
   };
   axios.post(path, payload).then((response) => {
     if (response.data) {
       localStorage.setItem("access_token", response.data);
-      localStorage.setItem("registrationId", "kakao");
+      localStorage.setItem("registrationId", "google");
       router.push("/");
     } else {
       router.replace("/login");
