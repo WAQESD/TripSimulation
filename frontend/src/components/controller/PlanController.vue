@@ -8,13 +8,13 @@ const playerStore = usePlayerStore();
 
 <template>
   <div class="plan-controller-container">
-    <div class="plan-controller-start">
+    <div v-show="playerStore.startPlace.lat > 0" class="plan-controller-start">
       <VPlace :place="playerStore.startPlace"></VPlace>
     </div>
     <div class="plan-controller-waypoint-list">
       <VPlace v-for="place in playerStore.wayPoints" :key="place.placeId" :place="place"></VPlace>
     </div>
-    <div class="plan-controller-goal">
+    <div v-show="playerStore.goalPlace.lat > 0" class="plan-controller-goal">
       <VPlace :place="playerStore.goalPlace"></VPlace>
     </div>
   </div>
@@ -26,7 +26,7 @@ const playerStore = usePlayerStore();
   flex-direction: column;
   align-items: center;
   background-color: white;
-  padding: 40px 20px;
+  padding: 20px 20px;
   border-radius: 0 16px 16px 0;
   border-right: 1px solid rgba(0, 0, 0, 0.3);
   box-sizing: border-box;

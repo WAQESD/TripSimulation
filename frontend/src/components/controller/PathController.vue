@@ -43,6 +43,7 @@ const getPath = () => {
 
 <template>
   <div id="controller">
+    <div class="plan-controller-previous"><span>←</span></div>
     <div class="controller-input-container">
       <div class="input-wrapper">
         <label id="label-start" for="start">출 발</label>
@@ -85,12 +86,28 @@ const getPath = () => {
   align-items: center;
   background-color: white;
   height: 40px;
-  padding: 40px 0;
+  padding: 10px 20px;
   border-radius: 0 16px 16px 0;
   border-right: 1px solid rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   width: 400px;
   height: 100vh;
+}
+
+.plan-controller-previous {
+  width: 100%;
+  text-align: left;
+  font-weight: bold;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+  color: rgba(0, 0, 0, 0.5);
+  padding-left: 30px;
+}
+
+.plan-controller-previous:hover {
+  color: rgba(255, 0, 0, 0.7);
 }
 
 .controller-input-container {

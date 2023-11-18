@@ -47,6 +47,7 @@ document.addEventListener("keydown", (e) => {
 
 <template>
   <div class="controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
+    <div class="search-btn"><img class="search-btn-icon" src="../../assets/images/search.png" /></div>
     <PathController v-show="menuSelector === 0" />
     <PlanController v-show="menuSelector === 1" />
     <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
@@ -72,6 +73,11 @@ document.addEventListener("keydown", (e) => {
   border-radius: 0 8px 8px 0;
   cursor: pointer;
   text-align: center;
+}
+
+.search-btn-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .closed {
