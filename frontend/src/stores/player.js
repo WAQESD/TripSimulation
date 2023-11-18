@@ -7,28 +7,32 @@ import axios from "axios";
 import SimpleTextModal from "../components/modal/SimpleTextModal.vue";
 
 export const usePlayerStore = defineStore("player", () => {
+  const traceMode = ref(false);
+  const tripStart = ref(false);
+  const isPaused = ref(false);
+  const isEnd = ref(false);
+  const map = ref(null);
   const speed = ref(5);
+
   const currentStart = ref(null);
   const currentGoal = ref(null);
-  const isEnd = ref(false);
-  const tripStart = ref(false);
+
   const modalStore = useModalStore();
   const carOverlay = ref(null);
-  const isPaused = ref(false);
+
   const miniMapBounds = ref(false);
   const departureTime = ref(null);
   const arrivalTime = ref(null);
-  const map = ref(null);
-  const startPlace = ref(null);
-  const goalPlace = ref(null);
+
+  const polylinePath = ref(null);
+  const startPlace = ref({ placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" });
+  const goalPlace = ref({ placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" });
   const wayPoints = ref([]);
-  const traceMode = ref(false);
 
   const width = 44;
   const height = 85;
 
   let CustomOverlay = null;
-  let polylinePath = ref(null);
   let path = null;
   let startTime = 0;
   let currentIndex = 0;
@@ -37,9 +41,11 @@ export const usePlayerStore = defineStore("player", () => {
 
   const increaseSpeed = () => {
     if (speed.value <= 1) return;
-    pause();
     speed.value -= 1;
-    reStart();
+    if (!isPaused.value) {
+      pause();
+      reStart();
+    }
   };
 
   const toggleTraceMode = () => {
@@ -49,9 +55,11 @@ export const usePlayerStore = defineStore("player", () => {
 
   const decreaseSpeed = () => {
     if (speed.value >= import.meta.env.VITE_MAX_SPEED) return;
-    pause();
     speed.value += 1;
-    reStart();
+    if (!isPaused.value) {
+      pause();
+      reStart();
+    }
   };
 
   const pause = () => {
@@ -84,6 +92,7 @@ export const usePlayerStore = defineStore("player", () => {
 
   let setMap = (newMap) => {
     map.value = newMap;
+
     CustomOverlay = function (options) {
       this._element = document.createElement("img");
       this._element.id = "car";
@@ -221,7 +230,10 @@ export const usePlayerStore = defineStore("player", () => {
     carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist, index);
   };
 
-  let getPath = async (start, goal) => {
+  let getPath = async () => {
+    let start = { x: startPlace.value.x, y: startPlace.value.y };
+    let goal = { x: goalPlace.value.x, y: goalPlace.value.y };
+
     if (!start || !goal) return;
 
     let { data } = await axios({
@@ -231,6 +243,9 @@ export const usePlayerStore = defineStore("player", () => {
       data: {
         name: "PATH",
         start: { lng: start.x, lat: start.y },
+        wayPoints: wayPoints.value.map((wayPoint) => {
+          return { lng: wayPoint.x, lat: wayPoint.y };
+        }),
         goal: { lng: goal.x, lat: goal.y },
       },
     });

@@ -1,3 +1,6 @@
+import { usePlayerStore } from "../stores/player";
+import { rabinKarpHash } from "./rabinKarp";
+
 export const initController = (map, el, position) => {
   window.naver.maps.Event.once(map, "init", function () {
     map.controls[position].push(el);
@@ -90,20 +93,14 @@ function hasAddition(addition) {
   return !!(addition && addition.value);
 }
 
-export const searchAddressToCoordinate = (
-  address,
-  map,
-  infoWindow,
-  startPos,
-  goalPos,
-  startAddr,
-  goalAddr,
-  searchResults
-) => {
+export const searchAddressToCoordinate = (address, infoWindow, searchResults) => {
   if (!address) {
     searchResults.value = [];
     return;
   }
+
+  const playerStore = usePlayerStore();
+
   window.naver.maps.Service.geocode(
     {
       query: address,
@@ -125,7 +122,10 @@ export const searchAddressToCoordinate = (
         htmlAddresses.push({ address: item.roadAddress, point });
       }
 
-      infoWindow.setContent(
+      playerStore.map.setCenter(htmlAddresses[0].point);
+
+      makeInfoWindow(
+        infoWindow,
         [
           '<div style="padding: 16px; ">',
           '<h4 style="margin-top:5px; text-align:center">검색 주소 : ' + address + "</h4>",
@@ -133,34 +133,21 @@ export const searchAddressToCoordinate = (
           `
           <div style="text-align: center; margin-top: 12px">
             <button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>
+            <button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>
             <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
           </div>
           `,
           "</div>",
-        ].join("\n")
+        ].join("\n"),
+        htmlAddresses
       );
-
-      map.setCenter(htmlAddresses[0].point);
-      infoWindow.open(map, htmlAddresses[0].point);
-
-      document.querySelector("#info-start-btn").addEventListener("click", () => {
-        startPos.value = htmlAddresses[0].point;
-        startAddr.value = htmlAddresses[0].address;
-        infoWindow.close();
-      });
-
-      document.querySelector("#info-goal-btn").addEventListener("click", () => {
-        goalPos.value = htmlAddresses[0].point;
-        goalAddr.value = htmlAddresses[0].address;
-        infoWindow.close();
-      });
 
       searchResults.value = htmlAddresses;
     }
   );
 };
 
-export const makeInfoWindowByCoord = (coord, infoWindow, map, startPos, startAddr, goalPos, goalAddr) => {
+export const makeInfoWindowByCoord = (coord, infoWindow) => {
   window.naver.maps.Service.reverseGeocode(
     {
       coords: coord,
@@ -171,44 +158,77 @@ export const makeInfoWindowByCoord = (coord, infoWindow, map, startPos, startAdd
         return alert("Something Wrong!");
       }
 
-      var items = response.v2.results,
-        address = "",
-        htmlAddresses = [];
+      let items = response.v2.results;
+      let address = "";
+      let htmlAddresses = [];
 
-      for (var i = 0, ii = items.length, item; i < ii; i++) {
+      for (let i = 0, ii = items.length, item; i < ii; i++) {
         item = items[i];
         address = makeAddress(item) || "";
-
-        htmlAddresses.push(address);
+        let point = new window.naver.maps.Point(coord.x, coord.y);
+        htmlAddresses.push({ address, point });
       }
 
-      infoWindow.setContent(
+      makeInfoWindow(
+        infoWindow,
         [
           '<div style="padding: 16px; ">',
-          htmlAddresses.join("<br />"),
+          htmlAddresses.map(({ address }) => address).join("<br />"),
           `
             <div style="text-align: center; margin-top: 12px">
               <button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>
+              <button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>
               <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
             </div>
           `,
           "</div>",
-        ].join("\n")
+        ].join("\n"),
+        htmlAddresses
       );
-
-      infoWindow.open(map, coord);
-
-      document.querySelector("#info-start-btn").addEventListener("click", () => {
-        startPos.value = coord;
-        startAddr.value = htmlAddresses[0];
-        infoWindow.close();
-      });
-
-      document.querySelector("#info-goal-btn").addEventListener("click", () => {
-        goalPos.value = coord;
-        goalAddr.value = htmlAddresses[0];
-        infoWindow.close();
-      });
     }
   );
 };
+
+function makeInfoWindow(infoWindow, contents, htmlAddresses) {
+  const playerStore = usePlayerStore();
+
+  infoWindow.setContent(contents);
+  infoWindow.open(playerStore.map, htmlAddresses[0].point);
+
+  document.querySelector("#info-start-btn").addEventListener("click", () => {
+    ({ x: playerStore.startPlace.lat, y: playerStore.startPlace.lng } = htmlAddresses[0].point);
+    ({ x: playerStore.startPlace.x, y: playerStore.startPlace.y } = htmlAddresses[0].point);
+    playerStore.startPlace.id = rabinKarpHash(htmlAddresses[0].address);
+    playerStore.startPlace.address = htmlAddresses[0].address;
+    playerStore.startPlace.placeName = htmlAddresses[0].address;
+
+    infoWindow.close();
+  });
+
+  document.querySelector("#info-waypoint-btn").addEventListener("click", () => {
+    const wayPoint = {
+      placeId: rabinKarpHash(htmlAddresses[0].address),
+      address: htmlAddresses[0].address,
+      placeName: htmlAddresses[0].address,
+      category: "None",
+      lat: htmlAddresses[0].point.x,
+      lng: htmlAddresses[0].point.y,
+      x: htmlAddresses[0].point.x,
+      y: htmlAddresses[0].point.y,
+    };
+
+    playerStore.wayPoints.push(wayPoint);
+
+    infoWindow.close();
+  });
+
+  document.querySelector("#info-goal-btn").addEventListener("click", () => {
+    ({ x: playerStore.goalPlace.lat, y: playerStore.goalPlace.lng } = htmlAddresses[0].point);
+    ({ x: playerStore.goalPlace.x, y: playerStore.goalPlace.y } = htmlAddresses[0].point);
+    playerStore.goalPlace.id = rabinKarpHash(htmlAddresses[0].address);
+    playerStore.goalPlace.address = htmlAddresses[0].address;
+    playerStore.goalPlace.placeName = htmlAddresses[0].address;
+
+    infoWindow.close();
+  });
+}

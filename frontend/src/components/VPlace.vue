@@ -14,13 +14,13 @@ const onClick = () => {
 
 <template>
   <div class="place-container" @click="onClick">
-    <img class="place-thumbnail" :src="place.thumbnail" />
+    <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" />
     <div class="place-info-container">
       <div class="place-info">
         <div class="place-name">{{ place.placeName }}</div>
-        <div class="place-address">{{ place.placeAddress }}</div>
+        <div class="place-address">{{ place.address }}</div>
       </div>
-      <div class="place-time-container">
+      <div v-show="place.departureTime || place.arrivalTime" class="place-time-container">
         <div class="place-time">
           {{ place.departureTime ? `${place.departureTime.hour}:${place.departureTime.minute}` : "도착" }}
         </div>
@@ -44,6 +44,7 @@ const onClick = () => {
   padding: 10px;
   box-sizing: border-box;
   border: 2px solid white;
+  flex-grow: 1;
 }
 
 .place-container:hover {
@@ -56,7 +57,9 @@ const onClick = () => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  margin-left: 40px;
+  margin-left: auto;
+  max-width: 100%;
+  height: 90px;
 }
 .place-thumbnail {
   width: 160px;

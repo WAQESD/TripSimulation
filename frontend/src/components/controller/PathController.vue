@@ -1,33 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
-import {
-  initController,
-  addController,
-  removeController,
-  makeInfoWindowByCoord,
-  searchAddressToCoordinate,
-} from "../../util/map";
+import { ref, onMounted } from "vue";
+import { makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 
 import AddressList from "../AddressList.vue";
-const position = window.naver.maps.Position.TOP_LEFT;
 
-const startPos = ref(null);
-const goalPos = ref(null);
-
-const startAddr = ref("");
-const goalAddr = ref("");
-
-const isClosed = ref(false);
-const controllerEl = ref(null);
 const searchResults = ref([]);
 const playerStore = usePlayerStore();
-
-const btnIcon = computed(() => (isClosed.value ? ">" : "<"));
-
-const toggleController = () => {
-  isClosed.value = !isClosed.value;
-};
 
 const timer = null;
 
@@ -35,10 +14,17 @@ let infoWindow = new window.naver.maps.InfoWindow({
   anchorSkew: true,
 });
 
+onMounted(() => {
+  window.naver.maps.Event.addListener(playerStore.map, "click", function ({ coord }) {
+    if (infoWindow) infoWindow.close();
+    makeInfoWindowByCoord(coord, infoWindow);
+  });
+});
+
 const makeInfoWindow = (item) => {
   let coord = new window.naver.maps.LatLng(item.point.y, item.point.x);
   if (infoWindow) infoWindow.close();
-  makeInfoWindowByCoord(coord, infoWindow, playerStore.map, startPos, startAddr, goalPos, goalAddr);
+  makeInfoWindowByCoord(coord, infoWindow);
   playerStore.map.setCenter(coord);
 };
 
@@ -46,89 +32,53 @@ const searchAddr = (e) => {
   if (timer) clearTimeout(timer);
 
   setTimeout(() => {
-    searchAddressToCoordinate(
-      e.target.value,
-      playerStore.map,
-      infoWindow,
-      startPos,
-      goalPos,
-      startAddr,
-      goalAddr,
-      searchResults
-    );
+    searchAddressToCoordinate(e.target.value, infoWindow, searchResults);
   }, 150);
 };
 
 const getPath = () => {
-  playerStore.getPath(startPos.value, goalPos.value);
+  playerStore.getPath();
 };
-
-onMounted(() => {
-  nextTick(() => {
-    initController(playerStore.map, controllerEl.value, position);
-
-    window.naver.maps.Event.addListener(playerStore.map, "click", function ({ coord }) {
-      if (infoWindow) infoWindow.close();
-      makeInfoWindowByCoord(coord, infoWindow, playerStore.map, startPos, startAddr, goalPos, goalAddr);
-    });
-  });
-});
-
-watch(
-  () => !playerStore.tripStart,
-  () => {
-    if (!playerStore.tripStart) addController(playerStore.map, controllerEl.value, position);
-    else removeController(playerStore.map, controllerEl.value, position);
-  }
-);
 </script>
 
 <template>
-  <div class="path-controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
-    <div id="controller">
-      <div class="controller-input-container">
-        <div class="input-wrapper">
-          <label id="label-start" for="start">출 발</label>
-          <input
-            type="text"
-            placeholder="출발지 입력"
-            id="start"
-            v-model="startAddr"
-            @keyup="
-              (e) => {
-                searchAddr(e);
-              }
-            "
-          />
-        </div>
-        <div class="input-wrapper">
-          <label id="label-goal" for="goal">도 착</label>
-          <input
-            type="text"
-            placeholder="도착지 입력"
-            id="goal"
-            v-model="goalAddr"
-            @keyup="
-              (e) => {
-                searchAddr(e);
-              }
-            "
-          />
-        </div>
-        <button type="button" @click="getPath">경로 찾기</button>
-        <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
+  <div id="controller">
+    <div class="controller-input-container">
+      <div class="input-wrapper">
+        <label id="label-start" for="start">출 발</label>
+        <input
+          type="text"
+          placeholder="출발지 입력"
+          id="start"
+          v-model="playerStore.startPlace.address"
+          @keyup="
+            (e) => {
+              searchAddr(e);
+            }
+          "
+        />
       </div>
+      <div class="input-wrapper">
+        <label id="label-goal" for="goal">도 착</label>
+        <input
+          type="text"
+          placeholder="도착지 입력"
+          id="goal"
+          v-model="playerStore.goalPlace.address"
+          @keyup="
+            (e) => {
+              searchAddr(e);
+            }
+          "
+        />
+      </div>
+      <button type="button" @click="getPath">경로 찾기</button>
+      <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
     </div>
-    <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
 </template>
 
 <style scoped>
-.path-controller-container {
-  transition: transform 0.5s;
-  box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
-}
-
 #controller {
   display: flex;
   flex-direction: column;
@@ -211,24 +161,5 @@ input {
 }
 #label-goal {
   border-radius: 0 0 0 8px;
-}
-
-.close-btn {
-  position: absolute;
-  top: calc(50vh - 40px);
-  left: 400px;
-  width: 24px;
-  height: 80px;
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  line-height: 80px;
-  border-left: none;
-  background-color: white;
-  border-radius: 0 8px 8px 0;
-  cursor: pointer;
-  text-align: center;
-}
-
-.closed {
-  transform: translateX(-400px);
 }
 </style>
