@@ -28,6 +28,7 @@ export const usePlayerStore = defineStore("player", () => {
   const startPlace = ref({ placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" });
   const goalPlace = ref({ placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" });
   const wayPoints = ref([]);
+  const currentWaypointIndex = ref(0);
 
   const width = 44;
   const height = 85;
@@ -38,6 +39,7 @@ export const usePlayerStore = defineStore("player", () => {
   let currentIndex = 0;
   let expectedEndTime = 0;
   let estimatedTime = 0;
+  let pathData = null;
 
   const increaseSpeed = () => {
     if (speed.value <= 1) return;
@@ -72,7 +74,8 @@ export const usePlayerStore = defineStore("player", () => {
     if (!isPaused.value) return;
     isPaused.value = false;
     let dist = getDist(currentStart.value, currentGoal.value);
-    carOverlay.value.moveTo(carOverlay.value.getPosition(), currentGoal.value, dist, currentIndex);
+    if (dist < 0.0000001) next(currentIndex + 1);
+    else carOverlay.value.moveTo(carOverlay.value.getPosition(), currentGoal.value, dist, currentIndex);
   };
 
   let getAngle = (s, e) => {
@@ -100,6 +103,7 @@ export const usePlayerStore = defineStore("player", () => {
       this._element.style.width = width + "px";
       this._element.style.height = height + "px";
       this._element.style.position = "absolute";
+      this._element.style["z-index"] = 1;
 
       this.setPosition(options.position);
       this.setMap(options.map || null);
@@ -193,6 +197,11 @@ export const usePlayerStore = defineStore("player", () => {
         y: currentStart.value.y + (currentGoal.value.y - currentStart.value.y) * rate,
       };
 
+      if (rate === 1) {
+        estimatedPosition.x = currentGoal.value.x;
+        estimatedPosition.y = currentGoal.value.y;
+      }
+
       this._element.style.transition = ``;
       this.setPosition(estimatedPosition);
       currentStart.value = estimatedPosition;
@@ -226,11 +235,13 @@ export const usePlayerStore = defineStore("player", () => {
     currentStart.value = polylinePath.value[index];
     currentGoal.value = polylinePath.value[index + 1];
 
+    if (pathData[index].wayPointIndex > 0) currentWaypointIndex.value = pathData[index].wayPointIndex;
+
     let dist = getDist(currentStart.value, currentGoal.value);
     carOverlay.value.moveTo(currentStart.value, currentGoal.value, dist, index);
   };
 
-  let getPath = async () => {
+  let startTrip = async () => {
     let start = { x: startPlace.value.x, y: startPlace.value.y };
     let goal = { x: goalPlace.value.x, y: goalPlace.value.y };
 
@@ -251,13 +262,39 @@ export const usePlayerStore = defineStore("player", () => {
     });
 
     let bbox = data.route.traoptimal[0].summary.bbox;
+
     miniMapBounds.value = new window.naver.maps.LatLngBounds(
       new window.naver.maps.LatLng(bbox[0][1], bbox[0][0]),
       new window.naver.maps.LatLng(bbox[1][1], bbox[1][0])
     );
 
-    let pathData = data.route.traoptimal[0].path;
-    let zipped = douglasPeucker(pathData, 0.00002);
+    pathData = data.route.traoptimal[0].path.map((p, i) => {
+      return { index: i, wayPointIndex: 0, lng: p[0], lat: p[1], x: p[0], y: p[1] };
+    });
+
+    pathData = douglasPeucker(pathData, 0.00002);
+    let pathIndex = 0;
+
+    for (
+      let i = 0;
+      data.route.traoptimal[0].summary.waypoints && i < data.route.traoptimal[0].summary.waypoints.length;
+      i++
+    ) {
+      let waypoint = data.route.traoptimal[0].summary.waypoints[i];
+      while (pathData[pathIndex].index < waypoint.pointIndex) pathIndex++;
+      if (pathData[pathIndex].index === waypoint.pointIndex) pathData[pathIndex].wayPointIndex = i;
+      else
+        pathData.splice(pathIndex, 0, {
+          lng: waypoint.location[0],
+          lat: waypoint.location[1],
+          x: waypoint.location[0],
+          y: waypoint.location[1],
+          wayPointIndex: i + 1,
+          index: waypoint.pointIndex,
+        });
+    }
+
+    console.log(pathData);
 
     let [hour, minute, second] = new Date(data.route.traoptimal[0].summary.departureTime)
       .toTimeString()
@@ -273,10 +310,10 @@ export const usePlayerStore = defineStore("player", () => {
       .split(":");
     arrivalTime.value = { hour, minute, second };
 
-    console.log("before : ", pathData.length, "after : ", zipped.length);
+    // console.log("before : ", pathData.length, "after : ", zipped.length);
 
-    polylinePath.value = zipped.filter((p) => !!p).map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
-    // polylinePath.value = pathData.map(([lng, lat]) => new window.naver.maps.LatLng(lat, lng));
+    polylinePath.value = pathData.map(({ lng, lat }) => new window.naver.maps.LatLng(lat, lng));
+    // polylinePath.value = pathData.map(({lng, lat}) => new window.naver.maps.LatLng(lat, lng));
 
     if (path) path.setMap(null);
 
@@ -294,13 +331,104 @@ export const usePlayerStore = defineStore("player", () => {
       map: map.value,
     });
 
+    window.naver.maps.Event.addListener(map.value, "zoomstart", () => {
+      if (isPaused.value) return;
+      pause();
+      window.naver.maps.Event.once(map.value, "zoomend", () => {
+        setTimeout(reStart, 10);
+      });
+    });
+
+    window.naver.maps.Event.addListener(map.value, "size_changed", () => {
+      if (isPaused.value) return;
+      pause();
+      setTimeout(reStart, 10);
+    });
+
     tripStart.value = true;
     startPath();
   };
 
+  const addWaypoint = async (waypoint) => {
+    pause();
+
+    wayPoints.value.splice(currentWaypointIndex.value, 0, waypoint);
+
+    let { data } = await axios({
+      method: "post",
+      // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
+      url: "http://localhost:8080/save",
+      data: {
+        name: "PATH",
+        start: { lng: currentStart.value.x, lat: currentStart.value.y },
+        wayPoints: [...wayPoints.value].splice(currentWaypointIndex.value).map((wayPoint) => {
+          return { lng: wayPoint.x, lat: wayPoint.y };
+        }),
+        goal: { lng: goalPlace.value.x, lat: goalPlace.value.y },
+      },
+    });
+
+    console.log(data);
+
+    let newPathData = data.route.traoptimal[0].path.map((p, i) => {
+      return { index: pathData[currentIndex].index + i, wayPointIndex: 0, lng: p[0], lat: p[1], x: p[0], y: p[1] };
+    });
+
+    newPathData = douglasPeucker(newPathData, 0.00002);
+    let pathIndex = 0;
+
+    for (
+      let i = 0;
+      data.route.traoptimal[0].summary.waypoints && i < data.route.traoptimal[0].summary.waypoints.length;
+      i++
+    ) {
+      let waypoint = data.route.traoptimal[0].summary.waypoints[i];
+      while (
+        newPathData[pathIndex] &&
+        newPathData[pathIndex].index < waypoint.pointIndex + pathData[currentIndex].index
+      )
+        pathIndex++;
+      if (newPathData[pathIndex].index === waypoint.pointIndex + pathData[currentIndex].index)
+        newPathData[pathIndex].wayPointIndex = currentWaypointIndex.value + i + 1;
+      else
+        newPathData.splice(pathIndex, 0, {
+          lng: waypoint.location[0],
+          lat: waypoint.location[1],
+          x: waypoint.location[0],
+          y: waypoint.location[1],
+          wayPointIndex: currentWaypointIndex.value + i + 1,
+          index: pathData[currentIndex].index + waypoint.pointIndex,
+        });
+    }
+
+    console.log(pathData);
+    console.log(
+      `currentStart : ${currentStart.value}, currentGoal : ${currentGoal.value}, currentIndex : ${currentIndex}`
+    );
+    console.dir(currentStart.value);
+    console.log(newPathData);
+    pathData = [...pathData.slice(0, currentIndex), ...newPathData];
+    console.log(pathData);
+
+    polylinePath.value = pathData.map(({ lng, lat }) => new window.naver.maps.LatLng(lat, lng));
+
+    // polylinePath.value = newPathData.map(({ lng, lat }) => new window.naver.maps.LatLng(lat, lng));
+
+    if (path) path.setMap(null);
+
+    path = new window.naver.maps.Polyline({
+      path: polylinePath.value,
+      strokeColor: "#5347AA",
+      map: map.value,
+    });
+
+    currentGoal.value = polylinePath.value[currentIndex + 1];
+    reStart();
+  };
+
   return {
+    startTrip,
     setMap,
-    getPath,
     decreaseSpeed,
     increaseSpeed,
     pause,
@@ -318,5 +446,6 @@ export const usePlayerStore = defineStore("player", () => {
     goalPlace,
     wayPoints,
     toggleTraceMode,
+    addWaypoint,
   };
 });

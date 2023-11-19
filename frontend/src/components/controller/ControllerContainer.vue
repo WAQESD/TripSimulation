@@ -11,7 +11,7 @@ const playerStore = usePlayerStore();
 const position = window.naver.maps.Position.TOP_LEFT;
 const controllerEl = ref(null);
 
-const menuSelector = ref(0);
+const menuSelector = ref(1);
 const isClosed = ref(false);
 const btnIcon = computed(() => (isClosed.value ? ">" : "<"));
 
@@ -38,6 +38,11 @@ const toggleMenu = () => {
   else menuSelector.value = 0;
 };
 
+const setMenu = (value) => {
+  menuSelector.value = value;
+  isClosed.value = false;
+};
+
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     toggleMenu();
@@ -47,8 +52,23 @@ document.addEventListener("keydown", (e) => {
 
 <template>
   <div class="controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
-    <div class="search-btn"><img class="search-btn-icon" src="../../assets/images/search.png" /></div>
-    <PathController v-show="menuSelector === 0" />
+    <div class="btn-container">
+      <div
+        class="search-btn"
+        @click="
+          () => {
+            setMenu(0);
+          }
+        "
+        v-show="menuSelector !== 0"
+      >
+        <img class="search-btn-icon" src="../../assets/images/search.png" />
+      </div>
+      <div class="set-path-btn" @click="playerStore.startTrip">
+        <img class="set-path-icon" src="../../assets/images/path.png" />
+      </div>
+    </div>
+    <PathController v-show="menuSelector === 0" @previous-menu="setMenu" />
     <PlanController v-show="menuSelector === 1" />
     <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
@@ -56,6 +76,7 @@ document.addEventListener("keydown", (e) => {
 
 <style scoped>
 .controller-container {
+  z-index: 3;
   transition: transform 0.5s;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
 }
@@ -75,9 +96,53 @@ document.addEventListener("keydown", (e) => {
   text-align: center;
 }
 
+.btn-container {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  justify-content: center;
+  align-items: center;
+  left: 420px;
+  top: 20px;
+}
+.search-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border-radius: 32px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
+  margin-bottom: 10px;
+}
 .search-btn-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
+  box-sizing: border-box;
+}
+
+.set-path-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  border-radius: 32px;
+  box-sizing: border-box;
+  cursor: pointer;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
+}
+
+.set-path-icon {
+  width: 30px;
+  height: 30px;
+  box-sizing: border-box;
 }
 
 .closed {

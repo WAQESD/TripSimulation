@@ -1,9 +1,11 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 
 import AddressList from "../AddressList.vue";
+
+const emit = defineEmits(["previousMenu"]);
 
 const searchResults = ref([]);
 const playerStore = usePlayerStore();
@@ -36,14 +38,47 @@ const searchAddr = (e) => {
   }, 150);
 };
 
-const getPath = () => {
-  playerStore.getPath();
+const previousMenu = () => {
+  emit("previousMenu", 1);
 };
+
+let startMarker = null;
+let goalMarker = null;
+let wayPointMarkers = [];
+
+watch(playerStore.startPlace, () => {
+  if (startMarker) startMarker.setMap(null);
+  startMarker = new window.naver.maps.Marker({
+    position: new window.naver.maps.LatLng(playerStore.startPlace.lat, playerStore.startPlace.lng),
+    map: playerStore.map,
+  });
+});
+
+watch(playerStore.goalPlace, () => {
+  if (goalMarker) goalMarker.setMap(null);
+  goalMarker = new window.naver.maps.Marker({
+    position: new window.naver.maps.LatLng(playerStore.goalPlace.lat, playerStore.goalPlace.lng),
+    map: playerStore.map,
+  });
+});
+
+watch(playerStore.wayPoints, () => {
+  wayPointMarkers.forEach((marker) => marker.setMap(null));
+  wayPointMarkers = [];
+  playerStore.wayPoints.forEach((wayPoint) => {
+    wayPointMarkers.push(
+      new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(wayPoint.lat, wayPoint.lng),
+        map: playerStore.map,
+      })
+    );
+  });
+});
 </script>
 
 <template>
   <div id="controller">
-    <div class="plan-controller-previous"><span>←</span></div>
+    <div class="plan-controller-previous" @click="previousMenu"><span>←</span></div>
     <div class="controller-input-container">
       <div class="input-wrapper">
         <label id="label-start" for="start">출 발</label>
@@ -73,7 +108,7 @@ const getPath = () => {
           "
         />
       </div>
-      <button type="button" @click="getPath">경로 찾기</button>
+      <button type="button" @click="playerStore.startTrip">경로 찾기</button>
       <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
     </div>
   </div>

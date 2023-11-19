@@ -18,7 +18,7 @@ const onClick = () => {
     <div class="place-info-container">
       <div class="place-info">
         <div class="place-name">{{ place.placeName }}</div>
-        <div class="place-address">{{ place.address }}</div>
+        <div class="place-address">{{ place.address || place.placeAddress }}</div>
       </div>
       <div v-show="place.departureTime || place.arrivalTime" class="place-time-container">
         <div class="place-time">
@@ -45,6 +45,8 @@ const onClick = () => {
   box-sizing: border-box;
   border: 2px solid white;
   flex-grow: 1;
+  border: 2px solid rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
 }
 
 .place-container:hover {
@@ -86,7 +88,7 @@ const onClick = () => {
 }
 
 .place-time {
-  width: 50px;
+  width: 40px;
   text-align: center;
 }
 </style>

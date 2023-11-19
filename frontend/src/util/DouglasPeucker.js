@@ -1,24 +1,24 @@
 export function douglasPeucker(points, epsilon) {
   // 최대 거리를 찾는 함수
   function findPerpendicularDistance(point, lineStart, lineEnd) {
-    var dx = lineEnd[0] - lineStart[0];
-    var dy = lineEnd[1] - lineStart[1];
+    var dx = lineEnd.x - lineStart.x;
+    var dy = lineEnd.y - lineStart.y;
 
     // 선분이 실제로는 점이라면
     if (dx == 0 && dy == 0) {
-      dx = point[0] - lineStart[0];
-      dy = point[1] - lineStart[1];
+      dx = point.x - lineStart.x;
+      dy = point.y - lineStart.y;
       return Math.sqrt(dx * dx + dy * dy);
     }
 
-    var t = ((point[0] - lineStart[0]) * dx + (point[1] - lineStart[1]) * dy) / (dx * dx + dy * dy);
+    var t = ((point.x - lineStart.x) * dx + (point.y - lineStart.y) * dy) / (dx * dx + dy * dy);
 
     t = Math.max(0, Math.min(1, t));
 
-    var closestPoint = [lineStart[0] + t * dx, lineStart[1] + t * dy];
+    var closestPoint = [lineStart.x + t * dx, lineStart.y + t * dy];
 
-    dx = point[0] - closestPoint[0];
-    dy = point[1] - closestPoint[1];
+    dx = point.x - closestPoint[0];
+    dy = point.y - closestPoint[1];
 
     return Math.sqrt(dx * dx + dy * dy);
   }

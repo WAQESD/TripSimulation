@@ -196,7 +196,7 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
   infoWindow.open(playerStore.map, htmlAddresses[0].point);
 
   document.querySelector("#info-start-btn").addEventListener("click", () => {
-    ({ x: playerStore.startPlace.lat, y: playerStore.startPlace.lng } = htmlAddresses[0].point);
+    ({ x: playerStore.startPlace.lng, y: playerStore.startPlace.lat } = htmlAddresses[0].point);
     ({ x: playerStore.startPlace.x, y: playerStore.startPlace.y } = htmlAddresses[0].point);
     playerStore.startPlace.id = rabinKarpHash(htmlAddresses[0].address);
     playerStore.startPlace.address = htmlAddresses[0].address;
@@ -211,19 +211,20 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
       address: htmlAddresses[0].address,
       placeName: htmlAddresses[0].address,
       category: "None",
-      lat: htmlAddresses[0].point.x,
-      lng: htmlAddresses[0].point.y,
+      lat: htmlAddresses[0].point.y,
+      lng: htmlAddresses[0].point.x,
       x: htmlAddresses[0].point.x,
       y: htmlAddresses[0].point.y,
     };
 
-    playerStore.wayPoints.push(wayPoint);
+    if (playerStore.tripStart) playerStore.addWaypoint(wayPoint);
+    else playerStore.wayPoints.push(wayPoint);
 
     infoWindow.close();
   });
 
   document.querySelector("#info-goal-btn").addEventListener("click", () => {
-    ({ x: playerStore.goalPlace.lat, y: playerStore.goalPlace.lng } = htmlAddresses[0].point);
+    ({ x: playerStore.goalPlace.lng, y: playerStore.goalPlace.lat } = htmlAddresses[0].point);
     ({ x: playerStore.goalPlace.x, y: playerStore.goalPlace.y } = htmlAddresses[0].point);
     playerStore.goalPlace.id = rabinKarpHash(htmlAddresses[0].address);
     playerStore.goalPlace.address = htmlAddresses[0].address;
