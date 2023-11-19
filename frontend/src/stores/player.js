@@ -407,7 +407,7 @@ export const usePlayerStore = defineStore("player", () => {
     );
     console.dir(currentStart.value);
     console.log(newPathData);
-    pathData = [...pathData.slice(0, currentIndex), ...newPathData];
+    pathData = [...pathData.slice(0, currentIndex + 1), ...newPathData];
     console.log(pathData);
 
     polylinePath.value = pathData.map(({ lng, lat }) => new window.naver.maps.LatLng(lat, lng));
@@ -424,6 +424,14 @@ export const usePlayerStore = defineStore("player", () => {
 
     currentGoal.value = polylinePath.value[currentIndex + 1];
     reStart();
+  };
+
+  const setStartPlace = (place) => {
+    startPlace.value = place;
+  };
+
+  const setGoalPlace = (place) => {
+    goalPlace.value = place;
   };
 
   return {
@@ -447,5 +455,7 @@ export const usePlayerStore = defineStore("player", () => {
     wayPoints,
     toggleTraceMode,
     addWaypoint,
+    setStartPlace,
+    setGoalPlace,
   };
 });

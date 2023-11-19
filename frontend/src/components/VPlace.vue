@@ -7,13 +7,13 @@ const props = defineProps({
 });
 
 const onClick = () => {
-  const placeCenter = new window.naver.maps.LatLng({ lat: props.place.lat, lng: props.place.lng });
-  playerStore.map.setCenter(placeCenter);
+  // const placeCenter = new window.naver.maps.LatLng({ lat: props.place.lat, lng: props.place.lng });
+  // playerStore.map.setCenter(placeCenter);
 };
 </script>
 
 <template>
-  <div class="place-container" @click="onClick">
+  <div class="place-container slide-left" @click="onClick">
     <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" />
     <div class="place-info-container">
       <div class="place-info">
@@ -90,5 +90,19 @@ const onClick = () => {
 .place-time {
   width: 40px;
   text-align: center;
+}
+
+.slide-left {
+  animation: slide-left 0.3s ease-in-out both;
+  z-index: 3;
+}
+
+@keyframes slide-left {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 </style>

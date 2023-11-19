@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted } from "vue";
 import { makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 
@@ -41,39 +41,6 @@ const searchAddr = (e) => {
 const previousMenu = () => {
   emit("previousMenu", 1);
 };
-
-let startMarker = null;
-let goalMarker = null;
-let wayPointMarkers = [];
-
-watch(playerStore.startPlace, () => {
-  if (startMarker) startMarker.setMap(null);
-  startMarker = new window.naver.maps.Marker({
-    position: new window.naver.maps.LatLng(playerStore.startPlace.lat, playerStore.startPlace.lng),
-    map: playerStore.map,
-  });
-});
-
-watch(playerStore.goalPlace, () => {
-  if (goalMarker) goalMarker.setMap(null);
-  goalMarker = new window.naver.maps.Marker({
-    position: new window.naver.maps.LatLng(playerStore.goalPlace.lat, playerStore.goalPlace.lng),
-    map: playerStore.map,
-  });
-});
-
-watch(playerStore.wayPoints, () => {
-  wayPointMarkers.forEach((marker) => marker.setMap(null));
-  wayPointMarkers = [];
-  playerStore.wayPoints.forEach((wayPoint) => {
-    wayPointMarkers.push(
-      new window.naver.maps.Marker({
-        position: new window.naver.maps.LatLng(wayPoint.lat, wayPoint.lng),
-        map: playerStore.map,
-      })
-    );
-  });
-});
 </script>
 
 <template>

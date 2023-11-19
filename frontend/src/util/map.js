@@ -196,26 +196,15 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
   infoWindow.open(playerStore.map, htmlAddresses[0].point);
 
   document.querySelector("#info-start-btn").addEventListener("click", () => {
-    ({ x: playerStore.startPlace.lng, y: playerStore.startPlace.lat } = htmlAddresses[0].point);
-    ({ x: playerStore.startPlace.x, y: playerStore.startPlace.y } = htmlAddresses[0].point);
-    playerStore.startPlace.id = rabinKarpHash(htmlAddresses[0].address);
-    playerStore.startPlace.address = htmlAddresses[0].address;
-    playerStore.startPlace.placeName = htmlAddresses[0].address;
+    playerStore.setStartPlace(makePlaceByAddress(htmlAddresses[0]));
+    console.log(playerStore.startPlace);
 
     infoWindow.close();
   });
 
   document.querySelector("#info-waypoint-btn").addEventListener("click", () => {
-    const wayPoint = {
-      placeId: rabinKarpHash(htmlAddresses[0].address),
-      address: htmlAddresses[0].address,
-      placeName: htmlAddresses[0].address,
-      category: "None",
-      lat: htmlAddresses[0].point.y,
-      lng: htmlAddresses[0].point.x,
-      x: htmlAddresses[0].point.x,
-      y: htmlAddresses[0].point.y,
-    };
+    const wayPoint = makePlaceByAddress(htmlAddresses[0]);
+    console.log(wayPoint);
 
     if (playerStore.tripStart) playerStore.addWaypoint(wayPoint);
     else playerStore.wayPoints.push(wayPoint);
@@ -224,12 +213,45 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
   });
 
   document.querySelector("#info-goal-btn").addEventListener("click", () => {
-    ({ x: playerStore.goalPlace.lng, y: playerStore.goalPlace.lat } = htmlAddresses[0].point);
-    ({ x: playerStore.goalPlace.x, y: playerStore.goalPlace.y } = htmlAddresses[0].point);
-    playerStore.goalPlace.id = rabinKarpHash(htmlAddresses[0].address);
-    playerStore.goalPlace.address = htmlAddresses[0].address;
-    playerStore.goalPlace.placeName = htmlAddresses[0].address;
-
+    playerStore.setGoalPlace(makePlaceByAddress(htmlAddresses[0]));
     infoWindow.close();
   });
 }
+
+const makePlaceByAddress = (htmlAddress) => {
+  return {
+    lng: htmlAddress.point.x,
+    lat: htmlAddress.point.y,
+    x: htmlAddress.point.x,
+    y: htmlAddress.point.y,
+    id: rabinKarpHash(htmlAddress.address),
+    address: htmlAddress.address,
+    placeName: htmlAddress.address,
+  };
+};
+
+export const getStartIcon = () => {
+  return `
+    <div class="start-place-marker">
+      <img class="start-place-marker-icon" src="./src/assets/images/start_marker.png" width="36", height="36">
+    </div>
+  `;
+};
+
+export const getGoalIcon = () => {
+  return `
+    <div class="goal-place-marker">
+      <img class="goal-place-marker-icon"  src="./src/assets/images/goal_marker.png" width="36", height="36">
+    </div>
+  `;
+};
+
+export const getWayPointIcon = (idx) => {
+  return `
+    <div class="waypoint-place-marker">
+      <img class="waypoint-place-marker-icon" src="./src/assets/images/waypoint_marker.png" width="36", height="36">
+      <div style="position : absolute; top : 4px; left : 18px,;text-align : center; width:36px; font-family : Pretendard-Regular">${idx}</div>
+      </img>
+    </div>
+  `;
+};

@@ -1,9 +1,116 @@
 <script setup>
+import { ref, watch } from "vue";
 import { usePlayerStore } from "../../stores/player";
+import { getStartIcon, getGoalIcon, getWayPointIcon } from "../../util/map";
 
 import VPlace from "../VPlace.vue";
 
 const playerStore = usePlayerStore();
+const changeTarget = ref(null);
+const polyLine = ref(null);
+
+const setPath = ({ place, type, idx }) => {
+  if (type === "start") playerStore.setStartPlace(place);
+  else if (type === "goal") playerStore.setGoalPlace(place);
+  else playerStore.wayPoints[idx] = place;
+};
+
+const changePath = (place, type, idx) => {
+  if (!changeTarget.value) {
+    changeTarget.value = { place, type, idx };
+  } else {
+    setPath({ place, type: changeTarget.value.type, idx: changeTarget.value.idx });
+    setPath({ place: changeTarget.value.place, type, idx });
+    changeTarget.value = null;
+  }
+};
+
+const drawPolyLine = () => {
+  if (playerStore.tripStart) return;
+  if (polyLine.value) polyLine.value.setMap(null);
+  if (playerStore.startPlace.lat === 0 || playerStore.goalPlace.lat === 0) return;
+  let polyLinePath = [
+    new window.naver.maps.LatLng(playerStore.startPlace.lat, playerStore.startPlace.lng),
+    ...playerStore.wayPoints.map((wayPoint) => new window.naver.maps.LatLng(wayPoint.lat, wayPoint.lng)),
+    new window.naver.maps.LatLng(playerStore.goalPlace.lat, playerStore.goalPlace.lng),
+  ];
+
+  polyLine.value = new window.naver.maps.Polyline({
+    map: playerStore.map,
+    path: polyLinePath,
+    fillColor: "#ff0000",
+    fillOpacity: 0.3,
+    strokeColor: "#ff0000",
+    strokeOpacity: 0.6,
+    strokeWeight: 3,
+  });
+};
+
+const startMarker = ref(null);
+const goalMarker = ref(null);
+const wayPointMarkers = ref([]);
+
+watch(
+  () => playerStore.startPlace,
+  () => {
+    if (startMarker.value) startMarker.value.setMap(null);
+    startMarker.value = null;
+    startMarker.value = new window.naver.maps.Marker({
+      position: new window.naver.maps.LatLng(playerStore.startPlace.lat, playerStore.startPlace.lng),
+      map: playerStore.map,
+      icon: {
+        content: getStartIcon(),
+        size: new window.naver.maps.Size(36, 36),
+        anchor: new window.naver.maps.Point(0, 36),
+      },
+    });
+    drawPolyLine();
+  }
+);
+
+watch(
+  () => playerStore.goalPlace,
+  () => {
+    if (goalMarker.value) goalMarker.value.setMap(null);
+    goalMarker.value = null;
+    goalMarker.value = new window.naver.maps.Marker({
+      position: new window.naver.maps.LatLng(playerStore.goalPlace.lat, playerStore.goalPlace.lng),
+      map: playerStore.map,
+      icon: {
+        content: getGoalIcon(),
+        size: new window.naver.maps.Size(36, 36),
+        anchor: new window.naver.maps.Point(0, 36),
+      },
+    });
+    drawPolyLine();
+  }
+);
+
+watch(playerStore.wayPoints, () => {
+  wayPointMarkers.value.forEach((marker) => marker.setMap(null));
+  wayPointMarkers.value = [];
+  playerStore.wayPoints.forEach((wayPoint, idx) => {
+    wayPointMarkers.value.push(
+      new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(wayPoint.lat, wayPoint.lng),
+        map: playerStore.map,
+        icon: {
+          content: getWayPointIcon(idx + 1),
+          size: new window.naver.maps.Size(36, 36),
+          anchor: new window.naver.maps.Point(18, 36),
+        },
+      })
+    );
+  });
+  drawPolyLine();
+});
+
+watch(
+  () => playerStore.tripStart,
+  () => {
+    if (playerStore.tripStart && polyLine.value) polyLine.value.setMap(null);
+  }
+);
 </script>
 
 <template>
@@ -11,16 +118,42 @@ const playerStore = usePlayerStore();
     <h2 class="plan-controller-title">여행 경로 설정</h2>
     <fieldset v-if="playerStore.startPlace.lat > 0" class="plan-controller-start">
       <legend>출발</legend>
-      <VPlace :place="playerStore.startPlace"></VPlace>
+      <VPlace
+        :place="playerStore.startPlace"
+        :class="{ isSelected: changeTarget && changeTarget.type === 'start' }"
+        @click="
+          () => {
+            changePath(playerStore.startPlace, 'start', 0);
+          }
+        "
+      ></VPlace>
     </fieldset>
     <div v-else><h2>출발지를 설정해주세요.</h2></div>
     <fieldset v-if="playerStore.wayPoints.length > 0" class="plan-controller-waypoint-list">
       <legend>경유</legend>
-      <VPlace v-for="place in playerStore.wayPoints" :key="place.placeId" :place="place"></VPlace>
+      <VPlace
+        v-for="(place, idx) in playerStore.wayPoints"
+        :class="{ isSelected: changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx }"
+        :key="place.placeId"
+        :place="place"
+        @click="
+          () => {
+            changePath(place, 'waypoint', idx);
+          }
+        "
+      ></VPlace>
     </fieldset>
     <fieldset v-if="playerStore.goalPlace.lat > 0" class="plan-controller-goal">
       <legend>도착</legend>
-      <VPlace :place="playerStore.goalPlace"></VPlace>
+      <VPlace
+        :place="playerStore.goalPlace"
+        :class="{ isSelected: changeTarget && changeTarget.type === 'goal' }"
+        @click="
+          () => {
+            changePath(playerStore.goalPlace, 'goal', 0);
+          }
+        "
+      ></VPlace>
     </fieldset>
     <div v-else><h2>목적지를 설정해주세요.</h2></div>
   </div>
