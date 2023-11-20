@@ -1,10 +1,10 @@
 <script setup>
 import { RouterView } from "vue-router";
-import Modal from "./commons/Modal.vue";
+import TheModal from "./commons/TheModal.vue";
 </script>
 
 <template>
-  <Modal></Modal>
+  <TheModal></TheModal>
   <RouterView />
 </template>
 

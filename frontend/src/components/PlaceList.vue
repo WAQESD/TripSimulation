@@ -34,6 +34,7 @@ defineProps({
   margin: 4px 0;
   padding: 20px 0;
   overflow: auto;
+  width: 340px;
 }
 
 .place-list-container::-webkit-scrollbar {

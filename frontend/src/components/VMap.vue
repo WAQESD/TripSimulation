@@ -2,11 +2,10 @@
 import { ref, onMounted, computed } from "vue";
 import { usePlayerStore } from "../stores/player";
 
-import PathController from "./controller/PathController.vue";
 import VehicleController from "./controller/VehicleController.vue";
 import MiniMapController from "./controller/MiniMapController.vue";
-import InformationController from "./controller/InformationController.vue";
 import PositionController from "./controller/PositionController.vue";
+import ControllerContainer from "./controller/ControllerContainer.vue";
 
 const map = ref(null);
 const moduleOnLoad = ref(false);
@@ -52,10 +51,9 @@ onMounted(() => {
   <div id="map-container">
     <div id="map"></div>
     <div class="map-controller-container" v-if="allModuleOnLoad">
-      <PathController />
+      <ControllerContainer />
       <MiniMapController />
       <VehicleController />
-      <InformationController />
       <PositionController />
     </div>
   </div>

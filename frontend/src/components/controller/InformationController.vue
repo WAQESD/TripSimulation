@@ -1,14 +1,7 @@
 <script setup>
-import { ref, onMounted, nextTick, watch, computed } from "vue";
-import { initController, addController, removeController } from "../../util/map";
-import { usePlayerStore } from "../../stores/player";
+import { ref } from "vue";
 
 import PlaceList from "../PlaceList.vue";
-
-const position = window.naver.maps.Position.TOP_LEFT;
-const playerStore = usePlayerStore();
-const controllerEl = ref(null);
-const isClosed = ref(null);
 
 const startPlace = ref({
   placeId: 1,
@@ -90,34 +83,9 @@ const wayPoints = ref([
     arrivalTime: { hour: "08", minute: "31", second: "13" },
   },
 ]);
-
-const btnIcon = computed(() => (isClosed.value ? ">" : "<"));
-
-const toggleController = () => {
-  isClosed.value = !isClosed.value;
-};
-
-onMounted(() => {
-  nextTick(() => {
-    initController(playerStore.map, controllerEl.value, position);
-  });
-});
-
-watch(
-  () => playerStore.tripStart,
-  () => {
-    if (playerStore.tripStart) addController(playerStore.map, controllerEl.value, position);
-    else removeController(playerStore.map, controllerEl.value, position);
-  }
-);
 </script>
 <template>
-  <div
-    class="information-controller-container"
-    v-show="playerStore.tripStart"
-    ref="controllerEl"
-    :class="isClosed ? 'closed' : ''"
-  >
+  <div class="information-controller-container">
     <!-- 
       place 구조
       {
@@ -132,7 +100,6 @@ watch(
       }
     -->
     <PlaceList :startPlace="startPlace" :goalPlace="goalPlace" :wayPoints="wayPoints"></PlaceList>
-    <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
 </template>
 

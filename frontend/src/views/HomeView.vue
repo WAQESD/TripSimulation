@@ -1,12 +1,24 @@
 <script setup>
-import TheHeader from "../commons/TheHeader.vue";
-import GradationBackground from "../components/GradationBackground.vue";
 import { useRouter } from "vue-router";
+import { useModalStore } from "../stores/modal";
+import { useTimeStore } from "../stores/time";
+
+import TheHeader from "../commons/TheHeader.vue";
+import TimePickerModal from "../components/modal/TimePickerModal.vue";
+import GradationBackground from "../components/GradationBackground.vue";
 
 const router = useRouter();
+const modalStore = useModalStore();
+const timeStore = useTimeStore();
 
 const startTrip = () => {
-  router.push("/trip");
+  modalStore.setModal(true, TimePickerModal, {
+    callback: (hours, minute) => {
+      router.push("/trip");
+      modalStore.setModal(false);
+      timeStore.setStartTime(hours, minute);
+    },
+  });
 };
 </script>
 
