@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, onMounted, nextTick, watch } from "vue";
-import { initController, addController, removeController } from "../../util/map";
+import { ref, computed, onMounted, nextTick } from "vue";
+import { initController } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 
 import PathController from "./PathController.vue";
 import PlanController from "./PlanController.vue";
+import InformationController from "./InformationController.vue";
 
 const playerStore = usePlayerStore();
 
@@ -20,14 +21,6 @@ onMounted(() => {
     initController(playerStore.map, controllerEl.value, position);
   });
 });
-
-watch(
-  () => !playerStore.tripStart,
-  () => {
-    if (!playerStore.tripStart) addController(playerStore.map, controllerEl.value, position);
-    else removeController(playerStore.map, controllerEl.value, position);
-  }
-);
 
 const toggleController = () => {
   isClosed.value = !isClosed.value;
@@ -64,12 +57,13 @@ document.addEventListener("keydown", (e) => {
       >
         <img class="search-btn-icon" src="../../assets/images/search.png" />
       </div>
-      <div class="set-path-btn" @click="playerStore.startTrip">
+      <div class="set-path-btn" v-show="!playerStore.tripStart" @click="playerStore.startTrip">
         <img class="set-path-icon" src="../../assets/images/path.png" />
       </div>
     </div>
     <PathController v-show="menuSelector === 0" @previous-menu="setMenu" />
-    <PlanController v-show="menuSelector === 1" />
+    <PlanController v-show="menuSelector === 1 && !playerStore.tripStart" />
+    <InformationController v-show="menuSelector === 1 && playerStore.tripStart" />
     <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
 </template>

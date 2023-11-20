@@ -132,11 +132,14 @@ export const searchAddressToCoordinate = (address, infoWindow, searchResults) =>
           htmlAddresses[0].address,
           `
           <div style="text-align: center; margin-top: 12px">
-            <button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>
+          ` +
+            (playerStore.tripStart
+              ? ""
+              : `<button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>`) +
+            `
             <button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>
             <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
-          </div>
-          `,
+          </div>`,
           "</div>",
         ].join("\n"),
         htmlAddresses
@@ -169,18 +172,21 @@ export const makeInfoWindowByCoord = (coord, infoWindow) => {
         htmlAddresses.push({ address, point });
       }
 
+      const playerStore = usePlayerStore();
+
       makeInfoWindow(
         infoWindow,
         [
           '<div style="padding: 16px; ">',
           htmlAddresses.map(({ address }) => address).join("<br />"),
           `
-            <div style="text-align: center; margin-top: 12px">
-              <button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>
-              <button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>
-              <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
-            </div>
-          `,
+            <div style="text-align: center; margin-top: 12px">` +
+            (playerStore.tripStart
+              ? ""
+              : `<button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>`) +
+            `<button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>` +
+            `<button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;">도착</button>
+            </div>`,
           "</div>",
         ].join("\n"),
         htmlAddresses
@@ -195,16 +201,17 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
   infoWindow.setContent(contents);
   infoWindow.open(playerStore.map, htmlAddresses[0].point);
 
-  document.querySelector("#info-start-btn").addEventListener("click", () => {
-    playerStore.setStartPlace(makePlaceByAddress(htmlAddresses[0]));
-    console.log(playerStore.startPlace);
+  if (!playerStore.tripStart) {
+    document.querySelector("#info-start-btn").addEventListener("click", () => {
+      playerStore.setStartPlace(makePlaceByAddress(htmlAddresses[0]));
+      console.log(playerStore.startPlace);
 
-    infoWindow.close();
-  });
+      infoWindow.close();
+    });
+  }
 
   document.querySelector("#info-waypoint-btn").addEventListener("click", () => {
     const wayPoint = makePlaceByAddress(htmlAddresses[0]);
-    console.log(wayPoint);
 
     if (playerStore.tripStart) playerStore.addWaypoint(wayPoint);
     else playerStore.pushWaypoint(wayPoint);
@@ -213,7 +220,8 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
   });
 
   document.querySelector("#info-goal-btn").addEventListener("click", () => {
-    playerStore.setGoalPlace(makePlaceByAddress(htmlAddresses[0]));
+    const goalPlace = makePlaceByAddress(htmlAddresses[0]);
+    playerStore.changeGoalPlace(goalPlace);
     infoWindow.close();
   });
 }
@@ -250,7 +258,7 @@ export const getWayPointIcon = (idx) => {
   return `
     <div class="waypoint-place-marker">
       <img class="waypoint-place-marker-icon" src="./src/assets/images/waypoint_marker.png" width="36", height="36">
-      <div style="position : absolute; top : 4px; left : 18px,;text-align : center; width:36px; font-family : Pretendard-Regular">${idx}</div>
+      <div style="position : absolute; top : 4px; left : 18px,;text-align : center; width:36px; font-family : Pretendard-Regular; font-weight : bold">${idx}</div>
       </img>
     </div>
   `;

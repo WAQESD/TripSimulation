@@ -1,9 +1,9 @@
 <script setup>
-import Map from "../components/Map.vue";
+import VMap from "../components/VMap.vue";
 </script>
 
 <template>
-  <Map></Map>
+  <VMap></VMap>
 </template>
 
 <style scoped></style>

@@ -4,7 +4,6 @@ import { usePlayerStore } from "../stores/player";
 
 import VehicleController from "./controller/VehicleController.vue";
 import MiniMapController from "./controller/MiniMapController.vue";
-import InformationController from "./controller/InformationController.vue";
 import PositionController from "./controller/PositionController.vue";
 import ControllerContainer from "./controller/ControllerContainer.vue";
 
@@ -55,7 +54,6 @@ onMounted(() => {
       <ControllerContainer />
       <MiniMapController />
       <VehicleController />
-      <InformationController />
       <PositionController />
     </div>
   </div>

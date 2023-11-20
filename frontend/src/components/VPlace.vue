@@ -18,10 +18,10 @@ const removeWayPoint = () => {
 </script>
 
 <template>
-  <div class="place-container slide-left" @click="onClick">
+  <div class="place-container" @click="onClick">
     <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" />
     <div class="place-info-container">
-      <div class="place-remove-btn" v-show="isSelected" @click="removeWayPoint">x</div>
+      <img class="place-remove-btn" v-show="isSelected" @click="removeWayPoint" src="../assets/images/trash.png" />
       <div class="place-info">
         <div class="place-name">{{ place.placeName }}</div>
         <div class="place-address">{{ place.address || place.placeAddress }}</div>
@@ -101,9 +101,23 @@ const removeWayPoint = () => {
 
 .place-remove-btn {
   position: absolute;
-  top: 4px;
-  left: 12px;
-  font-weight: bold;
+  top: 10px;
+  left: 10px;
+  width: 20px;
   color: rgba(255, 0, 0, 0.7);
+}
+.slide-left {
+  animation: slide-left 0.3s both;
+}
+
+@keyframes slide-left {
+  0% {
+    opacity: 0;
+    transform: translateX(200px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 </style>

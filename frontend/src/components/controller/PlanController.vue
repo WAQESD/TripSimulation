@@ -21,8 +21,8 @@ const changePath = (place, type, idx) => {
   } else if (changeTarget.value.place.placeId === place.placeId) {
     changeTarget.value = null;
   } else {
-    setPath({ place, type: changeTarget.value.type, idx: changeTarget.value.idx });
     setPath({ place: changeTarget.value.place, type, idx });
+    setPath({ place, type: changeTarget.value.type, idx: changeTarget.value.idx });
     changeTarget.value = null;
   }
 };
@@ -128,6 +128,7 @@ watch(
     <fieldset v-if="playerStore.startPlace.lat > 0" class="plan-controller-start">
       <legend>출발</legend>
       <VPlace
+        class="slide-left"
         :place="playerStore.startPlace"
         :class="{ selected: changeTarget && changeTarget.type === 'start' }"
         @click="
@@ -140,22 +141,25 @@ watch(
     <div v-else><h2>출발지를 설정해주세요.</h2></div>
     <fieldset v-if="playerStore.wayPoints.length > 0" class="plan-controller-waypoint-list">
       <legend>경유</legend>
-      <VPlace
-        v-for="(place, idx) in playerStore.wayPoints"
-        :class="{ selected: changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx }"
-        :key="place.placeId"
-        :place="place"
-        :isSelected="changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx"
-        @click="
-          () => {
-            changePath(place, 'waypoint', idx);
-          }
-        "
-      ></VPlace>
+      <TransitionGroup name="fade">
+        <VPlace
+          v-for="(place, idx) in playerStore.wayPoints"
+          :class="{ selected: changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx }"
+          :key="place.placeId"
+          :place="place"
+          :isSelected="changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx"
+          @click="
+            () => {
+              changePath(place, 'waypoint', idx);
+            }
+          "
+        ></VPlace>
+      </TransitionGroup>
     </fieldset>
     <fieldset v-if="playerStore.goalPlace.lat > 0" class="plan-controller-goal">
       <legend>도착</legend>
       <VPlace
+        class="slide-left"
         :place="playerStore.goalPlace"
         :class="{ selected: changeTarget && changeTarget.type === 'goal' }"
         @click="
@@ -211,5 +215,24 @@ legend {
 .selected {
   border: 2px dashed black !important;
   color: black !important;
+}
+
+.fade-move,
+.fade-enter-active
+/* .fade-leave-active  */ {
+  transition: all 0.5s cubic-bezier(0.55, 0, 0.1, 1);
+}
+
+/* 2. declare enter from and leave to state */
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: scaleY(0.01) translate(30px, 0);
+}
+/* 3. ensure leaving items are taken out of layout flow so that moving
+      animations can be calculated correctly. */
+.fade-leave-active {
+  position: absolute;
+  width: 359px;
 }
 </style>

@@ -34,22 +34,32 @@ watch(
   () => {
     if (playerStore.tripStart) {
       addController(playerStore.map, controllerEl.value, position);
-
-      if (playerStore.polylinePath) {
-        if (path) path.setMap(null);
-
-        path = new window.naver.maps.Polyline({
-          path: playerStore.polylinePath,
-          strokeColor: "#00008B",
-          strokeWeight: 3,
-          map: miniMap.value,
-        });
-      }
-
-      if (playerStore.miniMapBounds) {
-        miniMap.value.fitBounds(playerStore.miniMapBounds);
-      }
     } else removeController(playerStore.map, controllerEl.value, position);
+  }
+);
+
+watch(
+  () => playerStore.polylinePath,
+  () => {
+    if (playerStore.polylinePath) {
+      if (path) path.setMap(null);
+
+      path = new window.naver.maps.Polyline({
+        path: playerStore.polylinePath,
+        strokeColor: "#00008B",
+        strokeWeight: 3,
+        map: miniMap.value,
+      });
+    }
+  }
+);
+
+watch(
+  () => playerStore.miniMapBounds,
+  () => {
+    if (playerStore.miniMapBounds) {
+      miniMap.value.fitBounds(playerStore.miniMapBounds);
+    }
   }
 );
 
