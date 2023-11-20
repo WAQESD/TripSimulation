@@ -207,7 +207,7 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
     console.log(wayPoint);
 
     if (playerStore.tripStart) playerStore.addWaypoint(wayPoint);
-    else playerStore.wayPoints.push(wayPoint);
+    else playerStore.pushWaypoint(wayPoint);
 
     infoWindow.close();
   });
@@ -224,7 +224,7 @@ const makePlaceByAddress = (htmlAddress) => {
     lat: htmlAddress.point.y,
     x: htmlAddress.point.x,
     y: htmlAddress.point.y,
-    id: rabinKarpHash(htmlAddress.address),
+    placeId: rabinKarpHash(htmlAddress.address),
     address: htmlAddress.address,
     placeName: htmlAddress.address,
   };

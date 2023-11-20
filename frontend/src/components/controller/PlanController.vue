@@ -18,6 +18,8 @@ const setPath = ({ place, type, idx }) => {
 const changePath = (place, type, idx) => {
   if (!changeTarget.value) {
     changeTarget.value = { place, type, idx };
+  } else if (changeTarget.value.place.placeId === place.placeId) {
+    changeTarget.value = null;
   } else {
     setPath({ place, type: changeTarget.value.type, idx: changeTarget.value.idx });
     setPath({ place: changeTarget.value.place, type, idx });
@@ -111,6 +113,13 @@ watch(
     if (playerStore.tripStart && polyLine.value) polyLine.value.setMap(null);
   }
 );
+
+watch(
+  () => playerStore.wayPoints,
+  () => {
+    console.log("test2");
+  }
+);
 </script>
 
 <template>
@@ -120,7 +129,7 @@ watch(
       <legend>출발</legend>
       <VPlace
         :place="playerStore.startPlace"
-        :class="{ isSelected: changeTarget && changeTarget.type === 'start' }"
+        :class="{ selected: changeTarget && changeTarget.type === 'start' }"
         @click="
           () => {
             changePath(playerStore.startPlace, 'start', 0);
@@ -133,9 +142,10 @@ watch(
       <legend>경유</legend>
       <VPlace
         v-for="(place, idx) in playerStore.wayPoints"
-        :class="{ isSelected: changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx }"
+        :class="{ selected: changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx }"
         :key="place.placeId"
         :place="place"
+        :isSelected="changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx"
         @click="
           () => {
             changePath(place, 'waypoint', idx);
@@ -147,7 +157,7 @@ watch(
       <legend>도착</legend>
       <VPlace
         :place="playerStore.goalPlace"
-        :class="{ isSelected: changeTarget && changeTarget.type === 'goal' }"
+        :class="{ selected: changeTarget && changeTarget.type === 'goal' }"
         @click="
           () => {
             changePath(playerStore.goalPlace, 'goal', 0);
@@ -196,5 +206,10 @@ watch(
 legend {
   font-family: "Pretendard-Regular";
   font-size: 14px;
+}
+
+.selected {
+  border: 2px dashed black !important;
+  color: black !important;
 }
 </style>

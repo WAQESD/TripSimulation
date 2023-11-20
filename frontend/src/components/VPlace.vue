@@ -4,11 +4,16 @@ const playerStore = usePlayerStore();
 
 const props = defineProps({
   place: Object,
+  isSelected: Boolean,
 });
 
 const onClick = () => {
   // const placeCenter = new window.naver.maps.LatLng({ lat: props.place.lat, lng: props.place.lng });
   // playerStore.map.setCenter(placeCenter);
+};
+
+const removeWayPoint = () => {
+  playerStore.removeWayPoint(props.place);
 };
 </script>
 
@@ -16,6 +21,7 @@ const onClick = () => {
   <div class="place-container slide-left" @click="onClick">
     <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" />
     <div class="place-info-container">
+      <div class="place-remove-btn" v-show="isSelected" @click="removeWayPoint">x</div>
       <div class="place-info">
         <div class="place-name">{{ place.placeName }}</div>
         <div class="place-address">{{ place.address || place.placeAddress }}</div>
@@ -35,6 +41,7 @@ const onClick = () => {
 
 <style scoped>
 .place-container {
+  position: relative;
   display: flex;
   flex-direction: row;
   font-family: "Pretendard-Regular";
@@ -92,17 +99,11 @@ const onClick = () => {
   text-align: center;
 }
 
-.slide-left {
-  animation: slide-left 0.3s ease-in-out both;
-  z-index: 3;
-}
-
-@keyframes slide-left {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(0);
-  }
+.place-remove-btn {
+  position: absolute;
+  top: 4px;
+  left: 12px;
+  font-weight: bold;
+  color: rgba(255, 0, 0, 0.7);
 }
 </style>

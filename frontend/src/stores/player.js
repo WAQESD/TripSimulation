@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { ref, reactive } from "vue";
 import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "./modal";
 import axios from "axios";
@@ -27,7 +27,7 @@ export const usePlayerStore = defineStore("player", () => {
   const polylinePath = ref(null);
   const startPlace = ref({ placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" });
   const goalPlace = ref({ placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" });
-  const wayPoints = ref([]);
+  const wayPoints = reactive([]);
   const currentWaypointIndex = ref(0);
 
   const width = 44;
@@ -434,6 +434,19 @@ export const usePlayerStore = defineStore("player", () => {
     goalPlace.value = place;
   };
 
+  const removeWayPoint = (place) => {
+    let idx = -1;
+    wayPoints.forEach((waypoint, i) => {
+      if (place.placeId === waypoint.placeId) idx = i;
+    });
+
+    wayPoints.splice(idx, 1);
+  };
+
+  const pushWaypoint = (waypoint) => {
+    wayPoints.push(waypoint);
+  };
+
   return {
     startTrip,
     setMap,
@@ -457,5 +470,7 @@ export const usePlayerStore = defineStore("player", () => {
     addWaypoint,
     setStartPlace,
     setGoalPlace,
+    removeWayPoint,
+    pushWaypoint,
   };
 });
