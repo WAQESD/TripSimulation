@@ -1,6 +1,10 @@
 <script setup>
+import { usePlayerStore } from "../stores/player";
+
 import TheHeader from "../commons/TheHeader.vue";
 import ResultCard from "../components/ResultCard.vue";
+
+const playerStore = () => {};
 
 const placeList = [
   {

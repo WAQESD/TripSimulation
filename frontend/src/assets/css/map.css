@@ -1,0 +1,55 @@
+#info-start-btn,
+#info-waypoint-btn,
+#info-goal-btn {
+  height: 30px;
+  cursor: pointer;
+  border: #7c91ff 2px solid;
+  background-color: white;
+  font-weight: bold;
+}
+
+#info-start-btn {
+  padding: 0 8px 0 12px;
+  border-radius: 15px 0 0 15px;
+  border-right: none;
+}
+
+#info-waypoint-btn {
+  padding: 0 8px;
+  border-width: 2px 1px;
+}
+
+#info-waypoint-btn:first-child {
+  padding: 0 8px 0 12px;
+  border-radius: 15px 0 0 15px;
+}
+
+#info-goal-btn {
+  padding: 0 12px 0 8px;
+  border-radius: 0 15px 15px 0;
+  border-left: none;
+}
+
+#info-start-btn:hover,
+#info-waypoint-btn:hover,
+#info-goal-btn:hover {
+  background-color: #7c91ff;
+}
+
+.waypoint-place-marker {
+  position: relative;
+}
+
+.waypoint-place-marker-text {
+  position: absolute;
+  top: 6px;
+  text-align: center;
+  width: 36px;
+  font-weight: bold;
+  color: white;
+}
+
+#map > div > div > div > div > div:nth-child(3) > div > div {
+  border-radius: 15px;
+  border: #413f3f 1px solid;
+}

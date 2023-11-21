@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { useModalStore } from "../stores/modal";
 import { useTimeStore } from "../stores/time";
@@ -19,6 +20,8 @@ const startTrip = () => {
     },
   });
 };
+
+const mouseIn = ref(false);
 </script>
 
 <template>
@@ -35,9 +38,24 @@ const startTrip = () => {
         <br />
         <p><strong>최적의 경로를 직접 찾아보세요</strong></p>
       </div>
-      <div class="car-animation-container">
+      <div
+        class="car-animation-container"
+        @click="startTrip"
+        @mouseenter="
+          () => {
+            mouseIn = true;
+          }
+        "
+        @mouseleave="
+          () => {
+            mouseIn = false;
+          }
+        "
+      >
         <div id="car-animation"></div>
-        <button type="button" class="trip-btn" @click.prevent="startTrip">눌러서 시작하기</button>
+        <button type="button" class="trip-btn" :class="{ hover: mouseIn }" @click.prevent="startTrip">
+          눌러서 시작하기
+        </button>
       </div>
     </div>
   </main>
@@ -103,10 +121,19 @@ h2 {
   background-color: rgba(0, 0, 0, 0);
   font-weight: bold;
   color: #6f6f6f;
+  transition: all 0.2s;
+}
+
+#car-animation {
+  transition: font-size 0.3s;
 }
 
 #car-animation:hover {
   font-size: 22px;
   cursor: pointer;
+}
+
+.hover {
+  color: black;
 }
 </style>

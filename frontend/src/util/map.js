@@ -133,12 +133,10 @@ export const searchAddressToCoordinate = (address, infoWindow, searchResults) =>
           `
           <div style="text-align: center; margin-top: 12px">
           ` +
-            (playerStore.tripStart
-              ? ""
-              : `<button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>`) +
+            (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
             `
-            <button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>
-            <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
+            <button id="info-waypoint-btn">경유</button>
+            <button id="info-goal-btn" >도착</button>
           </div>`,
           "</div>",
         ].join("\n"),
@@ -181,11 +179,9 @@ export const makeInfoWindowByCoord = (coord, infoWindow) => {
           htmlAddresses.map(({ address }) => address).join("<br />"),
           `
             <div style="text-align: center; margin-top: 12px">` +
-            (playerStore.tripStart
-              ? ""
-              : `<button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>`) +
-            `<button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>` +
-            `<button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;">도착</button>
+            (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
+            `<button id="info-waypoint-btn">경유</button>` +
+            `<button id="info-goal-btn">도착</button>
             </div>`,
           "</div>",
         ].join("\n"),
@@ -258,7 +254,7 @@ export const getWayPointIcon = (idx) => {
   return `
     <div class="waypoint-place-marker">
       <img class="waypoint-place-marker-icon" src="./src/assets/images/waypoint_marker.png" width="36", height="36">
-      <div style="position : absolute; top : 4px; left : 18px,;text-align : center; width:36px; font-family : Pretendard-Regular; font-weight : bold">${idx}</div>
+      <div class="waypoint-place-marker-text">${idx}</div>
       </img>
     </div>
   `;

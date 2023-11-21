@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "./modal";
 import { useTimeStore } from "./time";
+import { useRouter } from "vue-router";
 import axios from "axios";
 
 import SimpleTextModal from "../components/modal/SimpleTextModal.vue";
@@ -18,6 +19,7 @@ export const usePlayerStore = defineStore("player", () => {
   const currentStart = ref(null);
   const currentGoal = ref(null);
 
+  const router = useRouter();
   const timeStore = useTimeStore();
   const modalStore = useModalStore();
   const carOverlay = ref(null);
@@ -237,6 +239,7 @@ export const usePlayerStore = defineStore("player", () => {
         isEnd.value = true;
         tripStart.value = false;
         carOverlay.value.setMap(null);
+        router.push("/result");
       },
     });
   };
@@ -260,7 +263,7 @@ export const usePlayerStore = defineStore("player", () => {
     let { data } = await axios({
       method: "post",
       // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
-      url: "http://localhost:8080/save",
+      url: import.meta.env.VITE_DRIVING_BASE_API,
       data: {
         name: "PATH",
         start: { lng: start.x, lat: start.y },
@@ -376,7 +379,7 @@ export const usePlayerStore = defineStore("player", () => {
     let { data } = await axios({
       method: "post",
       // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
-      url: "http://localhost:8080/save",
+      url: import.meta.env.VITE_DRIVING_BASE_API,
       data: {
         name: "PATH",
         start: { lng: currentStart.value.x, lat: currentStart.value.y },
@@ -453,7 +456,7 @@ export const usePlayerStore = defineStore("player", () => {
     let { data } = await axios({
       method: "post",
       // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
-      url: "http://localhost:8080/save",
+      url: import.meta.env.VITE_DRIVING_BASE_API,
       data: {
         name: "PATH",
         start: { lng: currentStart.value.x, lat: currentStart.value.y },

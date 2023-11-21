@@ -63,7 +63,7 @@ watch(
       icon: {
         content: getStartIcon(),
         size: new window.naver.maps.Size(36, 36),
-        anchor: new window.naver.maps.Point(0, 36),
+        anchor: new window.naver.maps.Point(6, 36),
       },
     });
     drawPolyLine();
@@ -81,7 +81,7 @@ watch(
       icon: {
         content: getGoalIcon(),
         size: new window.naver.maps.Size(36, 36),
-        anchor: new window.naver.maps.Point(0, 36),
+        anchor: new window.naver.maps.Point(6, 36),
       },
     });
     drawPolyLine();
