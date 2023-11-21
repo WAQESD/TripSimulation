@@ -5,7 +5,6 @@ import { useTimeStore } from "../stores/time";
 
 import TheHeader from "../commons/TheHeader.vue";
 import TimePickerModal from "../components/modal/TimePickerModal.vue";
-import GradationBackground from "../components/GradationBackground.vue";
 
 const router = useRouter();
 const modalStore = useModalStore();
@@ -23,7 +22,6 @@ const startTrip = () => {
 </script>
 
 <template>
-  <GradationBackground></GradationBackground>
   <TheHeader></TheHeader>
   <main>
     <img src="../assets/images/laptop.svg" alt="" />
@@ -37,19 +35,32 @@ const startTrip = () => {
         <br />
         <p><strong>최적의 경로를 직접 찾아보세요</strong></p>
       </div>
-      <button type="button" class="trip-btn" @click.prevent="startTrip">여행 시작하기</button>
+      <div class="car-animation-container">
+        <div id="car-animation"></div>
+        <button type="button" class="trip-btn" @click.prevent="startTrip">눌러서 시작하기</button>
+      </div>
     </div>
   </main>
 </template>
 
 <style scoped>
+header {
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.15);
+}
+
+.car-animation-container {
+  width: 100vw;
+  height: 700px;
+}
+
 main {
   width: 100%;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: space-around;
   flex-grow: 1;
+  background-color: rgb(243, 243, 243);
 }
 
 p {
@@ -59,14 +70,15 @@ p {
 }
 
 h2 {
-  font-family: "GmarketSansMedium";
+  font-family: "Baloo Chettan 2", sans-serif;
+  /* color: #37479e; */
   font-size: 84px;
   text-align: center;
   margin: 0;
 }
 
 .text-container {
-  height: 400px;
+  height: 300px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -74,20 +86,27 @@ h2 {
 }
 
 .trip-btn {
+  position: absolute;
+  left: calc(50% - 127px);
+  bottom: 160px;
   margin: 50px 0 10px 0;
   align-self: center;
   width: 254px;
   height: 64px;
   border-radius: 32px;
   font-family: "Pretendard-Regular";
-  font-size: 20px;
+  font-size: 32px;
   cursor: pointer;
-  box-shadow: 0px 2px 0px black;
+  /* box-shadow: 0px 2px 0px black; */
+  border: none;
   position: relative;
+  background-color: rgba(0, 0, 0, 0);
+  font-weight: bold;
+  color: #6f6f6f;
 }
 
-.trip-btn:active {
-  box-shadow: 0 0 black;
-  top: 2px;
+#car-animation:hover {
+  font-size: 22px;
+  cursor: pointer;
 }
 </style>

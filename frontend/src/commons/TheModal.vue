@@ -13,7 +13,7 @@ const modalStore = useModalStore();
 <style scoped>
 .modal-container {
   z-index: 2;
-  position: absolute;
+  position: fixed;
   width: 100vw;
   height: 100vh;
   display: flex;

@@ -58,7 +58,7 @@ const pathList = ref([
             <div class="path-info-list-item">
               <div class="path-info-item-index">{{ idx + 1 }}</div>
               <div class="path-info-item-title">{{ path.title }}</div>
-              <div class="path-info-item-regdate">{{ path.regDate + " saved" }}</div>
+              <div class="path-info-item-regdate">{{ path.regDate }}</div>
             </div>
           </template>
         </div>
@@ -84,7 +84,7 @@ const pathList = ref([
 .user-info-container {
   display: flex;
   align-items: center;
-  width: 1350px;
+  width: 1450px;
   box-sizing: border-box;
   height: 165px;
   background-color: #7c91ff;
@@ -285,10 +285,12 @@ const pathList = ref([
   position: relative;
   line-height: 38px;
   margin-bottom: 40px;
+  cursor: pointer;
+  border: none;
 }
 
 .path-create-btn-icon {
-  top: 12px;
+  top: 15px;
   right: 15px;
   position: absolute;
   width: 38px;

@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import TripView from "../views/TripView.vue";
 import LoginView from "../views/LoginView.vue";
-import ResultView from "../views/ResultView";
+import ResultView from "../views/ResultView.vue";
 import SignupView from "../views/SignupView.vue";
 import MyPageView from "../views/MyPageView.vue";
 import KakaoLogin from "../components/login/KakaoLogin.vue";
