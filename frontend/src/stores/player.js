@@ -44,9 +44,6 @@ export const usePlayerStore = defineStore("player", () => {
   let expectedEndTime = 0;
   let estimatedTime = 0;
   let pathData = null;
-  let totalDist = 0;
-  let sumDist = 0;
-  let duration = 0;
 
   const increaseSpeed = () => {
     if (speed.value <= 1) return;
@@ -188,9 +185,6 @@ export const usePlayerStore = defineStore("player", () => {
           else
             setTimeout(() => {
               if (!isPaused.value) {
-                sumDist += dist;
-                timeStore.addCurrentTime(duration * (dist / totalDist));
-                console.log(timeStore.currentTime);
                 next(index + 1);
               }
             });
@@ -235,7 +229,6 @@ export const usePlayerStore = defineStore("player", () => {
     modalStore.setModal(true, SimpleTextModal, {
       text: "목적지에 도착했습니다.",
       callback: () => {
-        console.log(sumDist, totalDist);
         isEnd.value = true;
         tripStart.value = false;
         carOverlay.value.setMap(null);
@@ -360,13 +353,6 @@ export const usePlayerStore = defineStore("player", () => {
       setTimeout(reStart, 10);
     });
 
-    totalDist = 0;
-    polylinePath.value.slice(0, polylinePath.value.length - 1).forEach((v, i) => {
-      totalDist += getDist(v, polylinePath.value[i + 1]);
-    });
-
-    duration = data.route.traoptimal[0].summary.duration;
-
     tripStart.value = true;
     startPath();
   };
@@ -378,7 +364,6 @@ export const usePlayerStore = defineStore("player", () => {
 
     let { data } = await axios({
       method: "post",
-      // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
       url: import.meta.env.VITE_DRIVING_BASE_API,
       data: {
         name: "PATH",
@@ -455,7 +440,6 @@ export const usePlayerStore = defineStore("player", () => {
 
     let { data } = await axios({
       method: "post",
-      // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
       url: import.meta.env.VITE_DRIVING_BASE_API,
       data: {
         name: "PATH",

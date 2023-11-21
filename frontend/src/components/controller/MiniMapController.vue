@@ -99,6 +99,6 @@ watch(
 #minimap {
   width: 300px;
   height: 300px;
-  border: 1px solid black;
+  border: 2px solid #7c91ff;
 }
 </style>

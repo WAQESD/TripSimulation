@@ -45,6 +45,10 @@ document.addEventListener("keydown", (e) => {
 
 <template>
   <div class="controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
+    <div class="controller-container-header">
+      <img class="controller-container-header-logo" src="../../assets/images/logo.svg" />
+      Trippy
+    </div>
     <div class="btn-container">
       <div
         class="search-btn"
@@ -73,6 +77,26 @@ document.addEventListener("keydown", (e) => {
   z-index: 3;
   transition: transform 0.5s;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
+}
+
+.controller-container-header {
+  position: absolute;
+  display: flex;
+  height: 50px;
+  align-items: center;
+  padding: 30px 40px;
+  font-size: 26px;
+  width: 400px;
+  box-sizing: border-box;
+  border-bottom: #37469e57 2px solid;
+  font-family: "Baloo Chettan 2", sans-serif;
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 1px 29px 0px;
+}
+
+.controller-container-header-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
 }
 
 .close-btn {
@@ -109,7 +133,7 @@ document.addEventListener("keydown", (e) => {
   border-radius: 32px;
   box-sizing: border-box;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid #7c91ff;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
   margin-bottom: 10px;
 }
@@ -129,7 +153,7 @@ document.addEventListener("keydown", (e) => {
   border-radius: 32px;
   box-sizing: border-box;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid #7c91ff;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
 }
 

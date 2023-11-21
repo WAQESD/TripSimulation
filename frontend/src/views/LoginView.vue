@@ -72,6 +72,9 @@ const login = () => {
           이용하실 수 있습니다.
         </h3>
       </div>
+      <div class="car-animation-container">
+        <div id="car-animation"></div>
+      </div>
       <div class="login-form-container">
         <form class="login-form" @submit.prevent="login">
           <input
@@ -143,6 +146,18 @@ h1 {
   width: 100%;
   flex-grow: 1;
   display: flex;
+  position: relative;
+}
+
+#car-animation {
+  font-size: 10px;
+  --green: #7c91ff !important;
+}
+.car-animation-container {
+  position: absolute;
+  background: #7c91ff !important;
+  width: 400px;
+  bottom: 0;
 }
 
 .login-text-container {

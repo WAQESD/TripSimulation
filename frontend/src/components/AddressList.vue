@@ -1,12 +1,16 @@
 <script setup>
+import { ref } from "vue";
+
 defineProps({
   addressList: Array,
 });
 
 const emit = defineEmits(["searchAddress"]);
+const selectedIdx = ref(-1);
 
-const onClick = (item) => {
+const onClick = (item, idx) => {
   emit("searchAddress", item);
+  selectedIdx.value = idx;
 };
 </script>
 
@@ -15,11 +19,12 @@ const onClick = (item) => {
     <li
       type="none"
       class="address-item"
-      v-for="item in addressList"
+      :class="{ selected: selectedIdx == idx }"
+      v-for="(item, idx) in addressList"
       :key="item.address"
       @click="
         () => {
-          onClick(item);
+          onClick(item, idx);
         }
       "
     >
@@ -31,24 +36,28 @@ const onClick = (item) => {
 <style scoped>
 .address-list {
   box-sizing: border-box;
-  width: 330px;
-  margin-top: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
+  width: 399px;
   overflow: auto;
   padding: 0;
   flex-grow: 1;
+  margin: 0;
 }
 
 .address-item {
-  height: 20px;
+  width: 399px;
+  box-sizing: border-box;
+  height: 60px;
   padding: 10px 20px;
-  line-height: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  line-height: 40px;
+  border-bottom: 1px solid #f1f1f1;
   cursor: pointer;
 }
 
 .address-item:hover {
   font-weight: bold;
+}
+
+.selected {
+  background: #e4e8ff;
 }
 </style>

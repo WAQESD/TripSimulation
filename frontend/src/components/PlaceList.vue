@@ -23,7 +23,7 @@ defineProps({
   font-family: "Pretendard-Regular";
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 30px;
+  margin: 50px 0 20px 0;
 }
 .place-list-container {
   display: flex;

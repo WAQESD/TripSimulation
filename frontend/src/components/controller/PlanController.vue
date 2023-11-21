@@ -40,10 +40,10 @@ const drawPolyLine = () => {
   polyLine.value = new window.naver.maps.Polyline({
     map: playerStore.map,
     path: polyLinePath,
-    fillColor: "#ff0000",
-    fillOpacity: 0.3,
-    strokeColor: "#ff0000",
-    strokeOpacity: 0.6,
+    fillColor: "#31C3C3",
+    fillOpacity: 1,
+    strokeColor: "#31C3C3",
+    strokeOpacity: 1,
     strokeWeight: 3,
   });
 };
@@ -113,13 +113,6 @@ watch(
     if (playerStore.tripStart && polyLine.value) polyLine.value.setMap(null);
   }
 );
-
-watch(
-  () => playerStore.wayPoints,
-  () => {
-    console.log("test2");
-  }
-);
 </script>
 
 <template>
@@ -136,7 +129,8 @@ watch(
             changePath(playerStore.startPlace, 'start', 0);
           }
         "
-      ></VPlace>
+        ><img class="start-place-icon" src="../../assets/images/start_marker.png" width="28"
+      /></VPlace>
     </fieldset>
     <div v-else><h2>출발지를 설정해주세요.</h2></div>
     <fieldset v-if="playerStore.wayPoints.length > 0" class="plan-controller-waypoint-list">
@@ -147,12 +141,16 @@ watch(
           :class="{ selected: changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx }"
           :key="place.placeId"
           :place="place"
+          :isRemovable="true"
           :isSelected="changeTarget && changeTarget.type === 'waypoint' && changeTarget.idx === idx"
           @click="
             () => {
               changePath(place, 'waypoint', idx);
             }
           "
+          ><div class="waypoint-place-icon-wrapper">
+            <div class="waypoint-place-text">{{ idx + 1 }}</div>
+            <img class="waypoint-place-icon" src="../../assets/images/waypoint_marker.png" width="32" /></div
         ></VPlace>
       </TransitionGroup>
     </fieldset>
@@ -167,7 +165,8 @@ watch(
             changePath(playerStore.goalPlace, 'goal', 0);
           }
         "
-      ></VPlace>
+        ><img class="goal-place-icon" src="../../assets/images/goal_marker.png" width="28"
+      /></VPlace>
     </fieldset>
     <div v-else><h2>목적지를 설정해주세요.</h2></div>
   </div>
@@ -179,8 +178,8 @@ watch(
   flex-direction: column;
   align-items: center;
   background-color: white;
-  padding: 20px 20px;
-  border-radius: 0 16px 16px 0;
+  padding: 0 30px;
+  padding-top: 70px;
   border-right: 1px solid rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   width: 400px;
@@ -202,9 +201,7 @@ watch(
 
 .plan-controller-title {
   width: 100%;
-  text-align: center;
-  padding: 0 0px 40px 0;
-  border-bottom: 1px solid black;
+  text-align: left;
 }
 
 legend {
@@ -213,7 +210,7 @@ legend {
 }
 
 .selected {
-  border: 2px dashed black !important;
+  border: 1px dashed rgba(255, 0, 0, 0.7) !important;
   color: black !important;
 }
 
@@ -234,5 +231,23 @@ legend {
 .fade-leave-active {
   position: absolute;
   width: 359px;
+}
+
+.waypoint-place-icon-wrapper {
+  position: relative;
+}
+
+.waypoint-place-text {
+  position: absolute;
+  color: white;
+  text-align: center;
+  width: 28px;
+  top: 4px;
+  left: 2px;
+}
+
+.start-place-icon,
+.goal-place-icon {
+  margin-left: 7 px;
 }
 </style>

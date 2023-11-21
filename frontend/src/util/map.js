@@ -134,9 +134,8 @@ export const searchAddressToCoordinate = (address, infoWindow, searchResults) =>
           <div style="text-align: center; margin-top: 12px">
           ` +
             (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
-            `
-            <button id="info-waypoint-btn">경유</button>
-            <button id="info-goal-btn" >도착</button>
+            `<button id="info-waypoint-btn">경유</button>` +
+            `<button id="info-goal-btn" >도착</button>
           </div>`,
           "</div>",
         ].join("\n"),
@@ -200,7 +199,6 @@ function makeInfoWindow(infoWindow, contents, htmlAddresses) {
   if (!playerStore.tripStart) {
     document.querySelector("#info-start-btn").addEventListener("click", () => {
       playerStore.setStartPlace(makePlaceByAddress(htmlAddresses[0]));
-      console.log(playerStore.startPlace);
 
       infoWindow.close();
     });
