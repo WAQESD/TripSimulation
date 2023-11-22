@@ -112,7 +112,6 @@ const wayPoints = ref([
   background-color: white;
   height: 40px;
   padding: 40px 0;
-  border-radius: 0 16px 16px 0;
   border-right: 1px solid rgba(0, 0, 0, 0.3);
   box-sizing: border-box;
   width: 400px;

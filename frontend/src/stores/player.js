@@ -3,6 +3,7 @@ import { ref } from "vue";
 import { douglasPeucker } from "../util/douglasPeucker";
 import { useModalStore } from "./modal";
 import { useTimeStore } from "./time";
+import { usePlaceStore } from "./place";
 import { useRouter } from "vue-router";
 import axios from "axios";
 
@@ -22,6 +23,7 @@ export const usePlayerStore = defineStore("player", () => {
   const router = useRouter();
   const timeStore = useTimeStore();
   const modalStore = useModalStore();
+  const placeStore = usePlaceStore();
   const carOverlay = ref(null);
 
   const miniMapBounds = ref(false);
@@ -232,6 +234,7 @@ export const usePlayerStore = defineStore("player", () => {
         isEnd.value = true;
         tripStart.value = false;
         carOverlay.value.setMap(null);
+        uploadPath();
         router.push("/result");
       },
     });
@@ -240,6 +243,8 @@ export const usePlayerStore = defineStore("player", () => {
   const next = (index) => {
     currentStart.value = polylinePath.value[index];
     currentGoal.value = polylinePath.value[index + 1];
+
+    placeStore.setCurrentRegion({ x: currentStart.value.x, y: currentStart.value.y });
 
     if (pathData[index].wayPointIndex > 0) currentWaypointIndex.value = pathData[index].wayPointIndex;
 
@@ -280,6 +285,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     pathData = douglasPeucker(pathData, 0.00002);
     let pathIndex = 0;
+    let sumDuration = 0;
 
     for (
       let i = 0;
@@ -287,6 +293,14 @@ export const usePlayerStore = defineStore("player", () => {
       i++
     ) {
       let waypoint = data.route.traoptimal[0].summary.waypoints[i];
+
+      if (currentWaypointIndex.value + i < wayPoints.value.length) {
+        sumDuration += waypoint.duration;
+        wayPoints.value[currentWaypointIndex.value + i].arrivalTime = new Date(
+          timeStore.startTime.getTime() + sumDuration
+        );
+      }
+
       while (pathData[pathIndex].index < waypoint.pointIndex) pathIndex++;
       if (pathData[pathIndex].index === waypoint.pointIndex) pathData[pathIndex].wayPointIndex = i;
       else
@@ -300,8 +314,9 @@ export const usePlayerStore = defineStore("player", () => {
         });
     }
 
+    console.log(wayPoints.value);
+
     timeStore.setEstimatedGoalTime(timeStore.startTime.getTime() + data.route.traoptimal[0].summary.duration);
-    console.log(timeStore.estimatedGoalTime);
 
     let [hour, minute, second] = new Date(data.route.traoptimal[0].summary.departureTime)
       .toTimeString()
@@ -393,6 +408,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     newPathData = douglasPeucker(newPathData, 0.00002);
     let pathIndex = 0;
+    let sumDuration = 0;
 
     for (
       let i = 0;
@@ -400,23 +416,26 @@ export const usePlayerStore = defineStore("player", () => {
       i++
     ) {
       let waypoint = data.route.traoptimal[0].summary.waypoints[i];
-      while (
-        newPathData[pathIndex] &&
-        newPathData[pathIndex].index < waypoint.pointIndex + pathData[currentIndex].index
-      )
-        pathIndex++;
-      if (newPathData[pathIndex].index === waypoint.pointIndex + pathData[currentIndex].index)
-        newPathData[pathIndex].wayPointIndex = currentWaypointIndex.value + i + 1;
+      if (currentWaypointIndex.value + i < wayPoints.value.length) {
+        sumDuration += waypoint.duration;
+        wayPoints.value[currentWaypointIndex.value + i].arrivalTime = new Date(
+          timeStore.startTime.getTime() + sumDuration
+        );
+      }
+
+      while (pathData[pathIndex].index < waypoint.pointIndex) pathIndex++;
+      if (pathData[pathIndex].index === waypoint.pointIndex) pathData[pathIndex].wayPointIndex = i;
       else
-        newPathData.splice(pathIndex, 0, {
+        pathData.splice(pathIndex, 0, {
           lng: waypoint.location[0],
           lat: waypoint.location[1],
           x: waypoint.location[0],
           y: waypoint.location[1],
-          wayPointIndex: currentWaypointIndex.value + i + 1,
-          index: pathData[currentIndex].index + waypoint.pointIndex,
+          wayPointIndex: i + 1,
+          index: waypoint.pointIndex,
         });
     }
+
     pathData = [...pathData.slice(0, currentIndex + 1), ...newPathData];
     polylinePath.value = pathData.map(({ lng, lat }) => new window.naver.maps.LatLng(lat, lng));
 
@@ -469,6 +488,7 @@ export const usePlayerStore = defineStore("player", () => {
 
     newPathData = douglasPeucker(newPathData, 0.00002);
     let pathIndex = 0;
+    let sumDuration = 0;
 
     for (
       let i = 0;
@@ -476,6 +496,12 @@ export const usePlayerStore = defineStore("player", () => {
       i++
     ) {
       let waypoint = data.route.traoptimal[0].summary.waypoints[i];
+      if (currentWaypointIndex.value + i < wayPoints.value.length) {
+        sumDuration += waypoint.duration;
+        wayPoints.value[currentWaypointIndex.value + i].arrivalTime = new Date(
+          timeStore.startTime.getTime() + sumDuration
+        );
+      }
       while (
         newPathData[pathIndex] &&
         newPathData[pathIndex].index < waypoint.pointIndex + pathData[currentIndex].index
@@ -530,6 +556,23 @@ export const usePlayerStore = defineStore("player", () => {
     wayPoints.value.push(waypoint);
   };
 
+  const uploadPath = async () => {
+    const result = await axios.post(import.meta.env.VITE_PATH_BASE_API, {
+      userEmail: "ssafy@ssafy.com",
+      pathName: "경로1",
+      path: {
+        start: startPlace.value,
+        goal: goalPlace.value,
+        wayPoints: wayPoints.value,
+        polylinePath: polylinePath.value.map(({ x, y }) => {
+          return { lng: x, lat: y };
+        }),
+      },
+    });
+
+    console.log(result);
+  };
+
   return {
     startTrip,
     setMap,
@@ -556,5 +599,6 @@ export const usePlayerStore = defineStore("player", () => {
     removeWayPoint,
     pushWaypoint,
     changeGoalPlace,
+    uploadPath,
   };
 });

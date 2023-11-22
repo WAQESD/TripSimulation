@@ -26,21 +26,10 @@ const toggleController = () => {
   isClosed.value = !isClosed.value;
 };
 
-const toggleMenu = () => {
-  if (menuSelector.value === 0) menuSelector.value = 1;
-  else menuSelector.value = 0;
-};
-
 const setMenu = (value) => {
   menuSelector.value = value;
   isClosed.value = false;
 };
-
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
-    toggleMenu();
-  }
-});
 </script>
 
 <template>

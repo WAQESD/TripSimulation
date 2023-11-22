@@ -8,6 +8,8 @@ import MyPageView from "../views/MyPageView.vue";
 import KakaoLogin from "../components/login/KakaoLogin.vue";
 import GoogleLogin from "../components/login/GoogleLogin.vue";
 
+import { useModalStore } from "../stores/modal";
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -54,6 +56,13 @@ const router = createRouter({
       component: ResultView,
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  const modalStore = useModalStore();
+  modalStore.setModal(false);
+  if (next) next();
+  return to;
 });
 
 export default router;

@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { usePlayerStore } from "../stores/player";
+import { usePlaceStore } from "../stores/place";
 
 import VehicleController from "./controller/VehicleController.vue";
 import MiniMapController from "./controller/MiniMapController.vue";
@@ -11,6 +12,7 @@ const map = ref(null);
 const moduleOnLoad = ref(false);
 const subModuleOnLoad = ref(false);
 const playerStore = usePlayerStore();
+const placeStore = usePlaceStore();
 
 const allModuleOnLoad = computed(() => moduleOnLoad.value && subModuleOnLoad.value);
 
@@ -31,6 +33,7 @@ onMounted(() => {
     map.value.setCursor("pointer");
 
     playerStore.setMap(map.value);
+    placeStore.setMap(map.value);
 
     moduleOnLoad.value = true;
   };
@@ -55,6 +58,7 @@ onMounted(() => {
       <MiniMapController />
       <VehicleController />
       <PositionController />
+      <PlaceController />
     </div>
   </div>
 </template>

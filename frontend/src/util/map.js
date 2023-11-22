@@ -93,57 +93,25 @@ function hasAddition(addition) {
   return !!(addition && addition.value);
 }
 
-export const searchAddressToCoordinate = (address, infoWindow, searchResults) => {
-  if (!address) {
-    searchResults.value = [];
-    return;
-  }
-
+export const makeInfoWindowByPlace = (place, infoWindow) => {
   const playerStore = usePlayerStore();
 
-  window.naver.maps.Service.geocode(
-    {
-      query: address,
-    },
-    function (status, response) {
-      if (status === window.naver.maps.Service.Status.ERROR) {
-        return;
-      }
-
-      if (response.v2.meta.totalCount === 0) {
-        searchResults.value = [];
-        return;
-      }
-
-      var htmlAddresses = [];
-      let point = {};
-      for (let item of response.v2.addresses) {
-        point = new window.naver.maps.Point(item.x, item.y);
-        htmlAddresses.push({ address: item.roadAddress, point });
-      }
-
-      playerStore.map.setCenter(htmlAddresses[0].point);
-
-      makeInfoWindow(
-        infoWindow,
-        [
-          '<div style="padding: 16px; ">',
-          '<h4 style="margin-top:5px; text-align:center">검색 주소 : ' + address + "</h4>",
-          htmlAddresses[0].address,
-          `
-          <div style="text-align: center; margin-top: 12px">
-          ` +
-            (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
-            `<button id="info-waypoint-btn">경유</button>` +
-            `<button id="info-goal-btn" >도착</button>
-          </div>`,
-          "</div>",
-        ].join("\n"),
-        htmlAddresses
-      );
-
-      searchResults.value = htmlAddresses;
-    }
+  makeInfoWindow(
+    infoWindow,
+    [
+      '<div style="padding: 16px; ">',
+      '<h4 style="margin-top:5px; text-align:center">' + place.placeName + "</h4>",
+      place.address,
+      `
+      <div style="text-align: center; margin-top: 12px">
+      ` +
+        (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
+        `<button id="info-waypoint-btn">경유</button>` +
+        `<button id="info-goal-btn" >도착</button>
+      </div>`,
+      "</div>",
+    ].join("\n"),
+    place
   );
 };
 
@@ -184,38 +152,35 @@ export const makeInfoWindowByCoord = (coord, infoWindow) => {
             </div>`,
           "</div>",
         ].join("\n"),
-        htmlAddresses
+        makePlaceByAddress(htmlAddresses[0])
       );
     }
   );
 };
 
-function makeInfoWindow(infoWindow, contents, htmlAddresses) {
+function makeInfoWindow(infoWindow, contents, place) {
   const playerStore = usePlayerStore();
 
   infoWindow.setContent(contents);
-  infoWindow.open(playerStore.map, htmlAddresses[0].point);
+  infoWindow.open(playerStore.map, { x: place.x, y: place.y });
 
   if (!playerStore.tripStart) {
     document.querySelector("#info-start-btn").addEventListener("click", () => {
-      playerStore.setStartPlace(makePlaceByAddress(htmlAddresses[0]));
+      playerStore.setStartPlace(place);
 
       infoWindow.close();
     });
   }
 
   document.querySelector("#info-waypoint-btn").addEventListener("click", () => {
-    const wayPoint = makePlaceByAddress(htmlAddresses[0]);
-
-    if (playerStore.tripStart) playerStore.addWaypoint(wayPoint);
-    else playerStore.pushWaypoint(wayPoint);
+    if (playerStore.tripStart) playerStore.addWaypoint(place);
+    else playerStore.pushWaypoint(place);
 
     infoWindow.close();
   });
 
   document.querySelector("#info-goal-btn").addEventListener("click", () => {
-    const goalPlace = makePlaceByAddress(htmlAddresses[0]);
-    playerStore.changeGoalPlace(goalPlace);
+    playerStore.changeGoalPlace(place);
     infoWindow.close();
   });
 }

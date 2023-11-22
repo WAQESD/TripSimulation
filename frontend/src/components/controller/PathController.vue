@@ -1,19 +1,21 @@
 <script setup>
-import { ref, onMounted } from "vue";
-import { makeInfoWindowByCoord, searchAddressToCoordinate } from "../../util/map";
+import { onMounted, watch, ref } from "vue";
+import { makeInfoWindowByCoord, makeInfoWindowByPlace } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
+import { usePlaceStore } from "../../stores/place";
 
 import AddressList from "../AddressList.vue";
 
 const emit = defineEmits(["previousMenu"]);
+const markers = ref([]);
 
-const searchResults = ref([]);
 const playerStore = usePlayerStore();
+const placeStore = usePlaceStore();
 
-const timer = null;
+let timer = null;
 
 let infoWindow = new window.naver.maps.InfoWindow({
-  anchorSkew: true,
+  // disableAnchor: true,
   borderColor: "#6981ff",
   borderWidth: "2",
 });
@@ -26,23 +28,41 @@ onMounted(() => {
 });
 
 const makeInfoWindow = (item) => {
-  let coord = new window.naver.maps.LatLng(item.point.y, item.point.x);
   if (infoWindow) infoWindow.close();
-  makeInfoWindowByCoord(coord, infoWindow);
-  playerStore.map.setCenter(coord);
+  makeInfoWindowByPlace(item, infoWindow);
+  playerStore.map.setCenter(new window.naver.maps.LatLng(item.y, item.x));
 };
 
 const searchAddr = (e) => {
   if (timer) clearTimeout(timer);
 
-  setTimeout(() => {
-    searchAddressToCoordinate(e.target.value, infoWindow, searchResults);
-  }, 150);
+  timer = setTimeout(() => {
+    // searchAddressToCoordinate(e.target.value, infoWindow, searchResults);
+    placeStore.getPlaceListByKeword(e.target.value);
+  }, 200);
 };
 
 const previousMenu = () => {
   emit("previousMenu", 1);
 };
+
+watch(
+  () => placeStore.placeList,
+  () => {
+    for (let marker of markers.value) marker.setMap(null);
+    markers.value = [];
+
+    for (let place of placeStore.placeList) {
+      let marker = new window.naver.maps.Marker({
+        position: new window.naver.maps.LatLng(place.lat, place.lng),
+        map: placeStore.map,
+      });
+
+      markers.value.push(marker);
+      window.naver.maps.Event.addListener(marker, "click", () => makeInfoWindowByPlace(place, infoWindow));
+    }
+  }
+);
 </script>
 
 <template>
@@ -56,7 +76,7 @@ const previousMenu = () => {
           type="text"
           placeholder="출발지를 정해주세요"
           id="start"
-          v-model="playerStore.startPlace.address"
+          v-model="playerStore.startPlace.placeName"
           @keyup="
             (e) => {
               searchAddr(e);
@@ -72,7 +92,7 @@ const previousMenu = () => {
           type="text"
           placeholder="도착지를 정해주세요"
           id="goal"
-          v-model="playerStore.goalPlace.address"
+          v-model="playerStore.goalPlace.placeName"
           @keyup="
             (e) => {
               searchAddr(e);
@@ -81,7 +101,7 @@ const previousMenu = () => {
         />
       </div>
       <div class="path-controller-seperator"></div>
-      <AddressList :addressList="searchResults" @search-address="makeInfoWindow"></AddressList>
+      <AddressList @search-address="makeInfoWindow"></AddressList>
     </div>
   </div>
 </template>
@@ -108,7 +128,6 @@ const previousMenu = () => {
   font-size: 20px;
   cursor: pointer;
   transition: all 0.2s;
-  margin-bottom: 10px;
   color: rgba(0, 0, 0, 0.5);
 }
 
@@ -121,6 +140,8 @@ const previousMenu = () => {
   flex-direction: column;
   align-items: center;
   flex-grow: 1;
+  padding-top: 10px;
+  overflow-y: auto;
 }
 
 .controller-input-wrapper {

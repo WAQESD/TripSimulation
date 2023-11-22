@@ -21,15 +21,6 @@ const removeWayPoint = () => {
 <template>
   <div class="place-container" @click="onClick">
     <slot></slot>
-    <div v-show="place.departureTime || place.arrivalTime" class="place-time-container">
-      <div class="place-time">
-        {{ place.departureTime ? `${place.departureTime.hour}:${place.departureTime.minute}` : "도착" }}
-      </div>
-      <div class="place-time">→</div>
-      <div class="place-time">
-        {{ place.arrivalTime ? `${place.arrivalTime.hour}:${place.arrivalTime.minute}` : "출발" }}
-      </div>
-    </div>
     <!-- <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" /> -->
     <div class="place-info-container">
       <img class="place-remove-btn" v-if="isRemovable" @click.stop="removeWayPoint" src="../assets/images/remove.svg" />
