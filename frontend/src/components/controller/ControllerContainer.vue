@@ -2,12 +2,13 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { initController } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
+import { useRouter } from "vue-router";
 
 import PathController from "./PathController.vue";
 import PlanController from "./PlanController.vue";
-import InformationController from "./InformationController.vue";
 
 const playerStore = usePlayerStore();
+const router = useRouter();
 
 const position = window.naver.maps.Position.TOP_LEFT;
 const controllerEl = ref(null);
@@ -34,7 +35,7 @@ const setMenu = (value) => {
 
 <template>
   <div class="controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
-    <div class="controller-container-header">
+    <div class="controller-container-header" @click="router.push('/')">
       <img class="controller-container-header-logo" src="../../assets/images/logo.svg" />
       Trippy
     </div>
@@ -55,8 +56,8 @@ const setMenu = (value) => {
       </div>
     </div>
     <PathController v-show="menuSelector === 0" @previous-menu="setMenu" />
-    <PlanController v-show="menuSelector === 1 && !playerStore.tripStart" />
-    <InformationController v-show="menuSelector === 1 && playerStore.tripStart" />
+    <PlanController v-show="menuSelector === 1" />
+    <!-- <InformationController v-show="menuSelector === 1 && playerStore.tripStart" /> -->
     <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
 </template>
@@ -80,6 +81,7 @@ const setMenu = (value) => {
   border-bottom: #37469e57 2px solid;
   font-family: "Baloo Chettan 2", sans-serif;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 1px 29px 0px;
+  cursor: pointer;
 }
 
 .controller-container-header-logo {
@@ -130,6 +132,7 @@ const setMenu = (value) => {
   width: 24px;
   height: 24px;
   box-sizing: border-box;
+  margin: 0 1px 1px 0;
 }
 
 .set-path-btn {

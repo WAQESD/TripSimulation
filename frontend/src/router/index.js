@@ -9,6 +9,7 @@ import KakaoLogin from "../components/login/KakaoLogin.vue";
 import GoogleLogin from "../components/login/GoogleLogin.vue";
 
 import { useModalStore } from "../stores/modal";
+import { usePlayerStore } from "../stores/player";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -44,6 +45,11 @@ const router = createRouter({
       path: "/trip",
       name: "trip",
       component: TripView,
+      beforeEnter: (to, from, next) => {
+        if (next) next();
+        usePlayerStore().init();
+        return to;
+      },
     },
     {
       path: "/mypage",

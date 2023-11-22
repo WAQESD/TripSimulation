@@ -97,8 +97,8 @@ watch(
 }
 
 #minimap {
-  width: 300px;
-  height: 300px;
+  width: 250px;
+  height: 250px;
   border: 2px solid #7c91ff;
 }
 </style>

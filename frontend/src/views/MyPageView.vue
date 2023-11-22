@@ -11,6 +11,10 @@ const pathList = ref([
   { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
   { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
 ]);
+
+const dateToString = (date) => {
+  return new Intl.DateTimeFormat("kr").format(date);
+};
 </script>
 
 <template>
@@ -84,7 +88,7 @@ const pathList = ref([
 .user-info-container {
   display: flex;
   align-items: center;
-  width: 1450px;
+  width: 1000px;
   box-sizing: border-box;
   height: 165px;
   background-color: #7c91ff;
@@ -98,6 +102,7 @@ const pathList = ref([
   height: 117px;
   border-radius: 60px;
   background-color: white;
+  margin-right: 30px;
 }
 
 .user-info-image-indicator {
@@ -113,19 +118,19 @@ const pathList = ref([
   align-items: center;
   margin-bottom: 40px;
   flex-grow: 1;
-  padding: 0 50px;
+  padding: 0;
   text-align: center;
   color: white;
-  font-size: 19px;
+  font-size: 16px;
 }
 
 .user-info-text-nickname {
-  width: 253px;
+  width: 200px;
   height: 48px;
   border-radius: 20px;
   border: 1px solid white;
   line-height: 48px;
-  font-size: 19px;
+  font-size: 16px;
 }
 
 .user-info-text-email {
@@ -135,7 +140,7 @@ const pathList = ref([
 .user-info-text-sperator {
   height: 34px;
   border-left: 1px solid white;
-  margin: 0 60px;
+  margin: 0 30px;
 }
 
 .user-info-text-mypage {
@@ -149,15 +154,15 @@ const pathList = ref([
   margin-top: 35px;
 }
 .path-info-detail {
-  width: 384px;
-  height: 560px;
+  width: 280px;
+  height: 520px;
   box-shadow: 0px 4px 10.4px 0px rgba(0, 0, 0, 0.18);
   background-color: #f4f4f4;
   border-radius: 20px;
 }
 
 #path-info-detail-map {
-  width: 384px;
+  width: 280px;
   height: 241px;
   background-color: #d9d9d9;
   border-radius: 20px 20px 0 0;
@@ -171,49 +176,52 @@ const pathList = ref([
 .path-info-index {
   position: absolute;
   display: inline-block;
-  left: -58px;
-  width: 38px;
-  height: 38px;
-  line-height: 38px;
-  border-radius: 19px;
+  left: -32px;
+  top: -3px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 12px;
   background-color: #adbaff;
 }
 
 .path-info-title {
   position: relative;
   line-height: 38px;
-  font-size: 19px;
+  font-size: 16px;
 }
 
 .path-info-waypoints {
   margin-top: 20px;
   display: flex;
+  flex-grow: 1;
   padding: 0 30px;
+  height: 150px;
+  justify-content: center;
 }
 
 .path-info-waypoints-title-list {
-  width: 180px;
   box-sizing: border-box;
-  height: 200px;
   border-right: 1px solid #d0d0d0;
   padding-top: 15px;
 }
 
 .path-info-waypoints-time-list {
-  width: 144px;
   box-sizing: border-box;
+  padding: 20px;
   height: 200px;
   padding-top: 15px;
 }
 
 .path-info-waypoints-title {
-  font-size: 19px;
-  margin-bottom: 25px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  margin-right: 20px;
 }
 
 .path-info-waypoints-time {
-  font-size: 19px;
-  margin-bottom: 25px;
+  font-size: 14px;
+  margin-bottom: 15px;
 }
 .path-info-list-container {
   display: flex;
@@ -221,13 +229,14 @@ const pathList = ref([
   position: relative;
   top: -86px;
   box-shadow: 0px 4px 10.4px 0px rgba(0, 0, 0, 0.18);
-  width: 867px;
-  height: 646px;
+  width: 600px;
+  height: 606px;
   margin-left: 30px;
   background-color: #f4f4f4;
   border-radius: 20px;
   padding: 0 34px;
   overflow-y: scroll;
+  box-sizing: border-box;
 }
 
 .path-info-list-mypath {
@@ -241,12 +250,12 @@ const pathList = ref([
   flex-direction: row;
   align-items: center;
   padding: 0 18px;
-  width: 807px;
-  height: 80px;
+  width: 510px;
+  height: 65px;
   border-radius: 20px;
   background-color: #e3e3e3;
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .path-info-item-index {
@@ -268,7 +277,7 @@ const pathList = ref([
 }
 
 .path-create-btn-container {
-  width: 1300px;
+  width: 900px;
   display: flex;
   justify-content: flex-end;
 }
@@ -280,7 +289,7 @@ const pathList = ref([
   background-color: #515151;
   border-radius: 25px;
   color: white;
-  font-size: 21px;
+  font-size: 18px;
   box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
   position: relative;
   line-height: 38px;

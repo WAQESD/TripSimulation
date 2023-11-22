@@ -20,7 +20,7 @@ const onClick = (item, idx) => {
       class="address-item"
       :class="{ selected: selectedIdx == idx }"
       v-for="(item, idx) in placeStore.placeList"
-      :key="item.address"
+      :key="item.placeId"
       @click="
         () => {
           onClick(item, idx);

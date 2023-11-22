@@ -16,6 +16,7 @@ const setPath = ({ place, type, idx }) => {
 };
 
 const changePath = (place, type, idx) => {
+  if (playerStore.tripStart) return;
   if (!changeTarget.value) {
     changeTarget.value = { place, type, idx };
   } else if (changeTarget.value.place.placeId === place.placeId) {

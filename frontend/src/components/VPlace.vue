@@ -8,11 +8,6 @@ const props = defineProps({
   isRemovable: Boolean,
 });
 
-const onClick = () => {
-  // const placeCenter = new window.naver.maps.LatLng({ lat: props.place.lat, lng: props.place.lng });
-  // playerStore.map.setCenter(placeCenter);
-};
-
 const removeWayPoint = () => {
   playerStore.removeWayPoint(props.place);
 };
@@ -23,7 +18,12 @@ const removeWayPoint = () => {
     <slot></slot>
     <!-- <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" /> -->
     <div class="place-info-container">
-      <img class="place-remove-btn" v-if="isRemovable" @click.stop="removeWayPoint" src="../assets/images/remove.svg" />
+      <img
+        class="place-remove-btn"
+        v-if="isRemovable && !playerStore.tripStart"
+        @click.stop="removeWayPoint"
+        src="../assets/images/remove.svg"
+      />
       <div class="place-info">
         <div class="place-name">{{ place.placeName }}</div>
         <div class="place-address">{{ place.address || place.placeAddress }}</div>

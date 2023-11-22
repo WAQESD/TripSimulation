@@ -47,6 +47,22 @@ export const usePlayerStore = defineStore("player", () => {
   let estimatedTime = 0;
   let pathData = null;
 
+  const init = () => {
+    startPlace.value = { placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" };
+    goalPlace.value = { placeId: 0, placeName: "", lat: 0, lng: 0, x: 0, y: 0, address: "", category: "None" };
+    wayPoints.value = [];
+    currentWaypointIndex.value = 0;
+
+    speed.value = 5;
+    tripStart.value = false;
+    isPaused.value = false;
+    isEnd.value = false;
+    miniMapBounds.value = null;
+    departureTime.value = null;
+    arrivalTime.value = null;
+    polylinePath.value = null;
+  };
+
   const increaseSpeed = () => {
     if (speed.value <= 1) return;
     speed.value -= 1;
@@ -234,7 +250,6 @@ export const usePlayerStore = defineStore("player", () => {
         isEnd.value = true;
         tripStart.value = false;
         carOverlay.value.setMap(null);
-        uploadPath();
         router.push("/result");
       },
     });
@@ -260,7 +275,6 @@ export const usePlayerStore = defineStore("player", () => {
 
     let { data } = await axios({
       method: "post",
-      // url: "http://ec2-54-180-89-8.ap-northeast-2.compute.amazonaws.com:8080/save",
       url: import.meta.env.VITE_DRIVING_BASE_API,
       data: {
         name: "PATH",
@@ -314,28 +328,10 @@ export const usePlayerStore = defineStore("player", () => {
         });
     }
 
-    console.log(wayPoints.value);
-
     timeStore.setEstimatedGoalTime(timeStore.startTime.getTime() + data.route.traoptimal[0].summary.duration);
-
-    let [hour, minute, second] = new Date(data.route.traoptimal[0].summary.departureTime)
-      .toTimeString()
-      .split(" ")[0]
-      .split(":");
-    departureTime.value = { hour, minute, second };
-
-    [hour, minute, second] = new Date(
-      new Date(data.route.traoptimal[0].summary.departureTime).getTime() + data.route.traoptimal[0].summary.duration
-    )
-      .toTimeString()
-      .split(" ")[0]
-      .split(":");
-    arrivalTime.value = { hour, minute, second };
-
-    // console.log("before : ", pathData.length, "after : ", zipped.length);
+    goalPlace.value.arrivalTime = timeStore.estimatedGoalTime;
 
     polylinePath.value = pathData.map(({ lng, lat }) => new window.naver.maps.LatLng(lat, lng));
-    // polylinePath.value = pathData.map(({lng, lat}) => new window.naver.maps.LatLng(lat, lng));
 
     if (path) path.setMap(null);
 
@@ -369,6 +365,20 @@ export const usePlayerStore = defineStore("player", () => {
     });
 
     tripStart.value = true;
+    placeStore.getThumbnailByPlaceName(startPlace.value, (thumbnail) => {
+      startPlace.value.thumbnail = thumbnail;
+    });
+
+    for (let i = 0; i < wayPoints.value.length; i++) {
+      placeStore.getThumbnailByPlaceName(wayPoints.value[i], (thumbnail) => {
+        wayPoints.value[i].thumbnail = thumbnail;
+      });
+    }
+
+    placeStore.getThumbnailByPlaceName(goalPlace.value, (thumbnail) => {
+      goalPlace.value.thumbnail = thumbnail;
+    });
+
     startPath();
   };
 
@@ -376,6 +386,9 @@ export const usePlayerStore = defineStore("player", () => {
     pause();
 
     wayPoints.value.splice(currentWaypointIndex.value, 0, waypoint);
+    placeStore.getThumbnailByPlaceName(wayPoints.value[currentWaypointIndex.value], (thumbnail) => {
+      wayPoints.value[currentWaypointIndex.value].thumbnail = thumbnail;
+    });
 
     let { data } = await axios({
       method: "post",
@@ -410,6 +423,8 @@ export const usePlayerStore = defineStore("player", () => {
     let pathIndex = 0;
     let sumDuration = 0;
 
+    console.log(pathData);
+
     for (
       let i = 0;
       data.route.traoptimal[0].summary.waypoints && i < data.route.traoptimal[0].summary.waypoints.length;
@@ -423,16 +438,17 @@ export const usePlayerStore = defineStore("player", () => {
         );
       }
 
-      while (pathData[pathIndex].index < waypoint.pointIndex) pathIndex++;
-      if (pathData[pathIndex].index === waypoint.pointIndex) pathData[pathIndex].wayPointIndex = i;
+      while (newPathData[pathIndex].index < waypoint.pointIndex + pathData[currentIndex].index) pathIndex++;
+      if (newPathData[pathIndex].index === waypoint.pointIndex + pathData[currentIndex].index)
+        newPathData[pathIndex].wayPointIndex = currentWaypointIndex.value + i;
       else
-        pathData.splice(pathIndex, 0, {
+        newPathData.splice(pathIndex, 0, {
           lng: waypoint.location[0],
           lat: waypoint.location[1],
           x: waypoint.location[0],
           y: waypoint.location[1],
           wayPointIndex: i + 1,
-          index: waypoint.pointIndex,
+          index: pathData[currentIndex].index + waypoint.pointIndex,
         });
     }
 
@@ -456,6 +472,10 @@ export const usePlayerStore = defineStore("player", () => {
     goalPlace.value = place;
     if (!tripStart.value) return;
     pause();
+
+    placeStore.getThumbnailByPlaceName(goalPlace.value, (thumbnail) => {
+      goalPlace.value.thumbnail = thumbnail;
+    });
 
     let { data } = await axios({
       method: "post",
@@ -556,23 +576,6 @@ export const usePlayerStore = defineStore("player", () => {
     wayPoints.value.push(waypoint);
   };
 
-  const uploadPath = async () => {
-    const result = await axios.post(import.meta.env.VITE_PATH_BASE_API, {
-      userEmail: "ssafy@ssafy.com",
-      pathName: "경로1",
-      path: {
-        start: startPlace.value,
-        goal: goalPlace.value,
-        wayPoints: wayPoints.value,
-        polylinePath: polylinePath.value.map(({ x, y }) => {
-          return { lng: x, lat: y };
-        }),
-      },
-    });
-
-    console.log(result);
-  };
-
   return {
     startTrip,
     setMap,
@@ -599,6 +602,6 @@ export const usePlayerStore = defineStore("player", () => {
     removeWayPoint,
     pushWaypoint,
     changeGoalPlace,
-    uploadPath,
+    init,
   };
 });

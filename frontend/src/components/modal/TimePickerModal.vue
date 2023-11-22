@@ -1,5 +1,8 @@
 <script setup>
 import { onMounted } from "vue";
+import { useModalStore } from "../../stores/modal";
+
+const modalStore = useModalStore();
 
 const props = defineProps({
   callback: Function,
@@ -24,13 +27,20 @@ const setStartTime = () => {
 
 <template>
   <div class="time-picker-modal-container">
-    <div id="tui-time-picker-container"></div>
     <h3>출발 시각을 입력해주세요</h3>
-    <button class="time-picker-btn" @click.prevent="setStartTime">시작</button>
+    <div id="tui-time-picker-container"></div>
+    <div class="btn-wrapper">
+      <button class="time-picker-btn" @click.prevent="setStartTime">시작</button>
+      <button class="time-picker-btn cancle" @click.prevent="modalStore.setModal(false)">취소</button>
+    </div>
   </div>
 </template>
 
 <style scoped>
+h3 {
+  margin: 0;
+  margin-left: 12px;
+}
 .time-picker-modal-container {
   display: flex;
   flex-direction: column;
@@ -44,10 +54,11 @@ const setStartTime = () => {
 
 #tui-time-picker-container {
   width: 300px;
+  margin-left: 53px;
 }
 
 .time-picker-btn {
-  padding: 6px 12px;
+  padding: 7px 16px;
   border-radius: 32px;
   background-color: black;
   color: white;
@@ -55,5 +66,14 @@ const setStartTime = () => {
   cursor: pointer;
   font-weight: bold;
   font-size: 14px;
+}
+
+.btn-wrapper {
+  width: 140px;
+  display: flex;
+  justify-content: space-around;
+}
+.cancle {
+  background-color: rgba(255, 0, 0, 0.675);
 }
 </style>

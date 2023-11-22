@@ -58,7 +58,6 @@ onMounted(() => {
       <MiniMapController />
       <VehicleController />
       <PositionController />
-      <PlaceController />
     </div>
   </div>
 </template>

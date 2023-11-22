@@ -152,11 +152,13 @@ h1 {
 #car-animation {
   font-size: 10px;
   --green: #7c91ff !important;
+  height: 300px;
 }
 .car-animation-container {
   position: absolute;
   background: #7c91ff !important;
   width: 400px;
+  height: 300px;
   bottom: 0;
 }
 
@@ -175,7 +177,7 @@ h1 {
   height: 100%;
   border: none;
   border-radius: 30px 0 0 0;
-  padding-top: 60px;
+  padding-top: 30px;
   background-color: white;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   box-sizing: border-box;
@@ -199,7 +201,7 @@ h1 {
 }
 
 input {
-  margin: 12px 0;
+  margin: 6px 0;
   font-family: "Pretendard-Regular";
 }
 
@@ -237,8 +239,8 @@ label {
 
 hr {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  width: 460px;
-  margin: 40px 0 0 0;
+  width: 440px;
+  margin: 20px 0 20px 0;
 }
 
 h3 {
@@ -274,7 +276,6 @@ h3 {
 
 .social-login-btn-container {
   width: 400px;
-  margin-top: 40px;
   display: flex;
   flex-direction: column;
 }
@@ -294,7 +295,7 @@ h3 {
 .account-service-container {
   display: flex;
   width: 300px;
-  margin-top: 30px;
+  margin-top: 15px;
   justify-content: space-around;
 }
 

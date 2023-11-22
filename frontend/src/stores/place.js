@@ -25,6 +25,7 @@ export const usePlaceStore = defineStore("place", () => {
       address: place.road_address_name || place.address_name,
       placeName: place.place_name,
       category: place.category_name,
+      placeId: parseInt(Math.random() * 1e9),
     };
   };
 
@@ -89,6 +90,30 @@ export const usePlaceStore = defineStore("place", () => {
     };
   };
 
+  const getThumbnailByPlaceName = (place, callback) => {
+    if (place.placeName === place.address) return;
+    axios.get(import.meta.env.VITE_THUMBNAIL_API + encodeURIComponent(place.placeName)).then(({ data }) => {
+      callback(data.thumbnail);
+    });
+  };
+
+  // const getThumbnail = (place, callback) => {
+  //   console.log(place);
+  //   axios
+  //     .get(import.meta.env.VITE_THUMBNAIL_API + encodeURIComponent(place.placeName), { responseType: "blob" })
+  //     .then((response) => {
+  //       if (!response.data) return;
+  //       const url = window.URL.createObjectURL(new Blob([response.data]));
+  //       callback(url);
+  //       queue.value.splice(0, 1);
+  //       if (queue.value.length > 0)
+  //         setTimeout(() => {
+  //           getThumbnail(queue.value[0][0], queue.value[0][1]);
+  //         }, 1000);
+  //     })
+  //     .catch((e) => console.log(e));
+  // };
+
   watch(
     () => currentRegion.value.dong,
     () => {
@@ -104,5 +129,6 @@ export const usePlaceStore = defineStore("place", () => {
     getPlaceListCurrentRegion,
     setCurrentRegion,
     getPlaceListByKeword,
+    getThumbnailByPlaceName,
   };
 });

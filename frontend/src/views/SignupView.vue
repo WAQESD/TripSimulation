@@ -142,11 +142,13 @@ h1 {
 #car-animation {
   font-size: 10px;
   --green: #7c91ff !important;
+  height: 300px;
 }
 .car-animation-container {
   position: absolute;
   background: #7c91ff !important;
   width: 400px;
+  height: 300px;
   bottom: 0;
 }
 
@@ -165,7 +167,7 @@ h1 {
   height: 100%;
   border: none;
   border-radius: 30px 0 0 0;
-  padding-top: 120px;
+  padding-top: 60px;
   background-color: white;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   box-sizing: border-box;
