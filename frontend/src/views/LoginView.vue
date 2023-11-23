@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { RouterView } from "vue-router";
-// import axios from "../util/request";
+import { RouterView, useRouter } from "vue-router";
 import axios from "axios";
 
 import TheHeader from "../commons/TheHeader.vue";
+
+const router = useRouter();
 
 onMounted(() => {
   const script = document.createElement("script");
@@ -117,7 +118,7 @@ const login = () => {
           </div>
           <div class="account-service-container">
             <span class="clickable">아이디찾기</span><span>/</span><span class="clickable">비밀번호찾기</span
-            ><span>/</span><span class="clickable">회원가입</span>
+            ><span>/</span><span class="clickable" @click="router.push('/signup')">회원가입</span>
           </div>
         </form>
       </div>

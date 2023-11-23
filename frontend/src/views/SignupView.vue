@@ -1,7 +1,8 @@
 <script setup>
-import { reactive } from "vue";
+import { ref, reactive } from "vue";
 
 import TheHeader from "../commons/TheHeader.vue";
+import axios from "axios";
 
 const userInfo = reactive({
   userEmail: "",
@@ -12,12 +13,39 @@ const userInfo = reactive({
   isForeign: false,
 });
 
+const message = ref("이메일 인증이 필요합니다.");
+const verifyCode = ref(null);
+const verified = ref(false);
+const authNumber = ref(0);
 const setGender = (value) => {
   userInfo.gender = value;
 };
 
+let sending = false;
+
 const setForeign = (value) => {
   userInfo.isForeign = value;
+};
+
+const verify = () => {
+  if (!userInfo.userEmail) message.value = "이메일을 입력해주세요.";
+  else if (sending) message.value = "메일을 발송 중 입니다.";
+  else {
+    sending = true;
+    if (authNumber.value) message.value = "메일을 다시 전송합니다.";
+    axios.get(import.meta.env.VITE_BASE_API + "/send", { params: { email: userInfo.userEmail } }).then(({ data }) => {
+      authNumber.value = data.authNumber;
+      sending = false;
+      message.value = "메일 전송이 완료되었습니다. 인증번호를 입력해주세요.";
+    });
+  }
+};
+
+const checkCode = () => {
+  if (verifyCode.value == authNumber.value) {
+    verified.value = true;
+    message.value = "인증이 완료되었습니다.";
+  }
 };
 </script>
 
@@ -55,7 +83,21 @@ const setForeign = (value) => {
             required
           />
           <input type="text" id="name" name="name" placeholder="이름" v-model="userInfo.userName" required />
-          <input type="email" id="birth" name="birth" placeholder="생일" v-model="userEmail" required />
+          <input type="date" id="birth" name="birth" placeholder="생일" v-model="userInfo.birth" required />
+          <div class="email-check-container">
+            <input
+              class="email-check-input"
+              name="code"
+              v-model="verifyCode"
+              type="text"
+              @change="checkCode"
+              :disabled="verified"
+            />
+            <div class="email-check-btn" @click="verify">코드 전송</div>
+          </div>
+          <div :class="verified ? 'verified' : 'not'">
+            {{ message }}
+          </div>
           <div class="radio-input-container">
             <div class="gender-input-container">
               <div
@@ -108,11 +150,10 @@ const setForeign = (value) => {
               </div>
             </div>
           </div>
-          <button class="join-btn">JOIN</button>
+          <button class="join-btn" @submit.prevent="">JOIN</button>
         </form>
       </div>
     </div>
-    <RouterView></RouterView>
   </main>
 </template>
 
@@ -192,8 +233,37 @@ h1 {
   box-sizing: border-box;
 }
 
+.email-check-container {
+  display: flex;
+  align-items: center;
+}
+
+.email-check-input {
+  width: 320px;
+  height: 50px;
+  border-radius: 10px 0 0 10px;
+  border: 0.5px grey solid;
+  padding: 8px 20px;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+.email-check-btn {
+  width: 80px;
+  height: 50px;
+  line-height: 50px;
+  background-color: #7583ff;
+  cursor: pointer;
+  border-radius: 0 10px 10px 0;
+  border: 0.5px grey solid;
+  border-left: none;
+  box-sizing: border-box;
+  color: white;
+  text-align: center;
+}
+
 input {
-  margin: 12px 0;
+  margin: 6px 0;
   font-family: "Pretendard-Regular";
 }
 
@@ -267,5 +337,13 @@ h3 {
 .selected {
   background-color: #7583ff;
   color: white;
+}
+
+.not {
+  color: rgba(255, 0, 0, 0.712);
+}
+
+.verified {
+  color: rgba(0, 128, 0, 0.718);
 }
 </style>

@@ -2,18 +2,24 @@
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 
-import { getBoundsByPathList } from "../util/map";
+// import { getBoundsByPathList } from "../util/map";
 import { usePathStore } from "../stores/path";
 import { useUserStore } from "../stores/user";
+import { useTimeStore } from "../stores/time";
+import { useModalStore } from "../stores/modal";
 
 import TheHeader from "../commons/TheHeader.vue";
+import TimePickerModal from "../components/modal/TimePickerModal.vue";
 
 const router = useRouter();
 const pathStore = usePathStore();
 const userStore = useUserStore();
+const modalStore = useModalStore();
+const timeStore = useTimeStore();
+
 const selectedIndex = ref(-1);
 const map = ref(null);
-const polylinePath = ref(null);
+// const polylinePath = ref(null);
 
 /*
   "pathContent":{
@@ -58,21 +64,31 @@ const loadMap = () => {
   });
 
   map.value.setCursor("default");
-  // drawPolyline();
+  // window.naver.maps.once(map.value, 'init', drawPolyline);
 };
 
-const drawPolyline = () => {
-  if (polylinePath.value) polylinePath.value.setMap(null);
+// const drawPolyline = () => {
+//   if (polylinePath.value) polylinePath.value.setMap(null);
 
-  polylinePath.value = new window.naver.maps.Polyline({
-    path: selectedPath.value.pathContent.path.map(({ lat, lng }) => new window.naver.maps.LatLng(lat, lng)),
-    strokeColor: "#5347AA",
-    strokeWeight: 3,
-    map: map.value,
+//   polylinePath.value = new window.naver.maps.Polyline({
+//     path: selectedPath.value.pathContent.path.map(({ lat, lng }) => new window.naver.maps.LatLng(lat, lng)),
+//     strokeColor: "#5347AA",
+//     strokeWeight: 3,
+//     map: map.value,
+//   });
+
+//   const bounds = getBoundsByPathList(selectedPath.value.pathContent.path);
+//   map.value.fitBounds(bounds);
+// };
+
+const startTrip = () => {
+  modalStore.setModal(true, TimePickerModal, {
+    callback: (hours, minute) => {
+      router.push("/trip");
+      modalStore.setModal(false);
+      timeStore.setStartTime(hours, minute);
+    },
   });
-
-  const bounds = getBoundsByPathList(selectedPath.value.pathContent.path);
-  map.value.fitBounds(bounds);
 };
 
 const dateToString = (date) => {
@@ -143,14 +159,7 @@ const dateToString = (date) => {
         </div>
       </div>
     </div>
-    <div
-      class="path-create-btn-container"
-      @click.prevent="
-        () => {
-          router.push('/trip');
-        }
-      "
-    >
+    <div class="path-create-btn-container" @click.prevent="startTrip">
       <button class="path-create-btn">
         새 여행경로 만들기
         <div class="path-create-btn-icon"></div>
