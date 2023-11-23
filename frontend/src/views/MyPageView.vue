@@ -41,7 +41,8 @@ watch(selectedIndex, () => {
 
       script.onload = loadMap;
     } else loadMap();
-  } else drawPolyline();
+  }
+  // else drawPolyline();
 });
 
 const loadMap = () => {
@@ -57,7 +58,6 @@ const loadMap = () => {
   });
 
   map.value.setCursor("default");
-  map.value.onload = drawPolyline;
   // drawPolyline();
 };
 
@@ -276,7 +276,7 @@ const dateToString = (date) => {
 .path-info-waypoints {
   margin-top: 10px;
   padding: 0 30px;
-  padding-top: 10px;
+  padding-top: 20px;
   border-top: 3px solid rgba(128, 128, 128, 0.3);
   display: flex;
   flex-grow: 1;

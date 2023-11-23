@@ -100,18 +100,18 @@ const login = () => {
           <button class="login-btn">로그인하기</button>
           <hr />
           <div class="social-login-btn-container">
-            <div class="social-login-container naver">
-              <img class="social-login-btn" src="../assets/images/naver_circle.png" @click="naverLogin" />
+            <div class="social-login-container naver" @click="naverLogin">
+              <img class="social-login-btn" src="../assets/images/naver_circle.png" />
               <div>네이버 로그인</div>
             </div>
-            <div class="social-login-container kakao">
+            <div class="social-login-container kakao" @click="kakaoLogin">
               <span class="social-login-btn-wrapper">
-                <img class="social-login-btn kakao-btn" src="../assets/images/kakao_circle.png" @click="kakaoLogin"
+                <img class="social-login-btn kakao-btn" src="../assets/images/kakao_circle.png"
               /></span>
               <div>카카오 로그인</div>
             </div>
-            <div class="social-login-container google">
-              <img class="social-login-btn" src="../assets/images/google_circle.svg" @click="googleLogin" />
+            <div class="social-login-container google" @click="googleLogin">
+              <img class="social-login-btn" src="../assets/images/google_circle.svg" />
               <div>구글 로그인</div>
             </div>
           </div>
