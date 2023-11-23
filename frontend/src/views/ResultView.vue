@@ -56,9 +56,11 @@ const uploadPath = () => {
         pathContent: {
           pathName,
           userEmail: user.userInfo.userEmail,
-          path: playerStore.polylinePath.map(({ x, y }) => {
-            return { lat: y, lng: x };
-          }),
+          path: JSON.stringify(
+            playerStore.polylinePath.map(({ x, y }) => {
+              return { lat: y, lng: x };
+            })
+          ),
         },
       });
       router.push("/mypage");
