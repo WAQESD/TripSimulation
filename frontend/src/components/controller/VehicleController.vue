@@ -31,13 +31,13 @@ const puaseOrRestart = () => {
 
 <template>
   <div v-show="playerStore.tripStart" class="vehicle-controller-container" ref="controllerEl">
-    <img class="vehicle-speed-btn decrease" @click="playerStore.decreaseSpeed" src="@/assets/images/previous.png" />
+    <img class="vehicle-speed-btn decrease" @click="playerStore.decreaseSpeed" src="@/assets/images/decrease.png" />
     <img
       class="vehicle-speed-btn"
       @click="puaseOrRestart"
       :src="isPaused ? './src/assets/images/play.png' : './src/assets/images/pause.png'"
     />
-    <img class="vehicle-speed-btn increase" @click="playerStore.increaseSpeed" src="@/assets/images/fast_forward.png" />
+    <img class="vehicle-speed-btn increase" @click="playerStore.increaseSpeed" src="@/assets/images/increase.png" />
   </div>
 </template>
 
@@ -55,7 +55,7 @@ const puaseOrRestart = () => {
   padding: 5px 4px;
   z-index: 2;
   transition: all 0.3s;
-  opacity: 0.4;
+  opacity: 0.6;
 }
 
 .vehicle-speed-btn:hover {
@@ -67,5 +67,6 @@ const puaseOrRestart = () => {
   width: 46px;
   height: 46px;
   padding: 2px 4px;
+  opacity: 0.55;
 }
 </style>

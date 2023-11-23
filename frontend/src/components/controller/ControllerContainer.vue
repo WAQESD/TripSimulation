@@ -2,12 +2,13 @@
 import { ref, computed, onMounted, nextTick } from "vue";
 import { initController } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
+import { useRouter } from "vue-router";
 
 import PathController from "./PathController.vue";
 import PlanController from "./PlanController.vue";
-import InformationController from "./InformationController.vue";
 
 const playerStore = usePlayerStore();
+const router = useRouter();
 
 const position = window.naver.maps.Position.TOP_LEFT;
 const controllerEl = ref(null);
@@ -26,25 +27,18 @@ const toggleController = () => {
   isClosed.value = !isClosed.value;
 };
 
-const toggleMenu = () => {
-  if (menuSelector.value === 0) menuSelector.value = 1;
-  else menuSelector.value = 0;
-};
-
 const setMenu = (value) => {
   menuSelector.value = value;
   isClosed.value = false;
 };
-
-document.addEventListener("keydown", (e) => {
-  if (e.code === "Space") {
-    toggleMenu();
-  }
-});
 </script>
 
 <template>
   <div class="controller-container" ref="controllerEl" :class="isClosed ? 'closed' : ''">
+    <div class="controller-container-header" @click="router.push('/')">
+      <img class="controller-container-header-logo" src="../../assets/images/logo.svg" />
+      Trippy
+    </div>
     <div class="btn-container">
       <div
         class="search-btn"
@@ -62,8 +56,8 @@ document.addEventListener("keydown", (e) => {
       </div>
     </div>
     <PathController v-show="menuSelector === 0" @previous-menu="setMenu" />
-    <PlanController v-show="menuSelector === 1 && !playerStore.tripStart" />
-    <InformationController v-show="menuSelector === 1 && playerStore.tripStart" />
+    <PlanController v-show="menuSelector === 1" />
+    <!-- <InformationController v-show="menuSelector === 1 && playerStore.tripStart" /> -->
     <div class="close-btn" @click="toggleController">{{ btnIcon }}</div>
   </div>
 </template>
@@ -73,6 +67,27 @@ document.addEventListener("keydown", (e) => {
   z-index: 3;
   transition: transform 0.5s;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
+}
+
+.controller-container-header {
+  position: absolute;
+  display: flex;
+  height: 50px;
+  align-items: center;
+  padding: 30px 40px;
+  font-size: 26px;
+  width: 400px;
+  box-sizing: border-box;
+  border-bottom: #37469e57 2px solid;
+  font-family: "Baloo Chettan 2", sans-serif;
+  box-shadow: rgba(100, 100, 111, 0.4) 0px 1px 29px 0px;
+  cursor: pointer;
+}
+
+.controller-container-header-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 12px;
 }
 
 .close-btn {
@@ -109,7 +124,7 @@ document.addEventListener("keydown", (e) => {
   border-radius: 32px;
   box-sizing: border-box;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid #7c91ff;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
   margin-bottom: 10px;
 }
@@ -117,6 +132,7 @@ document.addEventListener("keydown", (e) => {
   width: 24px;
   height: 24px;
   box-sizing: border-box;
+  margin: 0 1px 1px 0;
 }
 
 .set-path-btn {
@@ -129,7 +145,7 @@ document.addEventListener("keydown", (e) => {
   border-radius: 32px;
   box-sizing: border-box;
   cursor: pointer;
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid #7c91ff;
   box-shadow: rgba(100, 100, 111, 0.4) 0px 7px 29px 0px;
 }
 

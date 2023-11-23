@@ -10,7 +10,7 @@ import VSeperator from "../components/VSeperator.vue";
         <img class="logo-icon" src="../assets/images/logo.svg" />
         <div class="logo-text">Trippy</div>
       </RouterLink>
-      <div>
+      <div class="header-link-container">
         <RouterLink class="login-btn" to="/login">Login</RouterLink>
         <VSeperator :fontSize="'40px'" />
         <RouterLink class="signup-btn" to="/signup">Join</RouterLink>
@@ -21,7 +21,9 @@ import VSeperator from "../components/VSeperator.vue";
 
 <style scoped>
 header {
-  padding: 0 20px 0 20px;
+  /* padding: 0 20px 0 20px; */
+  box-sizing: border-box;
+  width: 100%;
 }
 
 .header-container {
@@ -40,6 +42,7 @@ a {
   text-decoration: none;
   padding: 4px;
   color: black;
+  font-family: "Baloo Chettan 2", sans-serif;
 }
 
 .logo {
@@ -58,5 +61,10 @@ a {
 .logo-icon {
   width: 24px;
   height: 24px;
+}
+
+.header-link-container {
+  display: flex;
+  align-items: center;
 }
 </style>

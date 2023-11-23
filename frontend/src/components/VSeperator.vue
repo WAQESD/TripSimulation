@@ -7,7 +7,7 @@
 <style scoped>
 span {
   display: inline-block;
-  margin: 0 8px;
+  margin: 2px 8px 0 8px;
   width: 8px;
   height: 8px;
   border-radius: 8px;

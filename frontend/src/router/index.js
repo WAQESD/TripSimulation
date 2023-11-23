@@ -2,11 +2,16 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import TripView from "../views/TripView.vue";
 import LoginView from "../views/LoginView.vue";
-import ResultView from "../views/ResultView";
+import ResultView from "../views/ResultView.vue";
 import SignupView from "../views/SignupView.vue";
 import MyPageView from "../views/MyPageView.vue";
 import KakaoLogin from "../components/login/KakaoLogin.vue";
 import GoogleLogin from "../components/login/GoogleLogin.vue";
+
+import { useModalStore } from "../stores/modal";
+import { usePlayerStore } from "../stores/player";
+import { usePathStore } from "../stores/path";
+import { useUserStore } from "../stores/user";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -42,11 +47,23 @@ const router = createRouter({
       path: "/trip",
       name: "trip",
       component: TripView,
+      beforeEnter: (to, from, next) => {
+        usePlayerStore().init();
+        if (next) next();
+        return to;
+      },
     },
     {
       path: "/mypage",
       name: "mypage",
       component: MyPageView,
+      beforeEnter: (to, from, next) => {
+        const userStore = useUserStore();
+        // 유저 유효성 판단
+        usePathStore().getPathList(userStore.userInfo);
+        if (next) next();
+        return to;
+      },
     },
     {
       path: "/result",
@@ -54,6 +71,13 @@ const router = createRouter({
       component: ResultView,
     },
   ],
+});
+
+router.beforeEach((to, from, next) => {
+  const modalStore = useModalStore();
+  modalStore.setModal(false);
+  if (next) next();
+  return to;
 });
 
 export default router;

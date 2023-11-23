@@ -5,7 +5,6 @@ import { RouterView } from "vue-router";
 import axios from "axios";
 
 import TheHeader from "../commons/TheHeader.vue";
-import GradationBackground from "../components/GradationBackground.vue";
 
 onMounted(() => {
   const script = document.createElement("script");
@@ -62,36 +61,66 @@ const login = () => {
 </script>
 
 <template>
-  <GradationBackground></GradationBackground>
-  <TheHeader></TheHeader>
   <main>
+    <TheHeader></TheHeader>
     <div class="login-container">
-      <h1>Login</h1>
-      <form class="login-form" @submit.prevent="login">
-        <input type="email" id="login-email" name="login-email" placeholder="이메일" v-model="userEmail" required />
-        <input
-          type="password"
-          id="login-password"
-          name="password"
-          placeholder="비밀번호"
-          v-model="userPassword"
-          required
-        />
-        <div class="login-remember-container">
-          <input type="checkbox" id="login-remember" name="remember" />
-          <label for="login-remember">아이디 저장하기</label>
-        </div>
-        <button class="login-btn">로그인하기</button>
-        <hr />
-        <h2>소셜 로그인</h2>
-        <div class="social-login-btn-container">
-          <img class="social-login-btn" src="../assets/images/naver_circle.png" @click="naverLogin" />
-          <span class="social-login-btn-wrapper">
-            <img class="social-login-btn kakao" src="../assets/images/kakao_circle.png" @click="kakaoLogin"
-          /></span>
-          <img class="social-login-btn" src="../assets/images/google_circle.svg" @click="googleLogin" />
-        </div>
-      </form>
+      <div class="login-text-container">
+        <h1>Log In</h1>
+        <h3>
+          회원가입 후 로그인하시면<br />
+          Trippy의 더 다양한 기능들을<br />
+          이용하실 수 있습니다.
+        </h3>
+      </div>
+      <div class="car-animation-container">
+        <div id="car-animation"></div>
+      </div>
+      <div class="login-form-container">
+        <form class="login-form" @submit.prevent="login">
+          <input
+            type="email"
+            id="login-email"
+            name="login-email"
+            placeholder="이메일 입력"
+            v-model="userEmail"
+            required
+          />
+          <input
+            type="password"
+            id="login-password"
+            name="password"
+            placeholder="비밀번호 입력"
+            v-model="userPassword"
+            required
+          />
+          <div class="login-remember-container">
+            <input type="checkbox" id="login-remember" name="remember" />
+            <label for="login-remember">로그인 상태 저장하기</label>
+          </div>
+          <button class="login-btn">로그인하기</button>
+          <hr />
+          <div class="social-login-btn-container">
+            <div class="social-login-container naver">
+              <img class="social-login-btn" src="../assets/images/naver_circle.png" @click="naverLogin" />
+              <div>네이버 로그인</div>
+            </div>
+            <div class="social-login-container kakao">
+              <span class="social-login-btn-wrapper">
+                <img class="social-login-btn kakao-btn" src="../assets/images/kakao_circle.png" @click="kakaoLogin"
+              /></span>
+              <div>카카오 로그인</div>
+            </div>
+            <div class="social-login-container google">
+              <img class="social-login-btn" src="../assets/images/google_circle.svg" @click="googleLogin" />
+              <div>구글 로그인</div>
+            </div>
+          </div>
+          <div class="account-service-container">
+            <span class="clickable">아이디찾기</span><span>/</span><span class="clickable">비밀번호찾기</span
+            ><span>/</span><span class="clickable">회원가입</span>
+          </div>
+        </form>
+      </div>
     </div>
     <RouterView></RouterView>
   </main>
@@ -103,23 +132,55 @@ main {
   flex-direction: column;
   align-items: center;
   flex-grow: 1;
-  padding: 80px 0;
+  background-color: #7c91ff;
 }
 
 h1 {
   margin-top: 0;
 }
 
+.clickable {
+  cursor: pointer;
+}
 .login-container {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
+  position: relative;
+}
+
+#car-animation {
+  font-size: 10px;
+  --green: #7c91ff !important;
+  height: 300px;
+}
+.car-animation-container {
+  position: absolute;
+  background: #7c91ff !important;
+  width: 400px;
+  height: 300px;
+  bottom: 0;
+}
+
+.login-text-container {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 40px;
+  color: white;
+}
+.login-form-container {
+  margin-left: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 600px;
-  border: 1px solid rgba(0, 0, 0, 0.2);
-  border-radius: 20px;
-  padding: 40px 0;
+  width: calc(100% - 400px);
+  height: 100%;
+  border: none;
+  border-radius: 30px 0 0 0;
+  padding-top: 30px;
   background-color: white;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  box-sizing: border-box;
 }
 
 .login-form {
@@ -130,16 +191,17 @@ h1 {
 
 #login-email,
 #login-password {
-  width: 240px;
-  height: 25px;
-  border-radius: 16px;
+  width: 400px;
+  height: 50px;
+  border-radius: 10px;
   border: 0.5px grey solid;
   padding: 8px 20px;
   font-size: 18px;
+  box-sizing: border-box;
 }
 
 input {
-  margin: 4px 0;
+  margin: 6px 0;
   font-family: "Pretendard-Regular";
 }
 
@@ -149,39 +211,52 @@ label {
 }
 
 .login-remember-container {
-  padding: 4px;
-  margin: 8px;
+  padding: 0 4px;
+  margin: 10px 0 24px 0;
+  width: 400px;
+  box-sizing: border-box;
+  display: flex;
 }
 
 .login-btn {
-  width: 280px;
-  height: 45px;
-  border-radius: 16px;
+  width: 400px;
+  height: 50px;
+  border-radius: 10px;
   border: none;
   padding: 8px 20px;
   font-size: 18px;
   cursor: pointer;
   font-family: "Pretendard-Regular";
+  box-sizing: border-box;
+  background-color: #7583ff;
+  color: white;
 }
 
 #login-remember {
   border-radius: 8px;
+  margin: 0;
 }
 
 hr {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-  width: 400px;
-  margin: 20px 0 0 0;
+  width: 440px;
+  margin: 20px 0 20px 0;
+}
+
+h3 {
+  font-weight: 300;
+  line-height: 24px;
 }
 
 .social-login-btn {
+  position: absolute;
   width: 50px;
   height: 50px;
   margin: 6px 0;
   cursor: pointer;
 }
 
-.kakao {
+.kakao-btn {
   position: absolute;
   width: 30px;
   height: 30px;
@@ -190,20 +265,54 @@ hr {
 }
 
 .social-login-btn-wrapper {
+  position: absolute;
   display: inline-block;
-  position: relative;
   width: 50px;
   height: 50px;
   background-color: #fee500;
   border-radius: 25px;
   margin: 6px 0;
-  cursor: pointer;
 }
 
 .social-login-btn-container {
-  width: 200px;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+.social-login-container {
+  width: 400px;
+  height: 50px;
+  border-radius: 10px;
   display: flex;
   flex-direction: row;
+  align-items: center;
+  margin-bottom: 12px;
+  position: relative;
+  cursor: pointer;
+}
+
+.account-service-container {
+  display: flex;
+  width: 300px;
+  margin-top: 15px;
   justify-content: space-around;
+}
+
+.social-login-container div {
+  margin: 0 auto;
+}
+
+.naver {
+  color: white;
+  background-color: #03c75a;
+}
+
+.kakao {
+  background-color: #fee500;
+}
+
+.google {
+  background-color: #f2f2f2;
 }
 </style>

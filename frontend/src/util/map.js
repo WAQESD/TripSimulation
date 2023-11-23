@@ -93,60 +93,25 @@ function hasAddition(addition) {
   return !!(addition && addition.value);
 }
 
-export const searchAddressToCoordinate = (address, infoWindow, searchResults) => {
-  if (!address) {
-    searchResults.value = [];
-    return;
-  }
-
+export const makeInfoWindowByPlace = (place, infoWindow) => {
   const playerStore = usePlayerStore();
 
-  window.naver.maps.Service.geocode(
-    {
-      query: address,
-    },
-    function (status, response) {
-      if (status === window.naver.maps.Service.Status.ERROR) {
-        return;
-      }
-
-      if (response.v2.meta.totalCount === 0) {
-        searchResults.value = [];
-        return;
-      }
-
-      var htmlAddresses = [];
-      let point = {};
-      for (let item of response.v2.addresses) {
-        point = new window.naver.maps.Point(item.x, item.y);
-        htmlAddresses.push({ address: item.roadAddress, point });
-      }
-
-      playerStore.map.setCenter(htmlAddresses[0].point);
-
-      makeInfoWindow(
-        infoWindow,
-        [
-          '<div style="padding: 16px; ">',
-          '<h4 style="margin-top:5px; text-align:center">검색 주소 : ' + address + "</h4>",
-          htmlAddresses[0].address,
-          `
-          <div style="text-align: center; margin-top: 12px">
-          ` +
-            (playerStore.tripStart
-              ? ""
-              : `<button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>`) +
-            `
-            <button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>
-            <button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >도착</button>
-          </div>`,
-          "</div>",
-        ].join("\n"),
-        htmlAddresses
-      );
-
-      searchResults.value = htmlAddresses;
-    }
+  makeInfoWindow(
+    infoWindow,
+    [
+      '<div style="padding: 16px; ">',
+      '<h4 style="margin-top:5px; text-align:center">' + place.placeName + "</h4>",
+      place.address,
+      `
+      <div style="text-align: center; margin-top: 12px">
+      ` +
+        (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
+        `<button id="info-waypoint-btn">경유</button>` +
+        `<button id="info-goal-btn" >도착</button>
+      </div>`,
+      "</div>",
+    ].join("\n"),
+    place
   );
 };
 
@@ -181,52 +146,46 @@ export const makeInfoWindowByCoord = (coord, infoWindow) => {
           htmlAddresses.map(({ address }) => address).join("<br />"),
           `
             <div style="text-align: center; margin-top: 12px">` +
-            (playerStore.tripStart
-              ? ""
-              : `<button id="info-start-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >출발</button>`) +
-            `<button id="info-waypoint-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;" >경유</button>` +
-            `<button id="info-goal-btn" style="width:60px; height:30px; border-radius:15px; font-family: 'Pretendard-Regular'; cursor:pointer;">도착</button>
+            (playerStore.tripStart ? "" : `<button id="info-start-btn">출발</button>`) +
+            `<button id="info-waypoint-btn">경유</button>` +
+            `<button id="info-goal-btn">도착</button>
             </div>`,
           "</div>",
         ].join("\n"),
-        htmlAddresses
+        makePlaceByAddress(htmlAddresses[0])
       );
     }
   );
 };
 
-function makeInfoWindow(infoWindow, contents, htmlAddresses) {
+export function makeInfoWindow(infoWindow, contents, place) {
   const playerStore = usePlayerStore();
 
   infoWindow.setContent(contents);
-  infoWindow.open(playerStore.map, htmlAddresses[0].point);
+  infoWindow.open(playerStore.map, { x: place.x, y: place.y });
 
   if (!playerStore.tripStart) {
     document.querySelector("#info-start-btn").addEventListener("click", () => {
-      playerStore.setStartPlace(makePlaceByAddress(htmlAddresses[0]));
-      console.log(playerStore.startPlace);
+      playerStore.setStartPlace(place);
 
       infoWindow.close();
     });
   }
 
   document.querySelector("#info-waypoint-btn").addEventListener("click", () => {
-    const wayPoint = makePlaceByAddress(htmlAddresses[0]);
-
-    if (playerStore.tripStart) playerStore.addWaypoint(wayPoint);
-    else playerStore.pushWaypoint(wayPoint);
+    if (playerStore.tripStart) playerStore.addWaypoint(place);
+    else playerStore.pushWaypoint(place);
 
     infoWindow.close();
   });
 
   document.querySelector("#info-goal-btn").addEventListener("click", () => {
-    const goalPlace = makePlaceByAddress(htmlAddresses[0]);
-    playerStore.changeGoalPlace(goalPlace);
+    playerStore.changeGoalPlace(place);
     infoWindow.close();
   });
 }
 
-const makePlaceByAddress = (htmlAddress) => {
+export const makePlaceByAddress = (htmlAddress) => {
   return {
     lng: htmlAddress.point.x,
     lat: htmlAddress.point.y,
@@ -236,6 +195,16 @@ const makePlaceByAddress = (htmlAddress) => {
     address: htmlAddress.address,
     placeName: htmlAddress.address,
   };
+};
+
+export const getBoundsByPathList = (path) => {
+  const latList = path.map(({ lat }) => lat);
+  const lngList = path.map(({ lng }) => lng);
+
+  return new window.naver.maps.LatLngBounds(
+    new window.naver.maps.LatLng(Math.min(...latList), Math.min(...lngList)),
+    new window.naver.maps.LatLng(Math.max(...latList), Math.max(...lngList))
+  );
 };
 
 export const getStartIcon = () => {
@@ -258,8 +227,16 @@ export const getWayPointIcon = (idx) => {
   return `
     <div class="waypoint-place-marker">
       <img class="waypoint-place-marker-icon" src="./src/assets/images/waypoint_marker.png" width="36", height="36">
-      <div style="position : absolute; top : 4px; left : 18px,;text-align : center; width:36px; font-family : Pretendard-Regular; font-weight : bold">${idx}</div>
+      <div class="waypoint-place-marker-text">${idx}</div>
       </img>
+    </div>
+  `;
+};
+
+export const getPlaceMarker = (placeName) => {
+  return `
+    <div class="place-marker">
+      <div class="place-marker-name">${placeName}</div>
     </div>
   `;
 };

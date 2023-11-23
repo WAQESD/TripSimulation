@@ -5,12 +5,8 @@ const playerStore = usePlayerStore();
 const props = defineProps({
   place: Object,
   isSelected: Boolean,
+  isRemovable: Boolean,
 });
-
-const onClick = () => {
-  // const placeCenter = new window.naver.maps.LatLng({ lat: props.place.lat, lng: props.place.lng });
-  // playerStore.map.setCenter(placeCenter);
-};
 
 const removeWayPoint = () => {
   playerStore.removeWayPoint(props.place);
@@ -19,21 +15,18 @@ const removeWayPoint = () => {
 
 <template>
   <div class="place-container" @click="onClick">
-    <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" />
+    <slot></slot>
+    <!-- <img class="place-thumbnail" v-show="place.thumbnail" :src="place.thumbnail" /> -->
     <div class="place-info-container">
-      <img class="place-remove-btn" v-show="isSelected" @click="removeWayPoint" src="../assets/images/trash.png" />
+      <img
+        class="place-remove-btn"
+        v-if="isRemovable && !playerStore.tripStart"
+        @click.stop="removeWayPoint"
+        src="../assets/images/remove.svg"
+      />
       <div class="place-info">
         <div class="place-name">{{ place.placeName }}</div>
         <div class="place-address">{{ place.address || place.placeAddress }}</div>
-      </div>
-      <div v-show="place.departureTime || place.arrivalTime" class="place-time-container">
-        <div class="place-time">
-          {{ place.departureTime ? `${place.departureTime.hour}:${place.departureTime.minute}` : "도착" }}
-        </div>
-        <div class="place-time">→</div>
-        <div class="place-time">
-          {{ place.arrivalTime ? `${place.arrivalTime.hour}:${place.arrivalTime.minute}` : "출발" }}
-        </div>
       </div>
     </div>
   </div>
@@ -44,6 +37,7 @@ const removeWayPoint = () => {
   position: relative;
   display: flex;
   flex-direction: row;
+  align-items: center;
   font-family: "Pretendard-Regular";
   margin-bottom: 10px;
   cursor: pointer;
@@ -52,13 +46,14 @@ const removeWayPoint = () => {
   box-sizing: border-box;
   border: 2px solid white;
   flex-grow: 1;
-  border: 2px solid rgba(0, 0, 0, 0.6);
+  border: 1px solid #b6b6b6;
   border-radius: 4px;
+  height: 70px;
 }
 
 .place-container:hover {
   color: rgba(255, 0, 0, 0.7);
-  border: 2px solid rgba(255, 0, 0, 0.7);
+  border: 1px solid rgba(255, 0, 0, 0.7);
   border-radius: 4px;
 }
 
@@ -68,7 +63,6 @@ const removeWayPoint = () => {
   justify-content: space-between;
   margin-left: auto;
   max-width: 100%;
-  height: 90px;
 }
 .place-thumbnail {
   width: 160px;
@@ -79,7 +73,6 @@ const removeWayPoint = () => {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  margin-top: auto;
 }
 
 .place-name,
@@ -101,10 +94,12 @@ const removeWayPoint = () => {
 
 .place-remove-btn {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 20px;
+  top: -15px;
+  right: -15px;
+  width: 30px;
   color: rgba(255, 0, 0, 0.7);
+  background-color: white;
+  border-radius: 15px;
 }
 .slide-left {
   animation: slide-left 0.3s both;

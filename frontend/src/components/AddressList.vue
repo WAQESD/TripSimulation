@@ -1,12 +1,15 @@
 <script setup>
-defineProps({
-  addressList: Array,
-});
+import { ref } from "vue";
+import { usePlaceStore } from "../stores/place";
 
 const emit = defineEmits(["searchAddress"]);
 
-const onClick = (item) => {
+const placeStore = usePlaceStore();
+const selectedIdx = ref(-1);
+
+const onClick = (item, idx) => {
   emit("searchAddress", item);
+  selectedIdx.value = idx;
 };
 </script>
 
@@ -15,15 +18,17 @@ const onClick = (item) => {
     <li
       type="none"
       class="address-item"
-      v-for="item in addressList"
-      :key="item.address"
+      :class="{ selected: selectedIdx == idx }"
+      v-for="(item, idx) in placeStore.placeList"
+      :key="item.placeId"
       @click="
         () => {
-          onClick(item);
+          onClick(item, idx);
         }
       "
     >
-      {{ item.address }}
+      <h2>{{ item.placeName }}</h2>
+      <h5>{{ item.address }}</h5>
     </li>
   </ul>
 </template>
@@ -31,24 +36,45 @@ const onClick = (item) => {
 <style scoped>
 .address-list {
   box-sizing: border-box;
-  width: 330px;
-  margin-top: 20px;
-  border: 1px solid rgba(0, 0, 0, 0.5);
-  border-radius: 8px;
-  overflow: auto;
+  width: 399px;
   padding: 0;
   flex-grow: 1;
+  margin: 0;
+  overflow-y: auto;
 }
 
 .address-item {
-  height: 20px;
+  width: 399px;
+  height: 102px;
+  box-sizing: border-box;
   padding: 10px 20px;
-  line-height: 20px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.5);
+  line-height: 40px;
+  border-bottom: 1px solid #f1f1f1;
   cursor: pointer;
 }
 
+.address-item > h2,
+.address-item > h5 {
+  margin: 0;
+}
+
+.address-item > h5 {
+  font-weight: 300;
+}
+
 .address-item:hover {
-  font-weight: bold;
+  background-color: #7c91ff;
+  color: white;
+  border-bottom: 1px solid #7c91ff;
+}
+
+.selected {
+  background-color: #7c91ff;
+  color: white;
+  border-bottom: 1px solid #7c91ff;
+}
+
+.address-list::-webkit-scrollbar {
+  display: none;
 }
 </style>

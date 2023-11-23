@@ -43,7 +43,7 @@ watch(
   padding: 12px;
   border-radius: 40px;
   background-color: white;
-  border: 1px solid rgba(0, 0, 0, 0.3);
+  border: 1px solid #7c91ff;
   cursor: pointer;
   box-shadow: rgba(100, 100, 111, 0.5) 0px 7px 29px 0px;
 }

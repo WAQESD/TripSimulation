@@ -1,156 +1,271 @@
 <script setup>
-import GradationBackground from "../components/GradationBackground.vue";
+import { reactive } from "vue";
+
 import TheHeader from "../commons/TheHeader.vue";
-import { ref } from "vue";
 
-const agreementCertification = ref(false);
+const userInfo = reactive({
+  userEmail: "",
+  userPwd: "",
+  userName: "",
+  birth: "",
+  gender: "M",
+  isForeign: false,
+});
 
-const toggleCertification = () => {
-  agreementCertification.value = !agreementCertification.value;
+const setGender = (value) => {
+  userInfo.gender = value;
+};
+
+const setForeign = (value) => {
+  userInfo.isForeign = value;
 };
 </script>
 
 <template>
-  <GradationBackground></GradationBackground>
-  <TheHeader></TheHeader>
   <main>
-    <form class="signup-container">
-      <div class="signup-userinfo-container">
-        <input type="text" id="id" placeholder="아이디" required />
-        <input type="password" id="password" placeholder="비밀번호" required />
-        <input type="password" id="password-check" placeholder="비밀번호 확인" required />
-        <input type="text" id="name" placeholder="이름" required />
-        <div class="gender-radio-container">
-          <div class="gender-radio-wrapper">
-            <label for="gender-male">남성</label>
-            <input type="radio" id="gender-male" name="gender" />
-          </div>
-          <div class="gender-radio-wrapper">
-            <label for="gender-female">여성</label>
-            <input type="radio" id="gender-female" name="gender" />
-          </div>
-        </div>
-        <input type="date" id="birth" name="birth" />
+    <TheHeader></TheHeader>
+    <div class="join-container">
+      <div class="join-text-container">
+        <h1>Log In</h1>
+        <h3>
+          회원가입 후 로그인하시면<br />
+          Trippy의 더 다양한 기능들을<br />
+          이용하실 수 있습니다.
+        </h3>
       </div>
-      <div class="signup-verify-container">
-        <input type="email" id="email" placeholder="인증 이메일 입력" />
-        <div class="signup-verify-wrapper">
-          <div class="email-verify-timer">01:30</div>
-          <input type="text" id="email-verify" placeholder="인증 번호 입력" />
-        </div>
+      <div class="car-animation-container">
+        <div id="car-animation"></div>
       </div>
-      <button class="certification-btn" @click.prevent="toggleCertification">
-        <input type="radio" :checked="agreementCertification" />
-        <span>인증약관 동의</span>
-      </button>
-      <button class="signup-btn">인증요청</button>
-    </form>
+      <div class="join-form-container">
+        <form class="join-form" @submit.prevent="join">
+          <input
+            type="email"
+            id="join-email"
+            name="join-email"
+            placeholder="이메일"
+            v-model="userInfo.userEmail"
+            required
+          />
+          <input
+            type="password"
+            id="join-password"
+            name="password"
+            placeholder="비밀번호"
+            v-model="userInfo.userPwd"
+            required
+          />
+          <input type="text" id="name" name="name" placeholder="이름" v-model="userInfo.userName" required />
+          <input type="email" id="birth" name="birth" placeholder="생일" v-model="userEmail" required />
+          <div class="radio-input-container">
+            <div class="gender-input-container">
+              <div
+                type="radio"
+                :class="{ selected: userInfo.gender === 'M' }"
+                id="gender-male"
+                @click="
+                  () => {
+                    setGender('M');
+                  }
+                "
+              >
+                남자
+              </div>
+              <div
+                type="radio"
+                :class="{ selected: userInfo.gender === 'F' }"
+                id="gender-female"
+                @click="
+                  () => {
+                    setGender('F');
+                  }
+                "
+              >
+                여자
+              </div>
+            </div>
+            <div class="gender-input-container">
+              <div
+                id="not-foreign"
+                :class="{ selected: userInfo.isForeign }"
+                @click="
+                  () => {
+                    setForeign(true);
+                  }
+                "
+              >
+                내국인
+              </div>
+              <div
+                id="foreign"
+                :class="{ selected: !userInfo.isForeign }"
+                @click="
+                  () => {
+                    setForeign(false);
+                  }
+                "
+              >
+                외국인
+              </div>
+            </div>
+          </div>
+          <button class="join-btn">JOIN</button>
+        </form>
+      </div>
+    </div>
+    <RouterView></RouterView>
   </main>
 </template>
 
 <style scoped>
-.signup-container,
-.signup-userinfo-container,
-.signup-verify-container {
+main {
   display: flex;
   flex-direction: column;
-  margin: 0 auto;
   align-items: center;
-  margin: 12px 0;
+  flex-grow: 1;
+  background-color: #7c91ff;
 }
 
-.signup-container {
-  padding: 60px 0;
+h1 {
+  margin-top: 0;
 }
 
-input,
-.gender-radio-container {
-  font-family: "Pretendard-Regular";
-  font-size: 14px;
-  box-sizing: border-box;
-  padding: 4px 16px;
-  margin: 0 6px;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-}
-
-.gender-radio-container,
-input[type="text"],
-input[type="password"],
-input[type="date"],
-input[type="email"] {
-  width: 320px;
-  height: 40px;
-  line-height: 32px;
-  border: none;
-  border-bottom: 0.5px grey solid;
-  border-left: 0.5px grey solid;
-  border-right: 0.5px grey solid;
-}
-
-.gender-radio-container {
-  text-align: center;
-  background-color: white;
-  display: flex;
-  justify-content: space-evenly;
-}
-.gender-radio-wrapper {
-  display: flex;
-  align-items: center;
-}
-
-input:first-child {
-  border-top: 0.5px grey solid;
-  border-radius: 12px 12px 0 0;
-}
-
-input:last-child {
-  border-radius: 0 0 12px 12px;
-}
-
-.certification-btn {
-  display: flex;
-  align-items: center;
-  font-family: "Pretendard-Regular";
-  font-size: 16px;
-  width: 320px;
-  height: 60px;
-  line-height: 60px;
-  border: 0.5px grey solid;
-  border-radius: 12px;
-  background-color: white;
-  padding: 0 20px;
-  text-align: left;
-  margin: 12px 0;
+.clickable {
   cursor: pointer;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
 }
-
-.certification-btn > * {
-  margin: 0 12px;
-}
-
-.signup-btn {
-  font-family: "Pretendard-Regular";
-  font-size: 16px;
-  text-align: center;
-  box-sizing: border-box;
-  width: 240px;
-  height: 40px;
-  border: none;
-  margin: 50px;
-  border-radius: 12px;
-  cursor: pointer;
-  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
-}
-
-.signup-verify-wrapper {
+.join-container {
+  width: 100%;
+  flex-grow: 1;
+  display: flex;
   position: relative;
 }
 
-.email-verify-timer {
-  color: rgba(0, 0, 0, 0.4);
+#car-animation {
+  font-size: 10px;
+  --green: #7c91ff !important;
+  height: 300px;
+}
+.car-animation-container {
   position: absolute;
-  line-height: 40px;
-  right: 20px;
+  background: #7c91ff !important;
+  width: 400px;
+  height: 300px;
+  bottom: 0;
+}
+
+.join-text-container {
+  box-sizing: border-box;
+  height: 100%;
+  padding: 40px;
+  color: white;
+}
+.join-form-container {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: calc(100% - 400px);
+  height: 100%;
+  border: none;
+  border-radius: 30px 0 0 0;
+  padding-top: 60px;
+  background-color: white;
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  box-sizing: border-box;
+}
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#join-email,
+#join-password,
+#name,
+#birth {
+  width: 400px;
+  height: 50px;
+  border-radius: 10px;
+  border: 0.5px grey solid;
+  padding: 8px 20px;
+  font-size: 18px;
+  box-sizing: border-box;
+}
+
+input {
+  margin: 12px 0;
+  font-family: "Pretendard-Regular";
+}
+
+input:focus {
+  border: 1px solid #8490ff;
+}
+
+label {
+  margin-left: 12px;
+  cursor: pointer;
+}
+
+.join-btn {
+  width: 400px;
+  height: 50px;
+  border-radius: 10px;
+  border: none;
+  padding: 8px 20px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: "Pretendard-Regular";
+  box-sizing: border-box;
+  background-color: #cbff5d;
+  font-weight: bold;
+}
+
+h3 {
+  font-weight: 300;
+  line-height: 24px;
+}
+
+.radio-input-container {
+  width: 400px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 10px 0 20px 0;
+}
+
+.gender-input-container {
+  display: flex;
+}
+
+#gender-male,
+#gender-female,
+#not-foreign,
+#foreign {
+  width: 90px;
+  height: 60px;
+  line-height: 60px;
+  text-align: center;
+  box-sizing: border-box;
+  border: 1px solid grey;
+  border-radius: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+#gender-male,
+#not-foreign {
+  border-radius: 10px 0 0 10px;
+  border-right: none;
+}
+
+#gender-female,
+#foreign {
+  border-radius: 0 10px 10px 0;
+}
+
+.selected {
+  background-color: #7583ff;
+  color: white;
 }
 </style>
