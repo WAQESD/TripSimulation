@@ -45,7 +45,11 @@ const uploadPath = () => {
     callback: (pathName) => {
       console.log(playerStore.polylinePath);
       pathStore.uploadPath({
-        waypoints: playerStore.wayPoints.map((place) => {
+        waypoints: [
+          extractData(playerStore.startPlace),
+          ...playerStore.wayPoints,
+          extractData(playerStore.goalPlace),
+        ].map((place) => {
           return {
             placeName: place.placeName,
             lat: place.lat,
@@ -66,6 +70,15 @@ const uploadPath = () => {
       router.push("/mypage");
     },
   });
+};
+
+const extractData = (place) => {
+  return {
+    lat: place.lat,
+    lng: place.lng,
+    placeName: place.placeName,
+    arrivalTime: place.arrivalTime || "",
+  };
 };
 
 pathStore.uploadPath({});
