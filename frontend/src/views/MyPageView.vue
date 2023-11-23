@@ -1,16 +1,79 @@
 <script setup>
-import { ref } from "vue";
+import { ref, computed, watch } from "vue";
+import { useRouter } from "vue-router";
+
+import { getBoundsByPathList } from "../util/map";
+import { usePathStore } from "../stores/path";
+import { useUserStore } from "../stores/user";
+
 import TheHeader from "../commons/TheHeader.vue";
 
-const pathList = ref([
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-  { title: "커피맛이 좋은 서울 카페투어 !", regDate: "2023.11.19" },
-]);
+const router = useRouter();
+const pathStore = usePathStore();
+const userStore = useUserStore();
+const selectedIndex = ref(-1);
+const map = ref(null);
+const polylinePath = ref(null);
+
+/*
+  "pathContent":{
+    "path":[
+    {"lat": 37.73, "lng": 127.721, "_id": "655ea02b7f6f0645aff170f0"}
+    ],
+    "pathName": "경로 1",
+    "userEmail": "ssafy@ssafy.com"
+  },
+  "_id": "655ea02b7f6f0645aff170ee",
+  "waypoints":[
+    {"placeName": "집", "lat": 37.37, "lng": 123.123, "arrivalTime": "2014-12-12",…}
+  ],
+*/
+
+const selectedPath = computed(() => (selectedIndex.value < 0 ? null : pathStore.pathList[selectedIndex.value]));
+
+watch(selectedIndex, () => {
+  if (!map.value) {
+    if (!window.naver) {
+      const script = document.createElement("script");
+      script.type = "text/javascript";
+      script.src = import.meta.env.VITE_MAP_MODULE_SRC;
+      document.head.appendChild(script);
+
+      script.onload = loadMap;
+    } else loadMap();
+  } else drawPolyline();
+});
+
+const loadMap = () => {
+  map.value = new window.naver.maps.Map("path-info-detail-map", {
+    zoom: 14,
+    draggable: false,
+    pinchZoom: false,
+    scrollWheel: false,
+    keyboardShortcuts: false,
+    disableDoubleTapZoom: true,
+    disableDoubleClickZoom: true,
+    disableTwoFingerTapZoom: true,
+  });
+
+  map.value.setCursor("default");
+  map.value.onload = drawPolyline;
+  // drawPolyline();
+};
+
+const drawPolyline = () => {
+  if (polylinePath.value) polylinePath.value.setMap(null);
+
+  polylinePath.value = new window.naver.maps.Polyline({
+    path: selectedPath.value.pathContent.path.map(({ lat, lng }) => new window.naver.maps.LatLng(lat, lng)),
+    strokeColor: "#5347AA",
+    strokeWeight: 3,
+    map: map.value,
+  });
+
+  const bounds = getBoundsByPathList(selectedPath.value.pathContent.path);
+  map.value.fitBounds(bounds);
+};
 
 const dateToString = (date) => {
   return new Intl.DateTimeFormat("kr").format(date);
@@ -25,10 +88,10 @@ const dateToString = (date) => {
         <div class="user-info-image-indicator"></div>
       </div>
       <div class="user-info-text-container">
-        <div class="user-info-text-nickname">soyoung님의 마이페이지</div>
-        <div class="user-info-text-email">tiger6453127@naver.com</div>
+        <div class="user-info-text-nickname">{{ userStore.userInfo.userName }}님의 마이페이지</div>
+        <div class="user-info-text-email">{{ userStore.userInfo.userEmail }}</div>
         <div class="user-info-text-sperator"></div>
-        <div class="user-info-text-birth">1998.05.15</div>
+        <div class="user-info-text-birth">{{ userStore.userInfo.birth }}</div>
         <div class="user-info-text-mypage">MyPage</div>
       </div>
     </div>
@@ -37,20 +100,25 @@ const dateToString = (date) => {
         <div id="path-info-detail-map"></div>
         <div class="path-info-detail-text">
           <div class="path-info-title-index">
-            <span class="path-info-title"><span class="path-info-index">2</span>커피맛이 좋은 서울 카페투어 !</span>
+            <span v-show="selectedIndex > -1" class="path-info-title">{{ selectedPath?.pathContent?.pathName }}</span>
           </div>
           <div class="path-info-waypoints">
-            <div class="path-info-waypoints-title-list">
-              <div class="path-info-waypoints-title">카페 경리단길</div>
-              <div class="path-info-waypoints-title">카페 경리단길</div>
-              <div class="path-info-waypoints-title">카페 경리단길</div>
-              <div class="path-info-waypoints-title">카페 경리단길</div>
-            </div>
-            <div class="path-info-waypoints-time-list">
-              <div class="path-info-waypoints-time">09:30</div>
-              <div class="path-info-waypoints-time">10:30</div>
-              <div class="path-info-waypoints-time">11:40</div>
-              <div class="path-info-waypoints-time">12:50</div>
+            <div v-show="selectedPath" class="path-info-waypoints-list">
+              <div
+                v-for="(place, idx) in selectedPath?.waypoints"
+                :key="place.arrivalTime"
+                class="path-info-waypoints-wrapper"
+              >
+                <div class="path-info-waypoints-icon">{{ idx + 1 + "." }}</div>
+                <div>
+                  <div class="path-info-waypoints-title">
+                    {{ place.placeName }}
+                  </div>
+                  <div class="path-info-waypoints-time">
+                    {{ place.arrivalTime }}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -58,17 +126,31 @@ const dateToString = (date) => {
       <div class="path-info-list-container">
         <div class="path-info-list-mypath">My Path</div>
         <div class="path-info-list">
-          <template v-for="(path, idx) in pathList" :key="path.title">
-            <div class="path-info-list-item">
+          <template v-for="(path, idx) in pathStore.pathList" :key="path.title">
+            <div
+              class="path-info-list-item"
+              @click="
+                () => {
+                  selectedIndex = idx;
+                }
+              "
+            >
               <div class="path-info-item-index">{{ idx + 1 }}</div>
-              <div class="path-info-item-title">{{ path.title }}</div>
-              <div class="path-info-item-regdate">{{ path.regDate }}</div>
+              <div class="path-info-item-title">{{ path.pathContent.pathName }}</div>
+              <div class="path-info-item-regdate">{{ dateToString(path.pathContent.regDate) }}</div>
             </div>
           </template>
         </div>
       </div>
     </div>
-    <div class="path-create-btn-container">
+    <div
+      class="path-create-btn-container"
+      @click.prevent="
+        () => {
+          router.push('/trip');
+        }
+      "
+    >
       <button class="path-create-btn">
         새 여행경로 만들기
         <div class="path-create-btn-icon"></div>
@@ -187,41 +269,53 @@ const dateToString = (date) => {
 
 .path-info-title {
   position: relative;
-  line-height: 38px;
+  line-height: 20px;
   font-size: 16px;
 }
 
 .path-info-waypoints {
-  margin-top: 20px;
+  margin-top: 10px;
+  padding: 0 30px;
+  padding-top: 10px;
+  border-top: 3px solid rgba(128, 128, 128, 0.3);
   display: flex;
   flex-grow: 1;
-  padding: 0 30px;
   height: 150px;
   justify-content: center;
+}
+
+.path-info-waypoints-icon {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+  border-radius: 12px;
+  margin-right: 24px;
+  color: #7c91ff;
 }
 
 .path-info-waypoints-title-list {
   box-sizing: border-box;
   border-right: 1px solid #d0d0d0;
-  padding-top: 15px;
 }
 
 .path-info-waypoints-time-list {
   box-sizing: border-box;
   padding: 20px;
   height: 200px;
-  padding-top: 15px;
 }
 
 .path-info-waypoints-title {
   font-size: 14px;
-  margin-bottom: 15px;
+  margin-bottom: 4px;
   margin-right: 20px;
+  width: 200px;
+  text-align: left;
 }
 
 .path-info-waypoints-time {
   font-size: 14px;
-  margin-bottom: 15px;
+  width: 200px;
+  text-align: left;
 }
 .path-info-list-container {
   display: flex;
@@ -250,12 +344,14 @@ const dateToString = (date) => {
   flex-direction: row;
   align-items: center;
   padding: 0 18px;
-  width: 510px;
+  width: 522px;
   height: 65px;
+  box-sizing: border-box;
   border-radius: 20px;
   background-color: #e3e3e3;
   margin-top: 20px;
   margin-bottom: 20px;
+  cursor: pointer;
 }
 
 .path-info-item-index {
@@ -320,5 +416,12 @@ const dateToString = (date) => {
 .path-info-list-container::-webkit-scrollbar-button {
   width: 10px;
   height: 10px;
+}
+
+.path-info-waypoints-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  padding-left: 40px;
 }
 </style>

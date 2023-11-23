@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
-import { douglasPeucker } from "../util/douglasPeucker";
+import { douglasPeucker } from "../util/DouglasPeucker";
 import { useModalStore } from "./modal";
 import { useTimeStore } from "./time";
 import { usePlaceStore } from "./place";
@@ -422,8 +422,6 @@ export const usePlayerStore = defineStore("player", () => {
     newPathData = douglasPeucker(newPathData, 0.00002);
     let pathIndex = 0;
     let sumDuration = 0;
-
-    console.log(pathData);
 
     for (
       let i = 0;

@@ -10,6 +10,8 @@ import GoogleLogin from "../components/login/GoogleLogin.vue";
 
 import { useModalStore } from "../stores/modal";
 import { usePlayerStore } from "../stores/player";
+import { usePathStore } from "../stores/path";
+import { useUserStore } from "../stores/user";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -46,8 +48,8 @@ const router = createRouter({
       name: "trip",
       component: TripView,
       beforeEnter: (to, from, next) => {
-        if (next) next();
         usePlayerStore().init();
+        if (next) next();
         return to;
       },
     },
@@ -55,6 +57,13 @@ const router = createRouter({
       path: "/mypage",
       name: "mypage",
       component: MyPageView,
+      beforeEnter: (to, from, next) => {
+        const userStore = useUserStore();
+        // 유저 유효성 판단
+        usePathStore().getPathList(userStore.userInfo);
+        if (next) next();
+        return to;
+      },
     },
     {
       path: "/result",

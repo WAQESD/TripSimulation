@@ -158,7 +158,7 @@ export const makeInfoWindowByCoord = (coord, infoWindow) => {
   );
 };
 
-function makeInfoWindow(infoWindow, contents, place) {
+export function makeInfoWindow(infoWindow, contents, place) {
   const playerStore = usePlayerStore();
 
   infoWindow.setContent(contents);
@@ -185,7 +185,7 @@ function makeInfoWindow(infoWindow, contents, place) {
   });
 }
 
-const makePlaceByAddress = (htmlAddress) => {
+export const makePlaceByAddress = (htmlAddress) => {
   return {
     lng: htmlAddress.point.x,
     lat: htmlAddress.point.y,
@@ -195,6 +195,16 @@ const makePlaceByAddress = (htmlAddress) => {
     address: htmlAddress.address,
     placeName: htmlAddress.address,
   };
+};
+
+export const getBoundsByPathList = (path) => {
+  const latList = path.map(({ lat }) => lat);
+  const lngList = path.map(({ lng }) => lng);
+
+  return new window.naver.maps.LatLngBounds(
+    new window.naver.maps.LatLng(Math.min(...latList), Math.min(...lngList)),
+    new window.naver.maps.LatLng(Math.max(...latList), Math.max(...lngList))
+  );
 };
 
 export const getStartIcon = () => {
@@ -219,6 +229,14 @@ export const getWayPointIcon = (idx) => {
       <img class="waypoint-place-marker-icon" src="./src/assets/images/waypoint_marker.png" width="36", height="36">
       <div class="waypoint-place-marker-text">${idx}</div>
       </img>
+    </div>
+  `;
+};
+
+export const getPlaceMarker = (placeName) => {
+  return `
+    <div class="place-marker">
+      <div class="place-marker-name">${placeName}</div>
     </div>
   `;
 };

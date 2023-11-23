@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, watch, ref } from "vue";
-import { makeInfoWindowByCoord, makeInfoWindowByPlace } from "../../util/map";
+import { makeInfoWindowByCoord, makeInfoWindowByPlace, getPlaceMarker } from "../../util/map";
 import { usePlayerStore } from "../../stores/player";
 import { usePlaceStore } from "../../stores/place";
 
@@ -56,10 +56,15 @@ watch(
       let marker = new window.naver.maps.Marker({
         position: new window.naver.maps.LatLng(place.lat, place.lng),
         map: placeStore.map,
+        icon: {
+          content: getPlaceMarker(place.placeName),
+        },
       });
 
       markers.value.push(marker);
       window.naver.maps.Event.addListener(marker, "click", () => makeInfoWindowByPlace(place, infoWindow));
+      window.naver.maps.Event.addListener(marker, "mouseover", () => marker.setZIndex(100));
+      window.naver.maps.Event.addListener(marker, "mouseout", () => marker.setZIndex(1));
     }
   }
 );

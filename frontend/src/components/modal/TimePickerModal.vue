@@ -29,9 +29,9 @@ const setStartTime = () => {
   <div class="time-picker-modal-container">
     <h3>출발 시각을 입력해주세요</h3>
     <div id="tui-time-picker-container"></div>
-    <div class="btn-wrapper">
-      <button class="time-picker-btn" @click.prevent="setStartTime">시작</button>
-      <button class="time-picker-btn cancle" @click.prevent="modalStore.setModal(false)">취소</button>
+    <div>
+      <button class="modal-btn" @click.prevent="setStartTime">시작</button>
+      <button class="modal-btn cancle" @click.prevent="modalStore.setModal(false)">취소</button>
     </div>
   </div>
 </template>
@@ -55,25 +55,5 @@ h3 {
 #tui-time-picker-container {
   width: 300px;
   margin-left: 53px;
-}
-
-.time-picker-btn {
-  padding: 7px 16px;
-  border-radius: 32px;
-  background-color: black;
-  color: white;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 14px;
-}
-
-.btn-wrapper {
-  width: 140px;
-  display: flex;
-  justify-content: space-around;
-}
-.cancle {
-  background-color: rgba(255, 0, 0, 0.675);
 }
 </style>

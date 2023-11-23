@@ -7,10 +7,10 @@ export const usePathStore = defineStore("path", () => {
   const path = ref(null);
 
   const getPathList = async (userInfo) => {
-    const { data } = await axios.get("/path/list", { params: userInfo.email });
-    pathList.value = data;
-
-    return data;
+    const result = await axios.get("/path/list", { params: { userEmail: userInfo.userEmail } });
+    pathList.value = result.data.map((path) => {
+      return { ...path, regDate: new Date(path.regDate) };
+    });
   };
 
   const getPathDetail = async (pathId) => {
@@ -23,7 +23,7 @@ export const usePathStore = defineStore("path", () => {
   const uploadPath = async (path) => {
     const response = await axios.post("/path", path);
 
-    /*
+    /*{
 		waypoints: [{placeName: String, lat : Number, lng : Number, arrivalTime : String}],
     pathContent: {
 			path: [{lat : Number, lng : Number}],
@@ -37,5 +37,9 @@ export const usePathStore = defineStore("path", () => {
     return response;
   };
 
-  return { pathList, getPathList, getPathDetail, uploadPath };
+  const timeToString = (date) => {
+    return new Date(date).toTimeString().split(" ")[0].slice(0, 5);
+  };
+
+  return { pathList, getPathList, getPathDetail, uploadPath, timeToString };
 });

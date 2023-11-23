@@ -1,16 +1,21 @@
 <script setup>
 import { computed } from "vue";
+import { useRouter } from "vue-router";
+
 import { usePlayerStore } from "../stores/player";
 import { usePathStore } from "../stores/path";
 import { useModalStore } from "../stores/modal";
+import { useUserStore } from "../stores/user";
 
 import TheHeader from "../commons/TheHeader.vue";
 import ResultCard from "../components/ResultCard.vue";
-import PathNameModal from "../components/modal/PathNameModal.vue";
+import PathNameModal from "../components/modal/PathUploadModal.vue";
 
+const router = useRouter();
 const playerStore = usePlayerStore();
 const pathStore = usePathStore();
 const modalStore = useModalStore();
+const user = useUserStore();
 
 // const placeList = [
 //   {
@@ -36,17 +41,28 @@ const modalStore = useModalStore();
 		}
 		*/
 const uploadPath = () => {
-  modalStore.setModal(true, PathNameModal, (pathName) => {
-    pathStore.uploadPath({
-      waypoints: playerStore.wayPoints.map((place) => {
-        return { placeName: place.placeName, lat: place.lat, lng: place.lng, arrivalTime: place.arrivalTime };
-      }),
-      pathContent: {
-        pathName,
-        userEmail: "ssafy@ssafy.com",
-        path: playerStore.polylinePath,
-      },
-    });
+  modalStore.setModal(true, PathNameModal, {
+    callback: (pathName) => {
+      console.log(playerStore.polylinePath);
+      pathStore.uploadPath({
+        waypoints: playerStore.wayPoints.map((place) => {
+          return {
+            placeName: place.placeName,
+            lat: place.lat,
+            lng: place.lng,
+            arrivalTime: pathStore.timeToString(place.arrivalTime),
+          };
+        }),
+        pathContent: {
+          pathName,
+          userEmail: user.userInfo.userEmail,
+          path: playerStore.polylinePath.map(({ x, y }) => {
+            return { lat: y, lng: x };
+          }),
+        },
+      });
+      router.push("/mypage");
+    },
   });
 };
 
