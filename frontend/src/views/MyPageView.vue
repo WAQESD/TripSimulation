@@ -2,7 +2,7 @@
 import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 
-// import { getBoundsByPathList } from "../util/map";
+import { getBoundsByPathList } from "../util/map";
 import { usePathStore } from "../stores/path";
 import { useUserStore } from "../stores/user";
 import { useTimeStore } from "../stores/time";
@@ -19,21 +19,7 @@ const timeStore = useTimeStore();
 
 const selectedIndex = ref(-1);
 const map = ref(null);
-// const polylinePath = ref(null);
-
-/*
-  "pathContent":{
-    "path":[
-    {"lat": 37.73, "lng": 127.721, "_id": "655ea02b7f6f0645aff170f0"}
-    ],
-    "pathName": "경로 1",
-    "userEmail": "ssafy@ssafy.com"
-  },
-  "_id": "655ea02b7f6f0645aff170ee",
-  "waypoints":[
-    {"placeName": "집", "lat": 37.37, "lng": 123.123, "arrivalTime": "2014-12-12",…}
-  ],
-*/
+const polylinePath = ref(null);
 
 const selectedPath = computed(() => (selectedIndex.value < 0 ? null : pathStore.pathList[selectedIndex.value]));
 
@@ -47,8 +33,7 @@ watch(selectedIndex, () => {
 
       script.onload = loadMap;
     } else loadMap();
-  }
-  // else drawPolyline();
+  } else drawPolyline();
 });
 
 const loadMap = () => {
@@ -64,22 +49,22 @@ const loadMap = () => {
   });
 
   map.value.setCursor("default");
-  // window.naver.maps.once(map.value, 'init', drawPolyline);
+  window.naver.maps.Event.once(map.value, "init", drawPolyline);
 };
 
-// const drawPolyline = () => {
-//   if (polylinePath.value) polylinePath.value.setMap(null);
+const drawPolyline = () => {
+  if (polylinePath.value) polylinePath.value.setMap(null);
 
-//   polylinePath.value = new window.naver.maps.Polyline({
-//     path: selectedPath.value.pathContent.path.map(({ lat, lng }) => new window.naver.maps.LatLng(lat, lng)),
-//     strokeColor: "#5347AA",
-//     strokeWeight: 3,
-//     map: map.value,
-//   });
+  polylinePath.value = new window.naver.maps.Polyline({
+    path: selectedPath.value.pathContent.path.map(({ lat, lng }) => new window.naver.maps.LatLng(lat, lng)),
+    strokeColor: "#5347AA",
+    strokeWeight: 3,
+    map: map.value,
+  });
 
-//   const bounds = getBoundsByPathList(selectedPath.value.pathContent.path);
-//   map.value.fitBounds(bounds);
-// };
+  const bounds = getBoundsByPathList(selectedPath.value.pathContent.path);
+  map.value.fitBounds(bounds);
+};
 
 const startTrip = () => {
   modalStore.setModal(true, TimePickerModal, {
@@ -107,7 +92,7 @@ const dateToString = (date) => {
         <div class="user-info-text-nickname">{{ userStore.userInfo.userName }}님의 마이페이지</div>
         <div class="user-info-text-email">{{ userStore.userInfo.userEmail }}</div>
         <div class="user-info-text-sperator"></div>
-        <div class="user-info-text-birth">{{ userStore.userInfo.birth }}</div>
+        <div class="user-info-text-birth">{{ dateToString(new Date(userStore.userInfo.birth)) }}</div>
         <div class="user-info-text-mypage">MyPage</div>
       </div>
     </div>

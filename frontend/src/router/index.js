@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHistory, useRouter } from "vue-router";
 import HomeView from "../views/HomeView.vue";
 import TripView from "../views/TripView.vue";
 import LoginView from "../views/LoginView.vue";
@@ -59,10 +59,12 @@ const router = createRouter({
       component: MyPageView,
       beforeEnter: (to, from, next) => {
         const userStore = useUserStore();
-        // 유저 유효성 판단
+
+        if (!userStore.userInfo) {
+          next("/login");
+        }
         usePathStore().getPathList(userStore.userInfo);
-        if (next) next();
-        return to;
+        next();
       },
     },
     {

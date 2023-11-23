@@ -1,6 +1,16 @@
 <script setup>
-import { RouterLink } from "vue-router";
+import { RouterLink, useRouter } from "vue-router";
+import { useUserStore } from "../stores/user";
 import VSeperator from "../components/VSeperator.vue";
+
+const userStore = useUserStore();
+const router = useRouter();
+
+const logout = () => {
+  localStorage.clear();
+  userStore.setUserInfo(null);
+  router.go(0);
+};
 </script>
 
 <template>
@@ -11,9 +21,16 @@ import VSeperator from "../components/VSeperator.vue";
         <div class="logo-text">Trippy</div>
       </RouterLink>
       <div class="header-link-container">
-        <RouterLink class="login-btn" to="/login">Login</RouterLink>
-        <VSeperator :fontSize="'40px'" />
-        <RouterLink class="signup-btn" to="/signup">Join</RouterLink>
+        <div v-if="!userStore.userInfo">
+          <RouterLink class="login-btn" to="/login">Login</RouterLink>
+          <VSeperator :fontSize="'40px'" />
+          <RouterLink class="signup-btn" to="/signup">Join</RouterLink>
+        </div>
+        <div v-else>
+          <RouterLink class="mypage-btn" to="/mypage">MyPage</RouterLink>
+          <VSeperator :fontSize="'40px'" />
+          <a class="logout-btn" @click="logout">Logout</a>
+        </div>
       </div>
     </div>
   </header>
@@ -66,5 +83,9 @@ a {
 .header-link-container {
   display: flex;
   align-items: center;
+}
+
+.logout-btn {
+  cursor: pointer;
 }
 </style>

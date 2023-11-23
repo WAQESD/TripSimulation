@@ -6,6 +6,7 @@ import { usePlayerStore } from "../stores/player";
 import { usePathStore } from "../stores/path";
 import { useModalStore } from "../stores/modal";
 import { useUserStore } from "../stores/user";
+import { useTimeStore } from "../stores/time";
 
 import TheHeader from "../commons/TheHeader.vue";
 import ResultCard from "../components/ResultCard.vue";
@@ -15,31 +16,9 @@ const router = useRouter();
 const playerStore = usePlayerStore();
 const pathStore = usePathStore();
 const modalStore = useModalStore();
-const user = useUserStore();
+const userStore = useUserStore();
+const timeStore = useTimeStore();
 
-// const placeList = [
-//   {
-//     placeId: 0,
-//     placeName: "종묘",
-//     category: "세계문화유산",
-//     description:
-//       "서울특별시 종로구 훈정동[3] 1-2번지에 자리한 조선시대 역대 왕과 왕비 및 추존된 왕과 왕비의 신주(神主)를 모신 조선 왕실, 대한제국 황실의 유교 사당.", //  면적은 186,786 ㎡. 태묘(太廟)라고도 한다. '종묘사직'이란 말에서 알 수 있듯 전제왕조 당시 왕실과 나라를 상징하는 대표적인 건물 중 하나였다. 1963년 1월 18일 사적으로 지정되었고 1995년 유네스코 세계문화유산으로 등재되었다.
-//     thumbnail:
-//       "https://search.pstatic.net/common/?src=https%3A%2F%2Fldb-phinf.pstatic.net%2F20200208_56%2F1581129640128GVrwD_JPEG%2FJJM3dYXS5wzDYp3RoxmWgJau.jpg",
-//     arrivalTime: new Date(),
-//   },
-// ];
-
-/*
-		waypoints: [{placeName: String, lat : Number, lng : Number, arrivalTime : String}],
-    pathContent: {
-			path: [{lat : Number, lng : Number}],
-			pathKey: String,
-			regDate: String,
-			pathName: String,
-			userEmail: String
-		}
-		*/
 const uploadPath = () => {
   modalStore.setModal(true, PathNameModal, {
     callback: (pathName) => {
@@ -59,12 +38,10 @@ const uploadPath = () => {
         }),
         pathContent: {
           pathName,
-          userEmail: user.userInfo.userEmail,
-          path: JSON.stringify(
-            playerStore.polylinePath.map(({ x, y }) => {
-              return { lat: y, lng: x };
-            })
-          ),
+          userEmail: userStore.userInfo.userEmail,
+          path: playerStore.polylinePath.map(({ x, y }) => {
+            return { lat: y, lng: x };
+          }),
         },
       });
       router.push("/mypage");
@@ -77,7 +54,7 @@ const extractData = (place) => {
     lat: place.lat,
     lng: place.lng,
     placeName: place.placeName,
-    arrivalTime: place.arrivalTime || "",
+    arrivalTime: place.arrivalTime || timeStore.startTime,
   };
 };
 

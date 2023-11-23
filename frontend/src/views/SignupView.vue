@@ -1,8 +1,12 @@
 <script setup>
 import { ref, reactive } from "vue";
+import { useRouter } from "vue-router";
+import axios from "axios";
+
+import { useModalStore } from "../stores/modal";
 
 import TheHeader from "../commons/TheHeader.vue";
-import axios from "axios";
+import SimpleTextModal from "../components/modal/SimpleTextModal.vue";
 
 const userInfo = reactive({
   userEmail: "",
@@ -13,10 +17,62 @@ const userInfo = reactive({
   isForeign: false,
 });
 
+const modalStore = useModalStore();
+const router = useRouter();
 const message = ref("이메일 인증이 필요합니다.");
 const verifyCode = ref(null);
 const verified = ref(false);
 const authNumber = ref(0);
+const idCheckResult = ref("");
+
+const regist = () => {
+  if (!verified.value) {
+    alert("이메일 인증을 진행해주세요.");
+    return;
+  }
+  axios
+    .post(import.meta.env.VITE_BASE_API + "/user/regist", {
+      userEmail: userInfo.userEmail,
+      password: userInfo.userPwd,
+      userName: userInfo.userName,
+      birth: userInfo.birth,
+      gender: userInfo.gender,
+      isForeign: userInfo.isForeign,
+    })
+    .then(() => {
+      modalStore.setModal(true, SimpleTextModal, {
+        text: "회원가입에 성공했습니다.",
+        callback: () => {
+          router.push("/login");
+        },
+      });
+    })
+    .catch(() => {
+      modalStore.setModal(true, SimpleTextModal, {
+        text: "회원가입에 실패했습니다.",
+        callback: () => {
+          router.go(0);
+        },
+      });
+    });
+};
+
+let timer = null;
+const checkId = () => {
+  if (timer) clearTimeout(timer);
+  timer = setTimeout(() => {
+    axios
+      .get(import.meta.env.VITE_BASE_API + "/user/idcheck", { params: { userEmail: userInfo.userEmail } })
+      .then(({ message }) => {
+        idCheckResult.value = message;
+      })
+      .catch(({ message }) => {
+        idCheckResult.value = message;
+      });
+    timer = null;
+  }, 150);
+};
+
 const setGender = (value) => {
   userInfo.gender = value;
 };
@@ -66,12 +122,19 @@ const checkCode = () => {
       </div>
       <div class="join-form-container">
         <form class="join-form" @submit.prevent="join">
+          <div
+            class="duplicated-email-indicator"
+            :class="idCheckResult === '사용 가능한 이메일입니다.' ? 'blue' : 'red'"
+          >
+            {{ idCheckResult }}
+          </div>
           <input
             type="email"
             id="join-email"
             name="join-email"
             placeholder="이메일"
             v-model="userInfo.userEmail"
+            @keydown="checkId"
             required
           />
           <input
@@ -128,17 +191,6 @@ const checkCode = () => {
             <div class="gender-input-container">
               <div
                 id="not-foreign"
-                :class="{ selected: userInfo.isForeign }"
-                @click="
-                  () => {
-                    setForeign(true);
-                  }
-                "
-              >
-                내국인
-              </div>
-              <div
-                id="foreign"
                 :class="{ selected: !userInfo.isForeign }"
                 @click="
                   () => {
@@ -146,11 +198,22 @@ const checkCode = () => {
                   }
                 "
               >
+                내국인
+              </div>
+              <div
+                id="foreign"
+                :class="{ selected: userInfo.isForeign }"
+                @click="
+                  () => {
+                    setForeign(true);
+                  }
+                "
+              >
                 외국인
               </div>
             </div>
           </div>
-          <button class="join-btn" @submit.prevent="">JOIN</button>
+          <button class="join-btn" type="button" @click="regist">JOIN</button>
         </form>
       </div>
     </div>
@@ -169,7 +232,10 @@ main {
 h1 {
   margin-top: 0;
 }
-
+.duplicated-email-indicator {
+  position: absolute;
+  top: -24px;
+}
 .clickable {
   cursor: pointer;
 }
@@ -177,7 +243,14 @@ h1 {
   width: 100%;
   flex-grow: 1;
   display: flex;
-  position: relative;
+}
+
+.blue {
+  color: rgba(0, 0, 255, 0.616);
+}
+
+.red {
+  color: rgba(255, 0, 0, 0.608);
 }
 
 #car-animation {
@@ -212,12 +285,14 @@ h1 {
   background-color: white;
   box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
   box-sizing: border-box;
+  position: relative;
 }
 
 .join-form {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 
 #join-email,

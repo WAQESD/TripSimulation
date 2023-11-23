@@ -1,11 +1,16 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { RouterView, useRouter } from "vue-router";
+import { useModalStore } from "../stores/modal";
 import axios from "axios";
 
 import TheHeader from "../commons/TheHeader.vue";
+import SimpleTextModal from "../components/modal/SimpleTextModal.vue";
+import { useUserStore } from "../stores/user";
 
 const router = useRouter();
+const modalStore = useModalStore();
+const userStore = useUserStore();
 
 onMounted(() => {
   const script = document.createElement("script");
@@ -53,11 +58,28 @@ const userPassword = ref("");
 
 const login = () => {
   axios
-    .post(import.meta.env.VITE_BASE_API + "/login/userLogin", {
+    .post(import.meta.env.VITE_BASE_API + "/user/login", {
       userEmail: userEmail.value,
-      userPassword: userPassword.value,
+      password: userPassword.value,
     })
-    .then(({ data }) => console.log(data));
+    .then(({ data }) => {
+      localStorage.setItem("token", data.token);
+      userStore.setUserInfo(data.userInfo);
+      modalStore.setModal(true, SimpleTextModal, {
+        text: "로그인에 성공했습니다.",
+        callback: () => {
+          router.go(-1);
+        },
+      });
+    })
+    .catch(() => {
+      modalStore.setModal(true, SimpleTextModal, {
+        text: "이메일 주소 또는 비밀번호가 틀렸습니다",
+        callback: () => {
+          router.go(0);
+        },
+      });
+    });
 };
 </script>
 
@@ -117,8 +139,8 @@ const login = () => {
             </div>
           </div>
           <div class="account-service-container">
-            <span class="clickable">아이디찾기</span><span>/</span><span class="clickable">비밀번호찾기</span
-            ><span>/</span><span class="clickable" @click="router.push('/signup')">회원가입</span>
+            <span class="clickable">비밀번호찾기</span><span>/</span
+            ><span class="clickable" @click="router.push('/signup')">회원가입</span>
           </div>
         </form>
       </div>
