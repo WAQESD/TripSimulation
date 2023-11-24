@@ -1,10 +1,16 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { RouterView } from "vue-router";
-// import axios from "../util/request";
+import { RouterView, useRouter } from "vue-router";
+import { useModalStore } from "../stores/modal";
 import axios from "axios";
 
 import TheHeader from "../commons/TheHeader.vue";
+import SimpleTextModal from "../components/modal/SimpleTextModal.vue";
+import { useUserStore } from "../stores/user";
+
+const router = useRouter();
+const modalStore = useModalStore();
+const userStore = useUserStore();
 
 onMounted(() => {
   const script = document.createElement("script");
@@ -52,11 +58,28 @@ const userPassword = ref("");
 
 const login = () => {
   axios
-    .post(import.meta.env.VITE_BASE_API + "/login/userLogin", {
+    .post(import.meta.env.VITE_BASE_API + "/user/login", {
       userEmail: userEmail.value,
-      userPassword: userPassword.value,
+      password: userPassword.value,
     })
-    .then(({ data }) => console.log(data));
+    .then(({ data }) => {
+      localStorage.setItem("token", data.token);
+      userStore.setUserInfo(data.userInfo);
+      modalStore.setModal(true, SimpleTextModal, {
+        text: "로그인에 성공했습니다.",
+        callback: () => {
+          router.push("/");
+        },
+      });
+    })
+    .catch(() => {
+      modalStore.setModal(true, SimpleTextModal, {
+        text: "이메일 주소 또는 비밀번호가 틀렸습니다",
+        callback: () => {
+          router.go(0);
+        },
+      });
+    });
 };
 </script>
 
@@ -100,24 +123,24 @@ const login = () => {
           <button class="login-btn">로그인하기</button>
           <hr />
           <div class="social-login-btn-container">
-            <div class="social-login-container naver">
-              <img class="social-login-btn" src="../assets/images/naver_circle.png" @click="naverLogin" />
+            <div class="social-login-container naver" @click="naverLogin">
+              <img class="social-login-btn" src="../assets/images/naver_circle.png" />
               <div>네이버 로그인</div>
             </div>
-            <div class="social-login-container kakao">
+            <div class="social-login-container kakao" @click="kakaoLogin">
               <span class="social-login-btn-wrapper">
-                <img class="social-login-btn kakao-btn" src="../assets/images/kakao_circle.png" @click="kakaoLogin"
+                <img class="social-login-btn kakao-btn" src="../assets/images/kakao_circle.png"
               /></span>
               <div>카카오 로그인</div>
             </div>
-            <div class="social-login-container google">
-              <img class="social-login-btn" src="../assets/images/google_circle.svg" @click="googleLogin" />
+            <div class="social-login-container google" @click="googleLogin">
+              <img class="social-login-btn" src="../assets/images/google_circle.svg" />
               <div>구글 로그인</div>
             </div>
           </div>
           <div class="account-service-container">
-            <span class="clickable">아이디찾기</span><span>/</span><span class="clickable">비밀번호찾기</span
-            ><span>/</span><span class="clickable">회원가입</span>
+            <span class="clickable">비밀번호찾기</span><span>/</span
+            ><span class="clickable" @click="router.push('/signup')">회원가입</span>
           </div>
         </form>
       </div>

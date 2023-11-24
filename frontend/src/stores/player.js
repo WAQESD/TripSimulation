@@ -53,7 +53,7 @@ export const usePlayerStore = defineStore("player", () => {
     wayPoints.value = [];
     currentWaypointIndex.value = 0;
 
-    speed.value = 5;
+    speed.value = 7;
     tripStart.value = false;
     isPaused.value = false;
     isEnd.value = false;
@@ -72,8 +72,15 @@ export const usePlayerStore = defineStore("player", () => {
     }
   };
 
+  // map.value.setCenter(carOverlay.value.getCurrentPosition());
   const toggleTraceMode = () => {
-    if (!traceMode.value) map.value.setCenter(carOverlay.value.getCurrentPosition());
+    if (!traceMode.value) {
+      map.value.setCenter(new window.naver.maps.LatLng(currentStart.value.y, currentStart.value.x));
+      map.value.panTo(
+        new window.naver.maps.LatLng(currentGoal.value.y, currentGoal.value.x),
+        getDist(currentStart.value, currentGoal.value) * 1.5 ** (speed.value - 3)
+      );
+    }
     traceMode.value = !traceMode.value;
   };
 
@@ -386,9 +393,6 @@ export const usePlayerStore = defineStore("player", () => {
     pause();
 
     wayPoints.value.splice(currentWaypointIndex.value, 0, waypoint);
-    placeStore.getThumbnailByPlaceName(wayPoints.value[currentWaypointIndex.value], (thumbnail) => {
-      wayPoints.value[currentWaypointIndex.value].thumbnail = thumbnail;
-    });
 
     let { data } = await axios({
       method: "post",
@@ -462,6 +466,15 @@ export const usePlayerStore = defineStore("player", () => {
       map: map.value,
     });
 
+    timeStore.setEstimatedGoalTime(timeStore.startTime.getTime() + data.route.traoptimal[0].summary.duration);
+    goalPlace.value.arrivalTime = timeStore.estimatedGoalTime;
+
+    const newWayPoint = wayPoints.value[currentWaypointIndex.value];
+
+    placeStore.getThumbnailByPlaceName(newWayPoint, (thumbnail) => {
+      newWayPoint.thumbnail = thumbnail;
+    });
+
     currentGoal.value = polylinePath.value[currentIndex + 1];
     reStart();
   };
@@ -470,10 +483,6 @@ export const usePlayerStore = defineStore("player", () => {
     goalPlace.value = place;
     if (!tripStart.value) return;
     pause();
-
-    placeStore.getThumbnailByPlaceName(goalPlace.value, (thumbnail) => {
-      goalPlace.value.thumbnail = thumbnail;
-    });
 
     let { data } = await axios({
       method: "post",
@@ -547,6 +556,13 @@ export const usePlayerStore = defineStore("player", () => {
       strokeColor: "#5347AA",
       strokeWeight: 4,
       map: map.value,
+    });
+
+    timeStore.setEstimatedGoalTime(timeStore.startTime.getTime() + data.route.traoptimal[0].summary.duration);
+    goalPlace.value.arrivalTime = timeStore.estimatedGoalTime;
+
+    placeStore.getThumbnailByPlaceName(goalPlace.value, (thumbnail) => {
+      goalPlace.value.thumbnail = thumbnail;
     });
 
     currentGoal.value = polylinePath.value[currentIndex + 1];

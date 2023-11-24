@@ -5,29 +5,21 @@ import { useRouter } from "vue-router";
 import { getBoundsByPathList } from "../util/map";
 import { usePathStore } from "../stores/path";
 import { useUserStore } from "../stores/user";
+import { useTimeStore } from "../stores/time";
+import { useModalStore } from "../stores/modal";
 
 import TheHeader from "../commons/TheHeader.vue";
+import TimePickerModal from "../components/modal/TimePickerModal.vue";
 
 const router = useRouter();
 const pathStore = usePathStore();
 const userStore = useUserStore();
+const modalStore = useModalStore();
+const timeStore = useTimeStore();
+
 const selectedIndex = ref(-1);
 const map = ref(null);
 const polylinePath = ref(null);
-
-/*
-  "pathContent":{
-    "path":[
-    {"lat": 37.73, "lng": 127.721, "_id": "655ea02b7f6f0645aff170f0"}
-    ],
-    "pathName": "경로 1",
-    "userEmail": "ssafy@ssafy.com"
-  },
-  "_id": "655ea02b7f6f0645aff170ee",
-  "waypoints":[
-    {"placeName": "집", "lat": 37.37, "lng": 123.123, "arrivalTime": "2014-12-12",…}
-  ],
-*/
 
 const selectedPath = computed(() => (selectedIndex.value < 0 ? null : pathStore.pathList[selectedIndex.value]));
 
@@ -57,8 +49,7 @@ const loadMap = () => {
   });
 
   map.value.setCursor("default");
-  map.value.onload = drawPolyline;
-  // drawPolyline();
+  window.naver.maps.Event.once(map.value, "init", drawPolyline);
 };
 
 const drawPolyline = () => {
@@ -73,6 +64,16 @@ const drawPolyline = () => {
 
   const bounds = getBoundsByPathList(selectedPath.value.pathContent.path);
   map.value.fitBounds(bounds);
+};
+
+const startTrip = () => {
+  modalStore.setModal(true, TimePickerModal, {
+    callback: (hours, minute) => {
+      router.push("/trip");
+      modalStore.setModal(false);
+      timeStore.setStartTime(hours, minute);
+    },
+  });
 };
 
 const dateToString = (date) => {
@@ -91,7 +92,7 @@ const dateToString = (date) => {
         <div class="user-info-text-nickname">{{ userStore.userInfo.userName }}님의 마이페이지</div>
         <div class="user-info-text-email">{{ userStore.userInfo.userEmail }}</div>
         <div class="user-info-text-sperator"></div>
-        <div class="user-info-text-birth">{{ userStore.userInfo.birth }}</div>
+        <div class="user-info-text-birth">{{ dateToString(new Date(userStore.userInfo.birth)) }}</div>
         <div class="user-info-text-mypage">MyPage</div>
       </div>
     </div>
@@ -143,14 +144,7 @@ const dateToString = (date) => {
         </div>
       </div>
     </div>
-    <div
-      class="path-create-btn-container"
-      @click.prevent="
-        () => {
-          router.push('/trip');
-        }
-      "
-    >
+    <div class="path-create-btn-container" @click.prevent="startTrip">
       <button class="path-create-btn">
         새 여행경로 만들기
         <div class="path-create-btn-icon"></div>
@@ -215,6 +209,14 @@ const dateToString = (date) => {
   font-size: 16px;
 }
 
+.path-info-waypoints-list {
+  overflow-y: auto;
+}
+
+.path-info-waypoints-list::-webkit-scrollbar {
+  display: none;
+}
+
 .user-info-text-email {
   margin-left: 60px;
 }
@@ -275,12 +277,11 @@ const dateToString = (date) => {
 
 .path-info-waypoints {
   margin-top: 10px;
-  padding: 0 30px;
-  padding-top: 10px;
+  padding-top: 20px;
   border-top: 3px solid rgba(128, 128, 128, 0.3);
   display: flex;
   flex-grow: 1;
-  height: 150px;
+  height: 180px;
   justify-content: center;
 }
 
@@ -422,6 +423,6 @@ const dateToString = (date) => {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  padding-left: 40px;
+  padding-left: 16px;
 }
 </style>

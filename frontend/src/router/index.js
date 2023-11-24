@@ -59,10 +59,12 @@ const router = createRouter({
       component: MyPageView,
       beforeEnter: (to, from, next) => {
         const userStore = useUserStore();
-        // 유저 유효성 판단
+
+        if (!userStore.userInfo) {
+          next("/login");
+        }
         usePathStore().getPathList(userStore.userInfo);
-        if (next) next();
-        return to;
+        next();
       },
     },
     {
