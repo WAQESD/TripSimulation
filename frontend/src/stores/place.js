@@ -47,10 +47,7 @@ export const usePlaceStore = defineStore("place", () => {
       const { data } = await axios.get(import.meta.env.VITE_KAKAO_SEARCH_API, {
         params: {
           query: keyword,
-          // x: map.value.center.x,
-          // y: map.value.center.y,
           page: pageNo,
-          // sort: "distance",
         },
         headers: {
           Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}`,
@@ -108,7 +105,7 @@ export const usePlaceStore = defineStore("place", () => {
         place.thumbnail = thumbnail;
         cnt -= 1;
         if (cnt == 0) {
-          if (playerStore.isEnd) return;
+          if (!playerStore.tripStart) return;
           playerStore.pause();
           modalStore.setModal(true, SimpleTextModal, { text: "새 추천 선택지가 열렸습니다!", callback: recommend });
         }
