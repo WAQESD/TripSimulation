@@ -68,7 +68,7 @@ const login = () => {
       modalStore.setModal(true, SimpleTextModal, {
         text: "로그인에 성공했습니다.",
         callback: () => {
-          router.go(-1);
+          router.push("/");
         },
       });
     })

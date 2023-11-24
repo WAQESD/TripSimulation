@@ -43,7 +43,7 @@ const regist = () => {
       modalStore.setModal(true, SimpleTextModal, {
         text: "회원가입에 성공했습니다.",
         callback: () => {
-          router.push("/login");
+          router.replace("/login");
         },
       });
     })
@@ -122,12 +122,6 @@ const checkCode = () => {
       </div>
       <div class="join-form-container">
         <form class="join-form" @submit.prevent="join">
-          <div
-            class="duplicated-email-indicator"
-            :class="idCheckResult === '사용 가능한 이메일입니다.' ? 'blue' : 'red'"
-          >
-            {{ idCheckResult }}
-          </div>
           <input
             type="email"
             id="join-email"
@@ -137,6 +131,9 @@ const checkCode = () => {
             @keydown="checkId"
             required
           />
+          <div :class="idCheckResult === '사용 가능한 이메일입니다.' ? 'blue' : 'red'">
+            {{ idCheckResult }}
+          </div>
           <input
             type="password"
             id="join-password"
@@ -153,7 +150,7 @@ const checkCode = () => {
               name="code"
               v-model="verifyCode"
               type="text"
-              @change="checkCode"
+              @keyup="checkCode"
               :disabled="verified"
             />
             <div class="email-check-btn" @click="verify">코드 전송</div>

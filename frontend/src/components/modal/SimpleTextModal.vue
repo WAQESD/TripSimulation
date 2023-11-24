@@ -9,8 +9,8 @@ const props = defineProps({
 });
 
 const onClick = () => {
-  props.callback();
   modalStore.setModal(false);
+  props.callback();
 };
 </script>
 

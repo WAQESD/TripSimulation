@@ -209,6 +209,14 @@ const dateToString = (date) => {
   font-size: 16px;
 }
 
+.path-info-waypoints-list {
+  overflow-y: auto;
+}
+
+.path-info-waypoints-list::-webkit-scrollbar {
+  display: none;
+}
+
 .user-info-text-email {
   margin-left: 60px;
 }
@@ -269,12 +277,11 @@ const dateToString = (date) => {
 
 .path-info-waypoints {
   margin-top: 10px;
-  padding: 0 30px;
   padding-top: 20px;
   border-top: 3px solid rgba(128, 128, 128, 0.3);
   display: flex;
   flex-grow: 1;
-  height: 150px;
+  height: 180px;
   justify-content: center;
 }
 
@@ -416,6 +423,6 @@ const dateToString = (date) => {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
-  padding-left: 40px;
+  padding-left: 16px;
 }
 </style>
