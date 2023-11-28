@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ssafy.trippy.path.model.mapper.PathMapper">
+	<resultMap type="PathDto" id="pathMap">
+		<result column="path_id" property="pathId"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="path_key" property="pathKey"/>
+		<result column="path_name" property="pathName"/>
+		<result column="user_email" property="userEmail"/>
+	</resultMap> 
+	<resultMap type="WaypointDto" id="waypointMap">
+		<result column="path_id" property="pathId"/>
+		<result column="place_name" property="placeName"/>
+		<result column="arrival_time" property="arrivalTime"/>
+	</resultMap> 
+	
+	<insert id="insertPathInfo" parameterType="PathDto">
+		insert into path (path_key, path_name, user_email) 
+		values (#{pathKey}, #{pathName}, #{userEmail})
+		<selectKey keyProperty="pathId" resultType="Integer">
+	        SELECT LAST_INSERT_ID()
+	    </selectKey>
+	</insert>
+	
+	<select id="getUserPaths" parameterType="String" resultMap="pathMap">
+		select path_id, reg_date, path_name, user_email
+		from path
+		where user_email = #{userEmail}
+	</select>
+	
+	<select id="getFileKey" parameterType="String" resultType="String">
+		select path_key
+		from path
+		where path_id = #{pathId}
+	</select>
+	
+	<insert id="insertWaypoint" parameterType="WaypointDto">
+		insert into waypoint (place_name, arrival_time, path_id) values	
+		(#{placeName}, #{arrivalTime}, #{pathId})
+	</insert>
+	
+	<delete id="deletePath" parameterType="String">
+		delete from path
+		where path_id = #{pathId}
+	</delete>
+	
+	
+</mapper>

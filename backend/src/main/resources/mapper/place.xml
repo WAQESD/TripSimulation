@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	
+<mapper namespace="com.ssafy.trippy.place.model.mapper.PlaceMapper">
+	<resultMap type="PlaceDto" id="placeMap">
+		<result column="place_id" property="placeId"/>
+		<result column="place_name" property="placeName"/>
+		<result column="lat" property="lat"/>
+		<result column="lng" property="lng"/>
+		<result column="thumbnail" property="thumbnail" />
+		<result column="place_category" property="placeCategory" />
+		<result column="review_cnt" property="reviewCnt" />  
+		<result column="score" property="score" />  
+		<result column="description" property="description" /> 
+		<result column="sido" property="sido" /> 
+		<result column="sigugun" property="sigugun" /> 
+		<result column="dongmyun" property="dongmyun" />    
+	</resultMap>
+
+	<select id="selectPlaces" parameterType="int" resultType="List">
+		select *
+		from area
+		where placeId = #{placeId}
+	</select>
+	
+	<insert id="savePlaces" parameterType="PlaceDto">
+		insert into place (place_name, lat, lng, place_category, sido, sigugun, dongmyun) values
+		<foreach collection="list" item="item" separator=" , ">
+			 (#{item.placeName}, #{item.lat}, #{item.lng}, #{item.placeCategory}, #{item.sido}, #{item.sigugun}, #{item.dongmyun})
+		</foreach>
+		
+	</insert>
+	 
+	<select id="getPlaceList" resultMap="placeMap">
+		select *
+		from place
+	</select>
+	 
+	<insert id="setReviewList" parameterType="ReviewDto">
+		insert into review (place_id, url, review_title, review_content, thumbnail) values
+		<foreach collection="list" item="item" separator=" , ">
+			 (#{item.placeId}, #{item.url}, #{item.reviewTitle}, #{item.reviewContent}, #{item.thumbnail})
+		</foreach>
+	</insert>
+	
+	<!-- <select id="selectPlaceAroundList" parameterType="CoordinateResponse" resultMap="placeMap">
+		select place_id, place_name, lat, lng, place_category, review_cnt, sido, sigugun, dongmyun
+		from place
+		where lat >= 37.4 and lat <= 37.5
+		and lng >= 126.7 and lng <= 126.8
+	</select> -->
+ 	<select id="selectPlaceAroundList" parameterType="CoordinateResponse" resultMap="placeMap">
+		select place_id, place_name, lat, lng, place_category, review_cnt, sido, sigugun, dongmyun
+		from place
+		where lat <![CDATA[>=]]> #{startY} and lat <![CDATA[<=]]> #{endY}
+		and lng <![CDATA[>=]]> #{startX} and lng <![CDATA[<=]]> #{endX}
+	</select>
+	
+	<select id="selectReviewList" parameterType="int" resultType="ReviewDto">
+		select *
+		from review
+		where place_id = #{placeId}
+	</select>
+	
+	
+</mapper>
