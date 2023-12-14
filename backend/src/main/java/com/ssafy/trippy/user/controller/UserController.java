@@ -30,19 +30,24 @@ import com.ssafy.trippy.user.model.service.UserService;
 @RestController
 @RequestMapping("/user")
 public class UserController {
+	
 	private final UserService userService;
 
-
+	//스프링 4.3이상부터는 단일 생성자는 @Autowired 생략가능하다함!
+	// 인터페이스의 구현 클래스를 알아서 주입시켜줌  
 	public UserController(UserService UserDtoService) {
 		this.userService = UserDtoService;
 	}
 	
-	@GetMapping("/idcheck/{UserDtoId}")
-	public ResponseEntity<Map<String, String>> idCheck(@PathVariable String UserDtoId) {
-		int count = userService.checkId(UserDtoId);
+	
+	//이메일 중복체크
+	//url에서는 카멜대신 다 소문자를 사용하거나 케밥케이스를 사용하는 모양이다 
+	@GetMapping("/emailcheck/{userEmail}")
+	public ResponseEntity<Map<String, String>> emailCheck(@PathVariable String userEmail) {
+		int count = userService.checkId(userEmail);
 		
 		Map<String, String> resultMap = new HashMap<>();
-		resultMap.put("result", count > 0 ? "Duplicate" : "Unique");
+		resultMap.put("result", count == 1 ? "Duplicate" : "Unique");
 		
 		return ResponseEntity.ok().body(resultMap);
 	}
@@ -52,8 +57,6 @@ public class UserController {
 	public ResponseEntity<String> userLogin(@RequestBody String response) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         UserDto loginRequest = mapper.readValue(response, UserDto.class);
-        System.out.println("controller: " + loginRequest.getUserEmail());
-        System.out.println("controller: " + loginRequest.getUserPassword());
 		String loginUser = userService.userLogin(loginRequest);
 		
 		//토큰 리턴
@@ -87,10 +90,10 @@ public class UserController {
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 	
-	
+	//이메일 인증번호 입
 	@ResponseBody
-    @PostMapping("/emailCheck")		// 이 부분은 각자 바꿔주시면 됩니다.
-    public String EmailCheck(@RequestBody String email) throws MessagingException, UnsupportedEncodingException, JsonMappingException, JsonProcessingException  {
+    @PostMapping("/emailCertify")		
+    public String emailCertify(@RequestBody String email) throws MessagingException, UnsupportedEncodingException, JsonMappingException, JsonProcessingException  {
 		ObjectMapper mapper = new ObjectMapper();
 		JsonNode jsonNode = mapper.readTree(email);
 		String userEmail = jsonNode.get("email").asText();

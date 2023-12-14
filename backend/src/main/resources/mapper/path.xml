@@ -15,6 +15,16 @@
 		<result column="place_name" property="placeName"/>
 		<result column="arrival_time" property="arrivalTime"/>
 	</resultMap> 
+	<resultMap type="MyPageDto" id="myPageDto">
+		<result column="path_id" property="pathId"/>
+		<result column="reg_date" property="regDate"/>
+		<result column="path_key" property="pathKey"/>
+		<result column="path_name" property="pathName"/>
+		<result column="user_email" property="userEmail"/>
+		<result column="path_id" property="pathId"/>
+		<result column="place_name" property="placeName"/>
+		<result column="arrival_time" property="arrivalTime"/>
+	</resultMap> 
 	
 	<insert id="insertPathInfo" parameterType="PathDto">
 		insert into path (path_key, path_name, user_email) 
@@ -46,5 +56,12 @@
 		where path_id = #{pathId}
 	</delete>
 	
+	<select id="getMyPageInfo" parameterType="String" resultMap="myPageDto">
+		select p.path_id, p.path_key, p.reg_date, p.path_name, p.user_email, w.waypoint_id, w.place_name, w.arrival_time
+		from path as p
+		join waypoint as w on p.path_id = w.path_id
+		where p.user_email = #{userEmail}
+		order by w.arrival_time asc;
+	</select>
 	
 </mapper>

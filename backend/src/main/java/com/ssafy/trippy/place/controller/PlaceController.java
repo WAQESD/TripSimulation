@@ -32,8 +32,6 @@ import com.ssafy.trippy.place.model.ReviewDto;
 import com.ssafy.trippy.place.service.KakaoMapApiService;
 import com.ssafy.trippy.place.service.PlaceService;
 
-//import lombok.extern.slf4j.Slf4j;
-
 
 @CrossOrigin("*")
 @RestController

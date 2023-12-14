@@ -236,9 +236,9 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public int checkId(String userId) {
-		// TODO Auto-generated method stub
-		return 0;
+	public int checkId(String userEmail) {
+		UserDto user = userMapper.selectByUserEmail(userEmail);
+		return (user == null) ? 0 : 1;
 	}
 	
 	@Override
