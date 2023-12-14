@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ssafy.trippy.path.model.MyPageResponse;
 import com.ssafy.trippy.path.model.PathDto;
 import com.ssafy.trippy.path.model.WaypointDto;
 import com.ssafy.trippy.path.model.WaypointRequest;
@@ -25,4 +26,6 @@ public interface PathService {
 	void deletePathFile(String key) throws Exception;
 
 	void deletePath(String pathId);
+
+	List<MyPageResponse> getMyPageInfo(String userEmail);
 }

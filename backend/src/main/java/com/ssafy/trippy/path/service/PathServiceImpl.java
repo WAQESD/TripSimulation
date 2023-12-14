@@ -1,6 +1,7 @@
 package com.ssafy.trippy.path.service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ssafy.trippy.config.S3Downloader;
 import com.ssafy.trippy.config.S3Uploader;
 import com.ssafy.trippy.path.model.mapper.PathMapper;
+import com.ssafy.trippy.path.model.MyPageDto;
+import com.ssafy.trippy.path.model.MyPageResponse;
 import com.ssafy.trippy.path.model.PathDto;
 import com.ssafy.trippy.path.model.WaypointDto;
 import com.ssafy.trippy.path.model.WaypointRequest;
@@ -84,6 +87,56 @@ public class PathServiceImpl implements PathService {
 
 	public void deletePath(String pathId) {
 		pathMapper.deletePath(pathId);
+	}
+
+	@Override
+	public List<MyPageResponse> getMyPageInfo(String userEmail) {
+//		join해서 가져온 데이터를 더 예쁘게 가공하기 위해 response dto에 담는과정 
+		List<MyPageDto> list = pathMapper.getMyPageInfo(userEmail);
+		
+		List<MyPageResponse> response = new ArrayList<>();
+		List<WaypointDto> wayList = new ArrayList<WaypointDto>();
+		MyPageResponse mypageResponse = new MyPageResponse();
+		int idChk = 0;
+		
+		for (MyPageDto dto : list) {
+			System.out.println("dto: " + dto);
+			if(dto.getPathId() != idChk) {
+				if(idChk != 0) {
+					mypageResponse.setList(wayList);
+					response.add(mypageResponse);
+				}
+				
+				mypageResponse = new MyPageResponse();
+				
+				idChk = dto.getPathId();
+				
+				PathDto pathDto = new PathDto();
+				pathDto.setPathId(dto.getPathId());
+				pathDto.setPathKey(dto.getPathKey());
+				pathDto.setRegDate(dto.getRegDate());
+				pathDto.setUserEmail(dto.getUserEmail());
+				
+				mypageResponse.setPathDto(pathDto);
+				
+				wayList = new ArrayList<WaypointDto>();
+				WaypointDto waypoint = new WaypointDto();
+				waypoint.setPathId(dto.getPathId());
+				waypoint.setPlaceName(dto.getPlaceName());
+				waypoint.setArrivalTime(dto.getArrivalTime());
+				wayList.add(waypoint);
+				
+			}else {
+				WaypointDto waypoint = new WaypointDto();
+				waypoint.setPathId(dto.getPathId());
+				waypoint.setPlaceName(dto.getPlaceName());
+				waypoint.setArrivalTime(dto.getArrivalTime());
+				wayList.add(waypoint);
+			}
+		}
+		mypageResponse.setList(wayList);
+		response.add(mypageResponse);
+		return response;
 	}
 	
 	

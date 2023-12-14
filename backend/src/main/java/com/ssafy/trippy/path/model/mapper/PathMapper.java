@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.ssafy.trippy.path.model.MyPageDto;
 import com.ssafy.trippy.path.model.PathDto;
 import com.ssafy.trippy.path.model.WaypointDto;
 import com.ssafy.trippy.path.model.WaypointRequest;
@@ -21,5 +22,5 @@ public interface PathMapper {
 
 	void deletePath(String pathId);
 	
-	
+	List<MyPageDto> getMyPageInfo(String userEmail);
 }

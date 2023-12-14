@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ssafy.trippy.path.model.MyPageDto;
+import com.ssafy.trippy.path.model.MyPageResponse;
 import com.ssafy.trippy.path.model.PathDto;
 import com.ssafy.trippy.path.model.PathRequest;
 import com.ssafy.trippy.path.model.WaypointDto;
@@ -47,28 +50,6 @@ public class PathController {
 		super();
 		this.pathService = pathService;
 	}
-	
-	
-//	@ApiOperation(value = "test", notes = "test.")
-//	@PostMapping("/upload")
-//    public void uploadUserPathToS3(@RequestBody String path) {
-//        String bucket = "trippyfinalpjt"; // Replace with your bucket name
-//        String key = UUID.randomUUID().toString() + ".json"; // Generates a random file name
-
-//        // Convert data to JSON String
-//        String jsonString = convertToJson(path);
-
-        // Create PutObjectRequest
-//        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-//                                                            .bucket(bucket)
-//                                                            .key(key)
-//                                                            .build();
-
-        // Upload to S3
-//        s3Client.putObject(putObjectRequest, software.amazon.awssdk.core.sync.RequestBody.fromString(path, StandardCharsets.UTF_8));
-//    }
-
-   
 	
 
 	/**
@@ -139,37 +120,14 @@ public class PathController {
 		return new ResponseEntity(null, HttpStatus.OK);
 	}
 	
-//	{
-//		waypoints : [],
-//		pathContent : path, pathKey, regDate, pathName, userEmail
-//	}
-	
-	
-	
-	
-	
-	
-	
+		
 	//userEmail에 해당하는 path정보 목록 반환 
 //	produces = "application/json; charset=utf8"
 	@GetMapping("/list")
-	public ResponseEntity<List<PathDto>> getPathList(String userEmail) throws IOException{
-//		String filePath = fileUrl.substring(52);
-		// Base64 디코딩
-		
-//		byte[] decodedBytes = Base64.getDecoder().decode(pathService.download(fileUrl));
-
-		// 바이너리 데이터를 문자열로 변환
-//		String jsonStr = new String(decodedBytes, StandardCharsets.UTF_8);
-		
+	public ResponseEntity<List<PathDto>> getPathList(String userEmail) throws IOException{		
 		List<PathDto> list = pathService.getPathList(userEmail);
-		System.out.println("testttttt: " + list.toString());
-		// JSON 파싱
-		//JSONObject jsonObj = new JSONObject(pathService.getPathList(userEmail));
-		
-		//System.out.println(jsonObj.toString());
+
 		return ResponseEntity.status(HttpStatus.OK).body(pathService.getPathList(userEmail));
-//		return convertToJson(pathService.download(fileUrl));
 	}
 	
 	
@@ -186,6 +144,13 @@ public class PathController {
 		//db path&waypoint 삭제
 		pathService.deletePath(pathId);
 			
+	}
+	
+	@GetMapping("/mypage/{userEmail}")
+	public ResponseEntity<List<MyPageResponse>> getMyPageInfo(@PathVariable String userEmail){
+		//마이페이지에 필요한 경로 목록, 경로에 따른 waypoint 목록 정보 반환
+		List<MyPageResponse> list = pathService.getMyPageInfo(userEmail);
+		return ResponseEntity.status(HttpStatus.OK).body(pathService.getMyPageInfo(userEmail));
 	}
 	
 	
