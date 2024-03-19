@@ -10,7 +10,7 @@
 
 #### 메인화면
 
-![home](.\images\home.PNG)
+![home](images/home.PNG)
 
 
 
@@ -26,13 +26,13 @@
 
 #### 경로 시뮬레이션 화면
 
-![경로](.\images\경로.gif)
+![경로](images/경로.gif)
 
 
 
 #### 시물레이션 결과 요약 화면
 
-![result](.\images\result.PNG)
+![result](images/result.PNG)
 
 
 
